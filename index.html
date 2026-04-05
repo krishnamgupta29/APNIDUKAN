@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ApniDukaan – Shahjahanpur</title>
+  <style>
+    /* CSS Variables */
+    :root {
+      --c-1: #fbf8cc;
+      --c-2: #fde4cf;
+      --c-3: #ffcfd2;
+      --c-4: #f1c0e8;
+      --c-5: #cfbaf0;
+      --c-6: #a3c4f3;
+      --c-7: #90dbf4;
+      --c-8: #8eecf5;
+      --c-9: #98f5e1;
+      --c-10: #b9fbc0;
+      
+      --text-dark: #2d3748;
+      --text-light: #4a5568;
+      --glass-bg: rgba(255, 255, 255, 0.4);
+      --glass-border: rgba(255, 255, 255, 0.6);
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+      --radius: 20px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    
+    body { background: var(--c-1); color: var(--text-dark); overflow-x: hidden; scroll-behavior: smooth; }
+
+    /* Animated Background Group */
+    .bg-animation {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
+      background: linear-gradient(-45deg, var(--c-1), var(--c-2), var(--c-3), var(--c-4));
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+    }
+    @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+    
+    .shape {
+      position: absolute; border-radius: 50%; filter: blur(60px); opacity: 0.6;
+      animation: floatShape 10s infinite alternate ease-in-out;
+    }
+    .shape-1 { width: 400px; height: 400px; background: var(--c-5); top: -10%; left: -10%; }
+    .shape-2 { width: 500px; height: 500px; background: var(--c-7); bottom: -10%; right: -10%; animation-delay: -3s; }
+    @keyframes floatShape { 0% { transform: translateY(0) scale(1); } 100% { transform: translateY(50px) scale(1.1); } }
+
+    /* Glass Effect */
+    .glass {
+      background: var(--glass-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    /* Navbar */
+    nav {
+      position: fixed; top: 0; width: 100%; padding: 1rem 5%; display: flex; justify-content: space-between; align-items: center; z-index: 100;
+      transition: all 0.3s ease;
+    }
+    nav.scrolled { background: rgba(255,255,255,0.7); backdrop-filter: blur(15px); box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+    .logo { font-size: 1.5rem; font-weight: bold; }
+    .cart-btn {
+      background: white; border: none; padding: 0.5rem 1rem; border-radius: 30px; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-weight: bold;
+      transition: all 0.3s; box-shadow: var(--shadow);
+    }
+    .cart-btn:hover { transform: scale(1.05); }
+    .cart-count { background: var(--c-3); padding: 0.2rem 0.5rem; border-radius: 50%; font-size: 0.8rem; }
+
+    /* Hero */
+    .hero { min-height: 100vh; display: flex; align-items: center; justify-content: space-between; padding: 0 5%; padding-top: 80px; }
+    .hero-text { flex: 1; max-width: 500px; }
+    .hero-text h1 { font-size: 3.5rem; line-height: 1.2; margin-bottom: 1rem; }
+    .hero-text p { font-size: 1.2rem; color: var(--text-light); margin-bottom: 2rem; }
+    .btn-main {
+      padding: 1rem 2.5rem; font-size: 1.1rem; font-weight: bold; color: white; background: linear-gradient(135deg, var(--c-4), var(--c-5)); border: none; border-radius: 30px; cursor: pointer;
+      transition: all 0.3s; box-shadow: 0 10px 20px rgba(207, 186, 240, 0.4); text-decoration: none; display: inline-block;
+    }
+    .btn-main:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 15px 25px rgba(207, 186, 240, 0.6); }
+
+    .hero-visual { flex: 1; display: flex; justify-content: center; position: relative; }
+    .floating-box {
+      width: 300px; height: 300px; background: linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.1));
+      border: 2px solid rgba(255,255,255,0.8); border-radius: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.1), inset 0 0 40px rgba(255,255,255,0.5);
+      animation: float 5s infinite ease-in-out; display: flex; align-items: center; justify-content: center; font-size: 5rem;
+    }
+    @keyframes float { 0% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-20px) rotate(5deg); } 100% { transform: translateY(0) rotate(0deg); } }
+
+    /* Benefits */
+    .benefits { padding: 4rem 5%; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 2rem; }
+    .benefit-card { padding: 2rem; text-align: center; transition: all 0.3s; cursor: default; }
+    .benefit-card:hover { transform: translateY(-10px) scale(1.02); box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
+    .benefit-card h3 { margin: 1rem 0 0.5rem; }
+    .bc-1 { background: rgba(207, 186, 240, 0.5); }
+    .bc-2 { background: rgba(163, 196, 243, 0.5); }
+    .bc-3 { background: rgba(152, 245, 225, 0.5); }
+    .bc-4 { background: rgba(185, 251, 192, 0.5); }
+    .icon { font-size: 2.5rem; }
+
+    /* Products */
+    .products-container { padding: 4rem 5%; }
+    .section-title { text-align: center; font-size: 2.5rem; margin-bottom: 3rem; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 2rem; }
+    .product-card { padding: 1rem; display: flex; flex-direction: column; transition: all 0.3s; }
+    .product-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
+    .img-wrap { width: 100%; height: 200px; border-radius: 12px; overflow: hidden; margin-bottom: 1rem; }
+    .img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: all 0.5s; }
+    .product-card:hover .img-wrap img { transform: scale(1.1); }
+    .p-name { font-weight: bold; font-size: 1.1rem; }
+    .p-price { color: #d0607e; font-size: 1.2rem; font-weight: bold; margin-bottom: 1rem; }
+    .btn-add { background: white; border: 1px solid var(--text-dark); padding: 0.8rem; border-radius: 30px; font-weight: bold; cursor: pointer; transition: all 0.3s; }
+    .btn-add:hover { background: var(--text-dark); color: white; }
+
+    /* Cart Modal & Checkout */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); backdrop-filter: blur(5px); z-index: 999; display: flex; justify-content: flex-end; opacity: 0; pointer-events: none; transition: 0.3s; }
+    .modal-overlay.active { opacity: 1; pointer-events: auto; }
+    .cart-drawer { width: 400px; max-width: 100%; height: 100%; background: rgba(255,255,255,0.9); box-shadow: -5px 0 30px rgba(0,0,0,0.1); padding: 2rem; transform: translateX(100%); transition: 0.3s; display: flex; flex-direction: column; }
+    .modal-overlay.active .cart-drawer { transform: translateX(0); }
+    .cart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+    .close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; }
+    .cart-items { flex: 1; overflow-y: auto; }
+    .cart-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(0,0,0,0.1); }
+    .form-group { margin-bottom: 1rem; }
+    .form-group input, .form-group textarea { width: 100%; padding: 0.8rem; border: 1px solid rgba(0,0,0,0.2); border-radius: 10px; font-family: inherit; }
+    .btn-checkout { width: 100%; padding: 1rem; background: linear-gradient(135deg, var(--c-7), var(--c-8)); border: none; border-radius: 30px; font-weight: bold; font-size: 1.1rem; cursor: pointer; margin-top: 1rem; transition: 0.3s; }
+    .btn-checkout:hover { transform: scale(1.02); }
+    
+    .fade-in { opacity: 0; transform: translateY(30px); transition: 0.8s; }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+    /* Success Message */
+    .success-msg { display: none; text-align: center; padding: 2rem; }
+    .success-msg.active { display: block; }
+    .cart-content { display: block; }
+    .cart-content.hidden { display: none; }
+
+    @media (max-width: 768px) {
+      .hero { flex-direction: column; text-align: center; padding-top: 100px; }
+      .hero-text { margin-bottom: 3rem; }
+      .hero-text h1 { font-size: 2.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-animation"></div>
+  <div class="shape shape-1"></div>
+  <div class="shape shape-2"></div>
+
+  <nav id="navbar">
+    <div class="logo">ApniDukaan<span style="color:#d0607e;">.</span></div>
+    <button class="cart-btn" onclick="toggleCart()">
+      🛒 <span class="cart-count" id="cartCount">0</span>
+    </button>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-text fade-in">
+      <h1>Welcome to ApniDukaan, Shahjahanpur</h1>
+      <p>Fast, trusted local delivery at your doorstep. Fresh daily essentials delivered within hours.</p>
+      <a href="#products" class="btn-main">Start Shopping</a>
+    </div>
+    <div class="hero-visual fade-in">
+      <div class="floating-box glass">📦</div>
+    </div>
+  </section>
+
+  <!-- Benefits Section -->
+  <section class="benefits fade-in">
+    <div class="benefit-card glass bc-1">
+      <div class="icon">⚡</div>
+      <h3>Fast Delivery</h3>
+      <p>Within 2 hours in Shahjahanpur</p>
+    </div>
+    <div class="benefit-card glass bc-2">
+      <div class="icon">🤝</div>
+      <h3>Local Trust</h3>
+      <p>Run by your own city people</p>
+    </div>
+    <div class="benefit-card glass bc-3">
+      <div class="icon">📱</div>
+      <h3>Easy Ordering</h3>
+      <p>Simple and fast without hassle</p>
+    </div>
+    <div class="benefit-card glass bc-4">
+      <div class="icon">💵</div>
+      <h3>Cash on Delivery</h3>
+      <p>Pay only after receiving</p>
+    </div>
+  </section>
+
+  <!-- Products Section -->
+  <section id="products" class="products-container fade-in">
+    <h2 class="section-title">Fresh Arrivals</h2>
+    <div class="grid" id="productGrid">
+      <!-- Injected by JS -->
+    </div>
+  </section>
+
+  <!-- Cart Modal -->
+  <div class="modal-overlay" id="cartOverlay">
+    <div class="cart-drawer glass">
+      <div class="cart-header">
+        <h2>Your Cart</h2>
+        <button class="close-btn" onclick="toggleCart()">×</button>
+      </div>
+
+      <div class="cart-content" id="cartContent">
+        <div class="cart-items" id="cartItems"></div>
+        <div style="font-weight: bold; text-align: right; margin: 1rem 0;">Total: ₹<span id="cartTotal">0</span></div>
+        
+        <form id="checkoutForm">
+          <div class="form-group"><input type="text" id="cName" placeholder="Full Name" required></div>
+          <div class="form-group"><input type="tel" id="cPhone" placeholder="Phone Number" required></div>
+          <div class="form-group"><textarea id="cAddr" placeholder="Delivery Address (Shahjahanpur)" required></textarea></div>
+          <button type="submit" class="btn-checkout">Place Order (Cash on Delivery)</button>
+        </form>
+      </div>
+
+      <div class="success-msg" id="successMsg">
+        <h2 style="color: #4dc2a8;">🎉 Order Confirmed!</h2>
+        <p style="margin: 1rem 0;">Your order is on the way.</p>
+        <p>Order ID: <strong id="orderIdTag"></strong></p>
+        <button class="btn-checkout" onclick="toggleCart()" style="margin-top:2rem;">Continue Shopping</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Demo Products
+    const products = [
+      { id: 1, name: "Fresh Apples", price: 150, img: "https://images.unsplash.com/photo-1560806887-1e4cd0b6faa6?auto=format&fit=crop&w=400&q=80" },
+      { id: 2, name: "Aashirvaad Atta 5kg", price: 210, img: "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=400&q=80" },
+      { id: 3, name: "Amul Butter 100g", price: 54, img: "https://images.unsplash.com/photo-1589047970725-d71c4c82c6de?auto=format&fit=crop&w=400&q=80" },
+      { id: 4, name: "Fortune Sunflower Oil 1L", price: 140, img: "https://images.unsplash.com/photo-1474440692490-2e83ae13ba29?auto=format&fit=crop&w=400&q=80" },
+      { id: 5, name: "Red Label Tea 250g", price: 120, img: "https://images.unsplash.com/photo-1556679343-c7306c1976bc?auto=format&fit=crop&w=400&q=80" },
+      { id: 6, name: "Local Farm Milk 1L", price: 65, img: "https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=400&q=80" }
+    ];
+
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+    // Render Products
+    const grid = document.getElementById('productGrid');
+    products.forEach(p => {
+      grid.innerHTML += `
+        <div class="product-card glass">
+          <div class="img-wrap"><img src="${p.img}" alt="${p.name}"></div>
+          <div class="p-name">${p.name}</div>
+          <div class="p-price">₹${p.price}</div>
+          <button class="btn-add" onclick="addToCart(${p.id})">Add to Cart</button>
+        </div>
+      `;
+    });
+
+    // Cart Functions
+    function updateCart() {
+      localStorage.setItem('cart', JSON.stringify(cart));
+      document.getElementById('cartCount').innerText = cart.length;
+      
+      const cartItemsDiv = document.getElementById('cartItems');
+      cartItemsDiv.innerHTML = '';
+      let total = 0;
+      
+      cart.forEach((item, index) => {
+        total += item.price;
+        cartItemsDiv.innerHTML += `
+          <div class="cart-item">
+            <div><strong>${item.name}</strong><br>₹${item.price}</div>
+            <button onclick="removeFromCart(${index})" style="background:none;border:none;color:red;font-weight:bold;cursor:pointer;">X</button>
+          </div>
+        `;
+      });
+      document.getElementById('cartTotal').innerText = total;
+    }
+
+    function addToCart(id) {
+      const prod = products.find(p => p.id === id);
+      cart.push(prod);
+      updateCart();
+      
+      // Quick animation on cart btn
+      const btn = document.querySelector('.cart-btn');
+      btn.style.transform = 'scale(1.2)';
+      setTimeout(() => btn.style.transform = 'scale(1)', 200);
+    }
+
+    function removeFromCart(index) {
+      cart.splice(index, 1);
+      updateCart();
+    }
+
+    function toggleCart() {
+      const overlay = document.getElementById('cartOverlay');
+      overlay.classList.toggle('active');
+      if (overlay.classList.contains('active')) {
+        document.getElementById('cartContent').classList.remove('hidden');
+        document.getElementById('successMsg').classList.remove('active');
+      }
+    }
+
+    // Checkout Form
+    document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      if(cart.length === 0) { return; }
+      
+      // Generate Order ID
+      const orderId = "AD" + Math.floor(Math.random() * 1000000);
+      document.getElementById('orderIdTag').innerText = orderId;
+      
+      // Clear Cart
+      cart = [];
+      updateCart();
+      
+      // Show Success
+      document.getElementById('cartContent').classList.add('hidden');
+      document.getElementById('successMsg').classList.add('active');
+      this.reset();
+    });
+
+    // Scroll Animations & Navbar
+    window.addEventListener('scroll', () => {
+      const nav = document.getElementById('navbar');
+      if (window.scrollY > 50) nav.classList.add('scrolled');
+      else nav.classList.remove('scrolled');
+
+      // Fade-in elements
+      document.querySelectorAll('.fade-in').forEach(el => {
+        if (el.getBoundingClientRect().top < window.innerHeight - 50) {
+          el.classList.add('visible');
+        }
+      });
+    });
+
+    // Init
+    updateCart();
+    setTimeout(() => {
+      document.querySelectorAll('.fade-in').forEach(el => {
+        if (el.getBoundingClientRect().top < window.innerHeight - 50) el.classList.add('visible');
+      });
+    }, 100);
+  </script>
+</body>
+</html>

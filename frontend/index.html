@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ApniDukaan – Premium Standard Delivery</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/feather-icons"></script>
+</head>
+<body>
+    <div class="bg-shape shape-1"></div>
+    <div class="bg-shape shape-2"></div>
+    <div class="bg-shape shape-3"></div>
+
+    <div id="app">
+        <!-- Navigation -->
+        <nav class="glass-navbar">
+            <div class="nav-container">
+                <div class="logo group" onclick="scrollToCurrent('home')">
+                    <i data-feather="box"></i>
+                    <span>ApniDukaan</span>
+                </div>
+                <div class="nav-links">
+                    <a href="#" onclick="scrollToCurrent('home')">Home</a>
+                    <a href="#" onclick="scrollToCurrent('shop')">Shop</a>
+                    <a href="#" onclick="scrollToCurrent('history')">Track Order</a>
+                </div>
+                <div class="nav-actions">
+                    <button class="btn ghost-btn admin-access-btn" onclick="openAdminLogin()"><i data-feather="lock"></i> Admin</button>
+                    <button class="icon-btn cart-btn" onclick="toggleCart()">
+                        <i data-feather="shopping-bag"></i>
+                        <span id="cart-badge" class="badge">0</span>
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <main>
+            <!-- Hero Section -->
+            <section id="home" class="hero-section">
+                <div class="hero-container">
+                    <div class="hero-content reveal">
+                        <div class="pill-badge">#1 in Shahjahanpur</div>
+                        <h1 class="hero-title">Experience <br>Local Delivery <br><span class="gradient-text">Redefined.</span></h1>
+                        <p class="hero-subtitle">Premium groceries, curated essentials, and instant delivery right to your doorstep. Seamlessly fast.</p>
+                        <div class="hero-actions">
+                            <button class="btn primary-btn btn-lg" onclick="scrollToCurrent('shop')">Start Shopping <i data-feather="arrow-right"></i></button>
+                            <button class="btn ghost-btn btn-lg" onclick="scrollToCurrent('history')">Track Orders</button>
+                        </div>
+                    </div>
+                    
+                    <div class="hero-visual reveal reveal-delay">
+                        <div class="floating-showcase parallax-layer">
+                            <div class="mock-card">
+                                <img src="https://images.unsplash.com/photo-1610832958506-aa56368176cf?q=80&w=600&auto=format&fit=crop" class="mock-img">
+                                <div class="mock-info">
+                                    <h4>Organic Harvest</h4>
+                                    <p>Delivered in 15 mins</p>
+                                </div>
+                                <div class="mock-badge"><i data-feather="check-circle"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Shop Section -->
+            <section id="shop" class="shop-section hidden">
+                <div class="section-header reveal">
+                    <h2 class="section-title">Curated Selection</h2>
+                    <p>Only the freshest quality products.</p>
+                </div>
+                <div class="product-grid" id="product-grid"></div>
+            </section>
+
+            <!-- Track Order Section -->
+            <section id="history" class="history-section reveal hidden">
+                <div class="section-header">
+                    <h2 class="section-title">Track Order</h2>
+                    <p>Enter your phone number to see real-time updates.</p>
+                </div>
+                <div class="history-search">
+                    <input type="tel" id="history-phone" class="history-input" placeholder="Phone Number (+91...)">
+                    <button class="btn primary-btn" onclick="fetchHistory()">Track Now</button>
+                </div>
+                <div id="history-results" class="history-grid"></div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Product Details Modal -->
+    <div class="drawer-overlay" id="product-overlay" onclick="closeProductModal()"></div>
+    <div class="modal product-modal" id="product-modal">
+        <button class="icon-btn close-modal-btn" onclick="closeProductModal()"><i data-feather="x"></i></button>
+        <div class="product-modal-layout" id="product-modal-content"></div>
+    </div>
+
+    <!-- Feedback Modal -->
+    <div class="drawer-overlay" id="feedback-overlay" onclick="closeFeedback()"></div>
+    <div class="modal feedback-modal" id="feedback-modal">
+        <button class="icon-btn close-modal-btn" onclick="closeFeedback()"><i data-feather="x"></i></button>
+        <h3>Rate Your Experience</h3>
+        <p class="text-sm txt-muted mb-2">Order: <strong id="feedback-order-id"></strong></p>
+        
+        <div class="stars" id="star-rating" style="display:flex; justify-content:center; gap:0.5rem; margin-bottom:1.5rem;">
+            <!-- SVG Shop Icons injected mapped 1 to 5 via JS automatically -->
+        </div>
+        
+        <textarea id="feedback-comment" class="floating-input" rows="4" placeholder="Optional: Tell us what you loved..."></textarea>
+        <button class="btn primary-btn btn-full mt-2" onclick="submitFeedback()">Submit Feedback</button>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div class="drawer-overlay" id="admin-login-overlay" onclick="closeAdminLogin()"></div>
+    <div class="modal admin-login-modal" id="admin-login-modal">
+        <button class="icon-btn close-modal-btn" onclick="closeAdminLogin()"><i data-feather="x"></i></button>
+        <div class="admin-login-content">
+            <h3 style="margin-bottom:0.5rem;text-align:center;">Admin Access</h3>
+            <p style="text-align:center;color:var(--clr-text-muted);font-size:0.9rem;margin-bottom:2rem;">Secure area for staff only</p>
+            <form id="admin-gate-form">
+                <input type="password" id="gate-password" placeholder="Enter Base Password" class="floating-input" style="margin-bottom:1rem" required>
+                <button type="submit" class="btn primary-btn btn-full" id="gate-submit-btn">Authenticate <i data-feather="key"></i></button>
+                <div id="gate-error" style="color:#ff5e5e; font-size:0.85rem; text-align:center; opacity:0; margin-top:1rem; transition:opacity 0.2s;">Wrong Password</div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Cart Drawer -->
+    <div class="drawer-overlay" id="cart-overlay" onclick="toggleCart()"></div>
+    <div class="drawer" id="cart-drawer">
+        <div class="drawer-header">
+            <h3>Your Bag</h3>
+            <button class="icon-btn" onclick="toggleCart()"><i data-feather="x"></i></button>
+        </div>
+        <div class="drawer-body" id="cart-items"></div>
+        <div class="drawer-footer">
+            <div class="total-row"><span>Total</span><span id="cart-total-price" class="total-price">₹0</span></div>
+            <button class="btn primary-btn btn-full checkout-btn" onclick="openCheckout()">Secure Checkout</button>
+        </div>
+    </div>
+
+    <!-- Checkout Modal -->
+    <div class="drawer-overlay" id="checkout-overlay" onclick="closeCheckout()"></div>
+    <div class="modal" id="checkout-modal">
+        <div class="modal-header">
+            <h3>Delivery Details</h3>
+            <button class="icon-btn" onclick="closeCheckout()"><i data-feather="x"></i></button>
+        </div>
+        <div class="modal-body">
+            <form id="checkout-form" class="floating-form">
+                <div class="form-group pt-margin">
+                    <input type="text" id="cust-name" class="floating-input" placeholder=" " required>
+                    <label class="floating-label">Full Name</label>
+                </div>
+                <div class="form-group">
+                    <input type="tel" id="cust-phone" class="floating-input" placeholder=" " required>
+                    <label class="floating-label">Phone Number</label>
+                </div>
+                <div class="form-group">
+                    <textarea id="cust-address" class="floating-input" placeholder=" " rows="3" required></textarea>
+                    <label class="floating-label">Complete Address</label>
+                </div>
+                
+                <!-- Payment Area -->
+                <div class="payment-group">
+                    <div class="payment-title">Payment Method</div>
+                    <label class="cod-label">
+                        <input type="radio" name="payment" value="COD" checked>
+                        <span>Cash on Delivery (COD)</span>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn primary-btn btn-full submit-btn">Review Order <i data-feather="arrow-right"></i></button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Order Final Confirm Popup -->
+    <div class="drawer-overlay" id="order-confirm-overlay" onclick="closeOrderConfirm()"></div>
+    <div class="modal confirm-modal" id="order-confirm-modal" style="text-align:center;">
+        <h3>Confirm Details</h3>
+        <p class="txt-muted text-sm mb-2" style="margin-bottom:1.5rem">Please verify your order before placing.</p>
+        <div id="confirm-summary-details" class="summary-box"></div>
+        <div style="display:flex; justify-content:center; gap:1rem; margin-top:2rem;">
+            <button class="btn secondary-btn" onclick="closeOrderConfirm()">Cancel</button>
+            <button class="btn primary-btn" id="final-confirm-btn">Place Order <i data-feather="check"></i></button>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="drawer-overlay" id="success-overlay" onclick="closeSuccess()"></div>
+    <div class="modal success-modal" id="success-modal">
+        <div class="success-icon-wrap"><i data-feather="check-circle" class="success-icon"></i></div>
+        <h2>Order Confirmed!</h2>
+        <p>Your order <strong id="success-order-id"></strong> is on its way.</p>
+        <button class="btn secondary-btn" onclick="closeSuccess()">Track Orders</button>
+    </div>
+
+    <div id="toast" class="toast"><span class="toast-msg"></span></div>
+    <script src="app.js"></script>
+</body>
+</html>
