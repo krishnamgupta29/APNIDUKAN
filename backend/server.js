@@ -28,9 +28,21 @@ INSTRUCTIONS TO RUN:
 3. Run `npm install` inside the backend directory.
 4. Run `npm run dev` to start the server at localhost:5000.
 */
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-        .then(() => console.log('MongoDB Connected'))
-        .catch(err => console.log('MongoDB error:', err));
+// Production MongoDB Connect Logic
+const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/apnidukan";
+
+mongoose.connect(MONGO_URI, { 
+    useNewUrlParser: true, 
+    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 5000 // Timeout faster if connection is impossible
+})
+.then(() => console.log('✅ MongoDB Cloud Connected'))
+.catch(err => {
+    console.error('❌ MONGODB CONNECTION ERROR:', err.message);
+    if (err.message.includes('buffering timed out')) {
+        console.log("👉 TIP: Check your MongoDB Atlas Network Access and URI credentials!");
+    }
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
