@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { Package, Trash2, ImagePlus, X, Check, UploadCloud } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import API_URL from './api';
 
 const ADMIN_TOKEN = 'apnidukanspn9140';
 
@@ -31,11 +32,11 @@ export default function Admin() {
 
     useEffect(() => { if (auth) { fetchOrders(); fetchProducts(); } }, [auth]);
 
-    const fetchOrders = async () => axios.get('http://localhost:5000/api/orders', { headers: { 'x-admin-token': ADMIN_TOKEN } }).then(res => setOrders(res.data));
-    const fetchProducts = async () => axios.get('http://localhost:5000/api/products').then(res => setProducts(res.data));
+    const fetchOrders = async () => axios.get(`${API_URL}/api/orders`, { headers: { 'x-admin-token': ADMIN_TOKEN } }).then(res => setOrders(res.data));
+    const fetchProducts = async () => axios.get(`${API_URL}/api/products`).then(res => setProducts(res.data));
 
     const updateStatus = async (id, status) => {
-        await axios.put(`http://localhost:5000/api/orders/${id}/status`, { status }, { headers: { 'x-admin-token': ADMIN_TOKEN } });
+        await axios.put(`${API_URL}/api/orders/${id}/status`, { status }, { headers: { 'x-admin-token': ADMIN_TOKEN } });
         fetchOrders();
     };
 
@@ -143,7 +144,7 @@ export default function Admin() {
                             <AnimatePresence>
                                 {products.map(p => (
                                     <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} key={p._id} className="bg-white p-5 rounded-3xl border border-gray-100 flex gap-4 relative group shadow-sm hover:shadow-md transition-shadow">
-                                        <img src={p.images?.[0] ? `http://localhost:5000${p.images[0]}` : p.image} className="w-24 h-24 object-cover rounded-2xl bg-gray-50" />
+                                        <img src={p.images?.[0] ? `${API_URL}${p.images[0]}` : p.image} className="w-24 h-24 object-cover rounded-2xl bg-gray-50" />
                                         <div className="flex-1 overflow-hidden">
                                             <h4 className="font-bold text-gray-900 truncate">{p.name}</h4>
                                             <p className="text-sm text-gray-500 mb-2 truncate">{p.description}</p>
@@ -156,7 +157,7 @@ export default function Admin() {
                                                 {p.outOfStock && <span className="text-[10px] font-bold bg-red-100 text-red-700 px-2.5 py-1 rounded-full uppercase tracking-wider">Empty</span>}
                                             </div>
                                         </div>
-                                        <button onClick={async () => { await axios.delete(`http://localhost:5000/api/products/${p._id}`, { headers: { 'x-admin-token': ADMIN_TOKEN } }); fetchProducts(); }} className="absolute top-4 right-4 text-red-300 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-red-50 rounded-full"><Trash2 size={18} /></button>
+                                        <button onClick={async () => { await axios.delete(`${API_URL}/api/products/${p._id}`, { headers: { 'x-admin-token': ADMIN_TOKEN } }); fetchProducts(); }} className="absolute top-4 right-4 text-red-300 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-red-50 rounded-full"><Trash2 size={18} /></button>
                                     </motion.div>
                                 ))}
                             </AnimatePresence>
@@ -232,7 +233,7 @@ function AddProductForm({ refreshCatalog }) {
         files.forEach(f => formData.append('images', f));
 
         try {
-            await axios.post('http://localhost:5000/api/products', formData, { headers: { 'x-admin-token': ADMIN_TOKEN } });
+            await axios.post(`${API_URL}/api/products`, formData, { headers: { 'x-admin-token': ADMIN_TOKEN } });
             
             // Success Reset State
             refreshCatalog();

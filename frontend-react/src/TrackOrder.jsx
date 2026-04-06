@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import { Search, CheckCircle2, ChevronRight, Check, X } from 'lucide-react';
+import API_URL from './api';
 
 export default function TrackOrder() {
     const [phone, setPhone] = useState('');
@@ -20,7 +21,7 @@ export default function TrackOrder() {
         if(!phone) return;
         setLoading(true);
         try {
-            const res = await axios.get(`http://localhost:5000/api/orders/user/${phone}`);
+            const res = await axios.get(`${API_URL}/api/orders/user/${phone}`);
             setOrders(res.data); setSearched(true);
         } catch(e) { setToast('Error fetching orders'); setTimeout(()=>setToast(null), 3000); }
         setLoading(false);
@@ -29,7 +30,7 @@ export default function TrackOrder() {
     const submitFeedback = async () => {
         if(!rating) return setToast("Please select a star rating!");
         try {
-            await axios.post(`http://localhost:5000/api/orders/${reviewOrder}/feedback`, { rating, comment });
+            await axios.post(`${API_URL}/api/orders/${reviewOrder}/feedback`, { rating, comment });
             setToast("Thanks! Feedback submitted successfully.");
             setReviewOrder(null);
             setTimeout(()=>setToast(null), 3000);

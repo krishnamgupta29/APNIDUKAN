@@ -3,13 +3,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Star, ArrowRight, Zap, ShieldCheck, MapPin, ShoppingBag, Plus } from 'lucide-react';
 import axios from 'axios';
 import ProductModal from './ProductModal';
+import API_URL from './api';
 
 export default function Home({ addToCart }) {
     const [products, setProducts] = useState([]);
     const [selectedProduct, setSelectedProduct] = useState(null);
 
     useEffect(() => {
-        axios.get('http://localhost:5000/api/products').then(res => setProducts(res.data));
+        axios.get(`${API_URL}/api/products`).then(res => setProducts(res.data));
     }, []);
 
     return (
@@ -74,7 +75,7 @@ export default function Home({ addToCart }) {
 
 function ProductCard({ p, onClick, onAdd }) {
     const originalPrice = p.originalPrice && p.originalPrice > p.price ? p.originalPrice : null;
-    const sources = p.images?.length > 0 ? p.images.map(x => `http://localhost:5000${x}`) : [p.image || 'https://via.placeholder.com/400'];
+    const sources = p.images?.length > 0 ? p.images.map(x => `${API_URL}${x}`) : [p.image || 'https://via.placeholder.com/400'];
     
     // Multi Image Hover Rotation State
     const [hoverIdx, setHoverIdx] = useState(0);

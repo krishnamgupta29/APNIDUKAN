@@ -7,6 +7,7 @@ import Admin from './Admin';
 import { ShoppingBag, X, ArrowRight, CheckCircle2 } from 'lucide-react';
 import Intro from './Intro';
 import axios from 'axios';
+import API_URL from './api';
 
 function Navigation({ cartCount, onCartClick }) {
     const navigate = useNavigate();
@@ -63,7 +64,7 @@ export default function App() {
 
     const confirmOrderPlace = async () => {
         try {
-            const res = await axios.post(`http://localhost:5000/api/orders`, orderPayload);
+            const res = await axios.post(`${API_URL}/api/orders`, orderPayload);
             setCart([]); setIsConfirmOpen(false);
             alert(`Order Placed! ID: ${res.data.orderId}`);
         } catch(e) { alert("Failed placing order."); }
