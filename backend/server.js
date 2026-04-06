@@ -9,9 +9,14 @@ const orderRoutes = require('./routes/orders');
 
 const app = express();
 
-app.use(cors());
+app.use(cors({ origin: '*' }));
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Health check root route
+app.get('/', (req, res) => {
+    res.json({ status: 'ok', message: '🚀 ApniDukaan API is running!', version: '1.0.0' });
+});
 
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
