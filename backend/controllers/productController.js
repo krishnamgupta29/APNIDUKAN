@@ -8,7 +8,7 @@ exports.getProducts = async (req, res) => {
 exports.createProduct = async (req, res) => {
     try {
         const { name, price, originalPrice, deliveryCharge, isFreeDelivery, outOfStock, description, instructions } = req.body;
-        const images = req.files ? req.files.map(f => `/uploads/${f.filename}`) : [];
+        const images = req.files ? req.files.map(f => f.path) : [];
         if (req.body.imageUrl && images.length === 0) images.push(req.body.imageUrl);
         const newProduct = new Product({ 
             name, price, 

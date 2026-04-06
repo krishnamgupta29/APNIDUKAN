@@ -4,6 +4,7 @@ import { Star, ArrowRight, Zap, ShieldCheck, MapPin, ShoppingBag, Plus } from 'l
 import axios from 'axios';
 import ProductModal from './ProductModal';
 import API_URL from './api';
+import { getImageUrl } from './utils';
 
 export default function Home({ addToCart }) {
     const [products, setProducts] = useState([]);
@@ -75,7 +76,7 @@ export default function Home({ addToCart }) {
 
 function ProductCard({ p, onClick, onAdd }) {
     const originalPrice = p.originalPrice && p.originalPrice > p.price ? p.originalPrice : null;
-    const sources = p.images?.length > 0 ? p.images.map(x => `${API_URL}${x}`) : [p.image || 'https://via.placeholder.com/400'];
+    const sources = p.images?.length > 0 ? p.images.map(getImageUrl) : [getImageUrl(p.image)];
     
     // Multi Image Hover Rotation State
     const [hoverIdx, setHoverIdx] = useState(0);

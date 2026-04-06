@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X, ChevronLeft, ChevronRight, ShoppingBag } from 'lucide-react';
 import API_URL from './api';
+import { getImageUrl } from './utils';
 
 export default function ProductModal({ product, onClose, onAdd }) {
-    const sources = product.images?.length > 0 ? product.images.map(x => `${API_URL}${x}`) : [product.image || 'https://via.placeholder.com/400'];
+    const sources = product.images?.length > 0 ? product.images.map(getImageUrl) : [getImageUrl(product.image)];
     const [curImg, setCurImg] = useState(0);
     const [isHovered, setIsHovered] = useState(false);
     const total = sources.length;

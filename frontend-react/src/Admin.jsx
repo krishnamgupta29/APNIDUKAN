@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Package, Trash2, ImagePlus, X, Check, UploadCloud } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import API_URL from './api';
+import { getImageUrl } from './utils';
 
 const ADMIN_TOKEN = 'apnidukanspn9140';
 
@@ -144,7 +145,7 @@ export default function Admin() {
                             <AnimatePresence>
                                 {products.map(p => (
                                     <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} key={p._id} className="bg-white p-5 rounded-3xl border border-gray-100 flex gap-4 relative group shadow-sm hover:shadow-md transition-shadow">
-                                        <img src={p.images?.[0] ? `${API_URL}${p.images[0]}` : p.image} className="w-24 h-24 object-cover rounded-2xl bg-gray-50" />
+                                        <img src={getImageUrl(p.images?.[0] || p.image)} className="w-24 h-24 object-cover rounded-2xl bg-gray-50" />
                                         <div className="flex-1 overflow-hidden">
                                             <h4 className="font-bold text-gray-900 truncate">{p.name}</h4>
                                             <p className="text-sm text-gray-500 mb-2 truncate">{p.description}</p>
