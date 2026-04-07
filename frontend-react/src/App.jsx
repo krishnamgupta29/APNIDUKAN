@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Home from './Home';
 import TrackOrder from './TrackOrder';
@@ -178,9 +178,13 @@ export default function App() {
         setIsCheckoutOpen(false); setIsConfirmOpen(true);
     };
 
+    const navigate = useNavigate();
+
     return (
-        <BrowserRouter>
-            <AnimatePresence>{showIntro && <Intro onComplete={() => setShowIntro(false)} />}</AnimatePresence>
+        <>
+            <AnimatePresence>
+                {showIntro && <Intro key="intro" onComplete={() => setShowIntro(false)} />}
+            </AnimatePresence>
 
             {!showIntro && (
                 <div className="min-h-screen flex flex-col relative w-full overflow-hidden">
@@ -202,12 +206,12 @@ export default function App() {
                     {/* Cart Drawer */}
                     <AnimatePresence>
                         {isCartOpen && (
-                            <>
-                                <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} onClick={()=>setIsCartOpen(false)} className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[60]"/>
-                                <motion.div initial={{x:'100%'}} animate={{x:0}} exit={{x:'100%'}} className="fixed top-0 right-0 h-full w-full max-w-sm bg-white shadow-2xl z-[70] flex flex-col">
+                            <motion.div key="cart-container" className="fixed inset-0 z-[60]">
+                                <motion.div key="cart-bg" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} onClick={()=>setIsCartOpen(false)} className="absolute inset-0 bg-black/20 backdrop-blur-sm"/>
+                                <motion.div key="cart-panel" initial={{x:'100%'}} animate={{x:0}} exit={{x:'100%'}} transition={{type:'spring',damping:25,stiffness:200}} className="absolute top-0 right-0 h-full w-full max-w-sm bg-white shadow-2xl z-10 flex flex-col">
                                     <div className="p-6 border-b border-gray-100 flex justify-between items-center">
                                         <h2 className="text-xl font-bold">Your Bag</h2>
-                                        <button onClick={()=>setIsCartOpen(false)} className="p-2 hover:bg-gray-100 rounded-full"><X size={20}/></button>
+                                        <button type="button" onClick={()=>setIsCartOpen(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors"><X size={20}/></button>
                                     </div>
                                     <div className="p-6 flex-1 overflow-y-auto space-y-4">
                                         {cart.length===0 ? <p className="text-gray-400">Empty bag.</p> : cart.map(c => (
@@ -217,24 +221,24 @@ export default function App() {
                                                     <h4 className="font-bold text-sm text-gray-900">{c.name}</h4>
                                                     <p className="text-sm text-gray-500">₹{c.price} x {c.quantity}</p>
                                                 </div>
-                                                <button onClick={()=>remFromCart(c.productId)} className="text-red-500 p-2"><X size={16}/></button>
+                                                <button type="button" onClick={()=>remFromCart(c.productId)} className="text-red-500 p-2"><X size={16}/></button>
                                             </div>
                                         ))}
                                     </div>
                                     <div className="p-6 border-t border-gray-100 bg-gray-50">
                                         <div className="flex justify-between font-bold text-lg mb-4"><span>Total</span><span>₹{totalCalc}</span></div>
-                                        <button onClick={()=>{setIsCartOpen(false); setIsCheckoutOpen(true);}} disabled={cart.length===0} className="w-full py-4 bg-gray-900 text-white rounded-xl font-bold hover:scale-[1.02] transition disabled:opacity-50">Secure Checkout</button>
+                                        <button type="button" onClick={()=>{setIsCartOpen(false); setIsCheckoutOpen(true);}} disabled={cart.length===0} className="w-full py-4 bg-gray-900 text-white rounded-xl font-bold hover:scale-[1.02] transition disabled:opacity-50">Secure Checkout</button>
                                     </div>
                                 </motion.div>
-                            </>
+                            </motion.div>
                         )}
                     </AnimatePresence>
 
                     {/* Checkout Details Modal */}
                     <AnimatePresence>
                         {isCheckoutOpen && (
-                            <div className="fixed inset-0 bg-black/40 backdrop-blur-md z-[80] flex items-center justify-center p-4">
-                                <motion.div initial={{scale:0.95, opacity:0}} animate={{scale:1, opacity:1}} exit={{scale:0.95, opacity:0}} className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl relative flex flex-col md:flex-row">
+                            <motion.div key="checkout-modal" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="fixed inset-0 bg-black/40 backdrop-blur-md z-[80] flex items-center justify-center p-4">
+                                <motion.div initial={{scale:0.95, y:20}} animate={{scale:1, y:0}} exit={{scale:0.95, y:20}} className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl relative flex flex-col md:flex-row">
                                     {/* Left: Map */}
                                     <div className="h-48 md:h-auto md:w-1/2 relative bg-gray-100">
                                         <MapContainer center={mapCenter} zoom={13} scrollWheelZoom={true} className="w-full h-full z-10">
@@ -275,15 +279,15 @@ export default function App() {
                                         </form>
                                     </div>
                                 </motion.div>
-                            </div>
+                            </motion.div>
                         )}
                     </AnimatePresence>
 
                     {/* Final Confirm Modal */}
                     <AnimatePresence>
                         {isConfirmOpen && !orderPayload.placedId && (
-                            <div className="fixed inset-0 bg-black/40 backdrop-blur-md z-[90] flex items-center justify-center p-4">
-                                <motion.div initial={{scale:0.9, opacity:0}} animate={{scale:1, opacity:1}} exit={{scale:0.9, opacity:0}} className="bg-white rounded-3xl p-6 md:p-8 max-w-sm w-full shadow-2xl text-center">
+                            <motion.div key="confirm-modal" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="fixed inset-0 bg-black/40 backdrop-blur-md z-[90] flex items-center justify-center p-4">
+                                <motion.div initial={{scale:0.9, y:20}} animate={{scale:1, y:0}} exit={{scale:0.9, y:20}} className="bg-white rounded-3xl p-6 md:p-8 max-w-sm w-full shadow-2xl text-center">
                                     <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4"><CheckCircle2 size={32}/></div>
                                     <h3 className="text-2xl font-extrabold mb-2 text-gray-900">Confirm Order</h3>
                                     <p className="text-gray-500 text-sm mb-6 font-medium">Review your order details.</p>
@@ -300,12 +304,12 @@ export default function App() {
                                         <button onClick={confirmOrderPlace} className="flex-1 py-3.5 bg-gray-900 text-white font-bold rounded-xl hover:bg-black transition shadow-xl shadow-gray-900/20">Confirm Place</button>
                                     </div>
                                 </motion.div>
-                            </div>
+                            </motion.div>
                         )}
 
                         {/* Order Success Styled UI Modal */}
                         {orderPayload.placedId && (
-                            <div className="fixed inset-0 bg-black/50 backdrop-blur-md z-[100] flex items-center justify-center p-4">
+                            <motion.div key="order-success" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="fixed inset-0 bg-black/50 backdrop-blur-md z-[100] flex items-center justify-center p-4">
                                 <motion.div initial={{scale:0.8, opacity:0}} animate={{scale:1, opacity:1}} className="bg-gradient-to-b from-emerald-50 to-white rounded-3xl p-8 max-w-sm w-full shadow-2xl border border-emerald-100 text-center relative overflow-hidden">
                                     <div className="absolute top-0 left-0 w-full h-2 bg-emerald-500"></div>
                                     
@@ -325,11 +329,11 @@ export default function App() {
                                         Track Order
                                     </button>
                                 </motion.div>
-                            </div>
+                            </motion.div>
                         )}
                     </AnimatePresence>
                 </div>
             )}
-        </BrowserRouter>
+        </>
     );
 }
