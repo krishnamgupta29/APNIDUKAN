@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { X, ChevronLeft, ChevronRight, ShoppingBag } from 'lucide-react';
 import API_URL from './api';
@@ -6,8 +6,8 @@ import { getImageUrl } from './utils';
 
 export default function ProductModal({ product, onClose, onAdd }) {
     const sources = product.images?.length > 0 ? product.images.map(getImageUrl) : [getImageUrl(product.image)];
-    const [curImg, setCurImg] = useState(0);
-    const [isHovered, setIsHovered] = useState(false);
+    const [curImg, setCurImg] = React.useState(0);
+    const [isHovered, setIsHovered] = React.useState(false);
     const total = sources.length;
 
     // Mobile Swipe Handler
@@ -20,7 +20,7 @@ export default function ProductModal({ product, onClose, onAdd }) {
     };
 
     // Auto Play
-    useEffect(() => {
+    React.useEffect(() => {
         if(isHovered || total <= 1) return;
         const interval = setInterval(() => { setCurImg(c => (c + 1) % total); }, 3000);
         return () => clearInterval(interval);
