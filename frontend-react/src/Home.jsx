@@ -201,7 +201,7 @@ export default function Home({ addToCart }) {
             </section>
 
             <AnimatePresence>
-                {selectedProduct && <ProductModal product={selectedProduct} onClose={()=>setSelectedProduct(null)} onAdd={() => addToCart(selectedProduct)} />}
+                {selectedProduct && <ProductModal key={selectedProduct._id} product={selectedProduct} onClose={()=>setSelectedProduct(null)} onAdd={() => addToCart(selectedProduct)} />}
             </AnimatePresence>
         </main>
     );
