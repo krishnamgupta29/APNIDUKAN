@@ -26,8 +26,8 @@ export default function Footer() {
                     <div>
                         <h4 className="font-bold text-gray-900 mb-6 uppercase tracking-widest text-xs">Platform</h4>
                         <ul className="space-y-4">
-                            <li><button onClick={() => navigate('/')} className="text-gray-500 hover:text-blue-600 font-medium transition-colors text-sm flex items-center gap-2 group"><ArrowRight size={14} className="opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all"/> Shop Products</button></li>
-                            <li><button onClick={() => navigate('/track')} className="text-gray-500 hover:text-blue-600 font-medium transition-colors text-sm flex items-center gap-2 group"><ArrowRight size={14} className="opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all"/> Track Order</button></li>
+                            <li><button type="button" onClick={() => navigate('/')} className="text-gray-500 hover:text-blue-600 font-medium transition-colors text-sm flex items-center gap-2 group"><ArrowRight size={14} className="opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all"/> Shop Products</button></li>
+                            <li><button type="button" onClick={() => navigate('/track')} className="text-gray-500 hover:text-blue-600 font-medium transition-colors text-sm flex items-center gap-2 group"><ArrowRight size={14} className="opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all"/> Track Order</button></li>
                             <li><a href="mailto:support@apnidukaan.com" className="text-gray-500 hover:text-blue-600 font-medium transition-colors text-sm flex items-center gap-2 group"><ArrowRight size={14} className="opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all"/> Contact Support</a></li>
                         </ul>
                     </div>
@@ -36,9 +36,9 @@ export default function Footer() {
                     <div>
                         <h4 className="font-bold text-gray-900 mb-6 uppercase tracking-widest text-xs">Legal & Info</h4>
                         <ul className="space-y-4">
-                            <li><button onClick={() => navigate('/legal')} className="text-gray-500 hover:text-blue-600 font-medium transition-colors text-sm flex items-center gap-2 group"><ArrowRight size={14} className="opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all"/> About Us</button></li>
-                            <li><button onClick={() => navigate('/legal')} className="text-gray-500 hover:text-blue-600 font-medium transition-colors text-sm flex items-center gap-2 group"><ArrowRight size={14} className="opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all"/> Terms & Conditions</button></li>
-                            <li><button onClick={() => navigate('/legal')} className="text-gray-500 hover:text-blue-600 font-medium transition-colors text-sm flex items-center gap-2 group"><ArrowRight size={14} className="opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all"/> Privacy Policy</button></li>
+                            <li><button type="button" onClick={() => navigate('/legal')} className="text-gray-500 hover:text-blue-600 font-medium transition-colors text-sm flex items-center gap-2 group"><ArrowRight size={14} className="opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all"/> About Us</button></li>
+                            <li><button type="button" onClick={() => navigate('/legal')} className="text-gray-500 hover:text-blue-600 font-medium transition-colors text-sm flex items-center gap-2 group"><ArrowRight size={14} className="opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all"/> Terms & Conditions</button></li>
+                            <li><button type="button" onClick={() => navigate('/legal')} className="text-gray-500 hover:text-blue-600 font-medium transition-colors text-sm flex items-center gap-2 group"><ArrowRight size={14} className="opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all"/> Privacy Policy</button></li>
                         </ul>
                     </div>
                 </div>

@@ -45,7 +45,7 @@ function ProductCard({ p, onClick, onAdd }) {
     return (
         <Link 
             to={`/product/${p._id}`}
-            onClick={(e) => { e.preventDefault(); if(!p.outOfStock) onClick(); }} 
+            onClick={(e) => { e.preventDefault(); if(!p.outOfStock && typeof onClick === 'function') { console.log(typeof onClick); onClick(); } }} 
             className={`flex flex-col h-full bg-white/60 backdrop-blur-xl rounded-3xl p-3 md:p-5 shadow-sm shadow-emerald-900/5 border border-platinum-200 relative group transition-all duration-300 ease-in-out hover:-translate-y-2 hover:shadow-xl hover:shadow-emerald-900/10 cursor-pointer overflow-hidden ${p.outOfStock ? 'opacity-90' : ''}`}
         >
             {/* Free Delivery Premium Badge */}
@@ -111,7 +111,7 @@ function ProductCard({ p, onClick, onAdd }) {
             {/* Quick Add CTA */}
             <button 
                 type="button"
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); onAdd(e); }}
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (typeof onAdd === 'function') { console.log(typeof onAdd); onAdd(e); } }}
                 disabled={p.outOfStock}
                 className={`absolute bottom-3 right-3 md:bottom-5 md:right-5 w-10 h-10 md:w-12 md:h-12 border rounded-2xl flex items-center justify-center transition-all duration-300 z-20 shadow-lg ${p.outOfStock ? 'bg-gray-100 border-gray-200 text-gray-300 cursor-not-allowed shadow-none' : 'bg-gray-900 border-gray-800 text-white hover:bg-emerald-600 hover:border-emerald-500 hover:rotate-90 hover:scale-110 shadow-gray-200'}`}
             >
@@ -156,7 +156,7 @@ export default function Home({ addToCart }) {
                         Experience lightning-fast online shopping in Shahjahanpur. Shop groceries and daily essentials with our trusted local store service.
                     </p>
                     <div className="flex justify-center gap-4">
-                        <button onClick={()=>document.getElementById('shop').scrollIntoView({behavior:'smooth'})} className="px-8 sm:px-10 py-3.5 sm:py-4 bg-gray-900 text-white font-bold rounded-full hover:scale-105 hover:bg-black shadow-xl shadow-gray-200 transition-all flex items-center justify-center gap-2 w-full sm:w-auto">
+                        <button type="button" onClick={()=>document.getElementById('shop').scrollIntoView({behavior:'smooth'})} className="px-8 sm:px-10 py-3.5 sm:py-4 bg-gray-900 text-white font-bold rounded-full hover:scale-105 hover:bg-black shadow-xl shadow-gray-200 transition-all flex items-center justify-center gap-2 w-full sm:w-auto">
                             Start Shopping <ArrowRight size={20}/>
                         </button>
                     </div>

@@ -46,9 +46,9 @@ export default function HowToUse({ isOpen, onClose }) {
                         exit={{ opacity: 0, scale: 0.95 }}
                         className="bg-white rounded-3xl w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl relative"
                     >
-                        <div className="sticky top-0 bg-white/90 backdrop-blur-md p-6 border-b border-gray-100 flex justify-between items-center z-10">
-                            <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">How to Use <span className="text-blue-500">ApniDukaan</span></h2>
-                            <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors"><X size={24} /></button>
+                        <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                            <h2 className="text-xl font-extrabold text-gray-900 tracking-tight">How ApniDukaan Works</h2>
+                            <button type="button" onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors"><X size={24} /></button>
                         </div>
                         
                         <div className="p-6 md:p-8 space-y-6">
@@ -67,7 +67,10 @@ export default function HowToUse({ isOpen, onClose }) {
                             <div className="mt-8 bg-gray-900 text-white rounded-2xl p-6 text-center">
                                 <h3 className="text-xl font-bold mb-3">Ready to order?</h3>
                                 <p className="text-gray-400 font-medium text-sm mb-6 max-w-md mx-auto">Get your daily needs and curated products delivered to your doorstep at lightning speed.</p>
-                                <button onClick={onClose} className="px-8 py-3 bg-white text-gray-900 font-extrabold rounded-xl hover:scale-105 transition-transform">Start Shopping Now</button>
+                                <div className="text-center group">
+                                    <button type="button" onClick={onClose} className="px-8 py-3 bg-white text-gray-900 font-extrabold rounded-xl hover:scale-105 transition-transform">Start Shopping Now</button>
+                                    <p className="text-white/60 text-xs mt-3">Shahjahanpur's fastest delivery network</p>
+                                </div>
                             </div>
                         </div>
                     </motion.div>

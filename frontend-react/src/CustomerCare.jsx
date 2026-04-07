@@ -21,7 +21,7 @@ export default function CustomerCare() {
                                 <HeadphonesIcon size={20} />
                                 Need Help?
                             </div>
-                            <button onClick={() => setIsOpen(false)} className="p-1 hover:bg-white/20 rounded-full transition-colors"><X size={18} /></button>
+                            <button type="button" onClick={() => setIsOpen(false)} className="p-1 hover:bg-white/20 rounded-full transition-colors"><X size={18} /></button>
                         </div>
                         <div className="p-5 flex flex-col gap-3">
                             <p className="text-xs font-bold text-gray-500 uppercase tracking-widest text-center mb-1">Contact Support</p>
