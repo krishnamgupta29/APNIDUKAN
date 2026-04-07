@@ -110,7 +110,8 @@ function ProductCard({ p, onClick, onAdd }) {
 
             {/* Quick Add CTA */}
             <button 
-                onClick={onAdd}
+                type="button"
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); onAdd(e); }}
                 disabled={p.outOfStock}
                 className={`absolute bottom-3 right-3 md:bottom-5 md:right-5 w-10 h-10 md:w-12 md:h-12 border rounded-2xl flex items-center justify-center transition-all duration-300 z-20 shadow-lg ${p.outOfStock ? 'bg-gray-100 border-gray-200 text-gray-300 cursor-not-allowed shadow-none' : 'bg-gray-900 border-gray-800 text-white hover:bg-emerald-600 hover:border-emerald-500 hover:rotate-90 hover:scale-110 shadow-gray-200'}`}
             >

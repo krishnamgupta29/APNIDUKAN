@@ -84,8 +84,9 @@ export default function ProductModal({ product, onClose, onAdd }) {
                     </div>
 
                     <button 
+                        type="button"
                         disabled={product.outOfStock}
-                        onClick={()=>{onAdd(); onClose();}} 
+                        onClick={(e)=>{e.preventDefault(); e.stopPropagation(); onAdd(); onClose();}} 
                         className={`w-full py-4 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2 ${product.outOfStock ? 'bg-gray-200 text-gray-400 cursor-not-allowed border border-gray-300' : 'bg-gray-900 text-white hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-gray-900/20 hover:bg-black'}`}
                     >
                         <ShoppingBag size={20}/> {product.outOfStock ? 'Currently Unavailable' : 'Add to Cart'}
