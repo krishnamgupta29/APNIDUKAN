@@ -66,7 +66,7 @@ function Navigation({ cartCount, onCartClick }) {
 
 export default function App() {
     const [showIntro, setShowIntro] = useState(true);
-    const [cart, setCart] = useState(() => JSON.parse(localStorage.getItem('react-cart')) || []);
+    const [cart, setCart] = useState([]);
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -74,11 +74,12 @@ export default function App() {
     const [orderPayload, setOrderPayload] = useState({});
 
     useEffect(() => { 
-        localStorage.setItem('react-cart', JSON.stringify(cart)); 
+        // Cart reset on refresh is handled by initial state being [].
+        // We still add listener for shared triggers
         const openHowToUse = () => setIsHowToUseOpen(true);
         document.addEventListener('open-how-to-use', openHowToUse);
         return () => document.removeEventListener('open-how-to-use', openHowToUse);
-    }, [cart]);
+    }, []);
 
     const addToCart = (product) => {
         setCart(prev => {
@@ -182,7 +183,9 @@ export default function App() {
 
     return (
         <>
-            <AnimatePresence>{showIntro && <Intro onComplete={() => setShowIntro(false)} />}</AnimatePresence>
+            <AnimatePresence>
+                {showIntro && <Intro key="intro" onComplete={() => setShowIntro(false)} />}
+            </AnimatePresence>
 
             {!showIntro && (
                 <div className="min-h-screen flex flex-col relative w-full overflow-hidden">
@@ -207,12 +210,12 @@ export default function App() {
                     {/* Cart Drawer */}
                     <AnimatePresence>
                         {isCartOpen && (
-                            <>
-                                <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} onClick={()=>setIsCartOpen(false)} className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[60]"/>
-                                <motion.div initial={{x:'100%'}} animate={{x:0}} exit={{x:'100%'}} className="fixed top-0 right-0 h-full w-full max-w-sm bg-white shadow-2xl z-[70] flex flex-col">
+                            <motion.div key="cart-container" className="fixed inset-0 z-[60]">
+                                <motion.div key="cart-bg" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} onClick={()=>setIsCartOpen(false)} className="absolute inset-0 bg-black/20 backdrop-blur-sm z-[60]"/>
+                                <motion.div key="cart-panel" initial={{x:'100%'}} animate={{x:0}} exit={{x:'100%'}} transition={{type: 'spring', damping: 25, stiffness: 200}} className="absolute top-0 right-0 h-full w-full max-w-sm bg-white shadow-2xl z-[70] flex flex-col">
                                     <div className="p-6 border-b border-gray-100 flex justify-between items-center">
                                         <h2 className="text-xl font-bold">Your Bag</h2>
-                                        <button onClick={()=>setIsCartOpen(false)} className="p-2 hover:bg-gray-100 rounded-full"><X size={20}/></button>
+                                        <button onClick={()=>setIsCartOpen(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors"><X size={20}/></button>
                                     </div>
                                     <div className="p-6 flex-1 overflow-y-auto space-y-4">
                                         {cart.length===0 ? <p className="text-gray-400">Empty bag.</p> : cart.map(c => (
@@ -231,7 +234,7 @@ export default function App() {
                                         <button onClick={()=>{setIsCartOpen(false); setIsCheckoutOpen(true);}} disabled={cart.length===0} className="w-full py-4 bg-gray-900 text-white rounded-xl font-bold hover:scale-[1.02] transition disabled:opacity-50">Secure Checkout</button>
                                     </div>
                                 </motion.div>
-                            </>
+                            </motion.div>
                         )}
                     </AnimatePresence>
 
@@ -310,7 +313,7 @@ export default function App() {
 
                         {/* Order Success Styled UI Modal */}
                         {orderPayload.placedId && (
-                            <div className="fixed inset-0 bg-black/50 backdrop-blur-md z-[100] flex items-center justify-center p-4">
+                            <motion.div key="order-success" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="fixed inset-0 bg-black/50 backdrop-blur-md z-[100] flex items-center justify-center p-4">
                                 <motion.div initial={{scale:0.8, opacity:0}} animate={{scale:1, opacity:1}} className="bg-gradient-to-b from-emerald-50 to-white rounded-3xl p-8 max-w-sm w-full shadow-2xl border border-emerald-100 text-center relative overflow-hidden">
                                     <div className="absolute top-0 left-0 w-full h-2 bg-emerald-500"></div>
                                     
@@ -330,7 +333,7 @@ export default function App() {
                                         Track Order
                                     </button>
                                 </motion.div>
-                            </div>
+                            </motion.div>
                         )}
                     </AnimatePresence>
                 </div>
