@@ -48,12 +48,20 @@ export default function Footer() {
                         &copy; {new Date().getFullYear()} ApniDukaan. All rights reserved.
                     </div>
                     
-                    <div className="flex flex-col items-center md:items-end gap-1">
+                        <div className="flex flex-col items-center md:items-end gap-1">
                         <div className="text-xs font-bold text-gray-400 tracking-wider">
                             Developed in Shahjahanpur & operated locally
                         </div>
-                        <div className="text-sm font-medium text-gray-600 flex items-center gap-1.5">
+                        <div className="text-sm font-medium text-gray-600 flex items-center gap-1.5 mb-2">
                             Developed by <a href="https://krishnamportfolio.netlify.app/" target="_blank" rel="noreferrer" className="text-blue-600 font-bold hover:underline">Krishnam Gupta</a>
+                        </div>
+                        <div className="text-xs text-gray-500 font-medium text-center md:text-right">
+                           <p>Visit us: Shahjahanpur, Uttar Pradesh, India</p>
+                           <p>Call: +91 [Insert Number]</p>
+                           <p>Email: contact@apnidukan.com</p>
+                           <a href="https://www.google.com/maps/search/Shahjahanpur,+Uttar+Pradesh" target="_blank" rel="noreferrer" className="text-blue-500 hover:underline flex items-center gap-1 justify-center md:justify-end mt-1">
+                               <MapPin size={12}/> View on Google Maps
+                           </a>
                         </div>
                     </div>
                 </div>

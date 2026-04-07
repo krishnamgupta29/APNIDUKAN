@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://apnidukan.com/sitemap.xml
