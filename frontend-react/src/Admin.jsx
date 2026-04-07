@@ -279,9 +279,9 @@ function AddProductForm({ refreshCatalog }) {
             <h3 className="font-bold text-2xl mb-8 text-gray-900">Create Product</h3>
 
             {/* Premium Dynamic Alert Toast */}
-            <AnimatePresence>
+            <AnimatePresence mode="wait">
                 {toast && (
-                    <motion.div initial={{opacity:0, y:-20}} animate={{opacity:1, y:0}} exit={{opacity:0}} className={`absolute top-0 left-0 w-full p-4 border-b font-bold flex items-center justify-center gap-2 z-10 transition-colors ${toast.type === 'error' ? 'bg-red-50 border-red-100 text-red-600' : 'bg-emerald-50 border-emerald-100 text-emerald-700'}`}>
+                    <motion.div key={toast.msg} initial={{opacity:0, y:-20}} animate={{opacity:1, y:0}} exit={{opacity:0}} className={`absolute top-0 left-0 w-full p-4 border-b font-bold flex items-center justify-center gap-2 z-10 transition-colors ${toast.type === 'error' ? 'bg-red-50 border-red-100 text-red-600' : 'bg-emerald-50 border-emerald-100 text-emerald-700'}`}>
                         {toast.type === 'error' ? <X size={18}/> : <CheckCircle size={18}/>} 
                         {toast.msg}
                     </motion.div>
