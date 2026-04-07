@@ -42,7 +42,7 @@ export default function TrackOrder() {
         <div className="flex-1 w-full max-w-4xl mx-auto px-6 py-12">
             <AnimatePresence>
                 {toast && (
-                    <motion.div initial={{opacity:0, y:-20}} animate={{opacity:1, y:0}} exit={{opacity:0}} className="fixed top-4 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full font-bold shadow-2xl z-[100]">
+                    <motion.div key="toast-msg" initial={{opacity:0, y:-20}} animate={{opacity:1, y:0}} exit={{opacity:0}} className="fixed top-4 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full font-bold shadow-2xl z-[100]">
                         {toast}
                     </motion.div>
                 )}

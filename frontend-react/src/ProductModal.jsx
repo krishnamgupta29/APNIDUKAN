@@ -27,10 +27,10 @@ export default function ProductModal({ product, onClose, onAdd }) {
     }, [isHovered, total]);
 
     return (
-        <React.Fragment>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/30 backdrop-blur-md z-[100]" onClick={onClose} />
+        <motion.div key="product-modal-root" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/30 backdrop-blur-md" onClick={onClose} />
             <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-4xl bg-white rounded-3xl shadow-2xl z-[101] overflow-hidden flex flex-col md:flex-row max-h-[90vh]">
+                className="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl z-[101] overflow-hidden flex flex-col md:flex-row max-h-[90vh]">
                 
                 <button onClick={onClose} className="absolute top-4 right-4 z-50 p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition"><X size={20}/></button>
 
@@ -93,6 +93,6 @@ export default function ProductModal({ product, onClose, onAdd }) {
                     </button>
                 </div>
             </motion.div>
-        </React.Fragment>
+        </motion.div>
     );
 }

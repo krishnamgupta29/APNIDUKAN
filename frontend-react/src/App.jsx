@@ -241,8 +241,8 @@ export default function App() {
                     {/* Checkout Details Modal */}
                     <AnimatePresence>
                         {isCheckoutOpen && (
-                            <div className="fixed inset-0 bg-black/40 backdrop-blur-md z-[80] flex items-center justify-center p-4">
-                                <motion.div initial={{scale:0.95, opacity:0}} animate={{scale:1, opacity:1}} exit={{scale:0.95, opacity:0}} className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl relative flex flex-col md:flex-row">
+                            <motion.div key="checkout-modal" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="fixed inset-0 bg-black/40 backdrop-blur-md z-[80] flex items-center justify-center p-4">
+                                <motion.div initial={{scale:0.95, y:20}} animate={{scale:1, y:0}} exit={{scale:0.95, y:20}} className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl relative flex flex-col md:flex-row">
                                     {/* Left: Map */}
                                     <div className="h-48 md:h-auto md:w-1/2 relative bg-gray-100">
                                         <MapContainer center={mapCenter} zoom={13} scrollWheelZoom={true} className="w-full h-full z-10">
@@ -283,15 +283,15 @@ export default function App() {
                                         </form>
                                     </div>
                                 </motion.div>
-                            </div>
+                            </motion.div>
                         )}
                     </AnimatePresence>
 
                     {/* Final Confirm Modal */}
                     <AnimatePresence>
                         {isConfirmOpen && !orderPayload.placedId && (
-                            <div className="fixed inset-0 bg-black/40 backdrop-blur-md z-[90] flex items-center justify-center p-4">
-                                <motion.div initial={{scale:0.9, opacity:0}} animate={{scale:1, opacity:1}} exit={{scale:0.9, opacity:0}} className="bg-white rounded-3xl p-6 md:p-8 max-w-sm w-full shadow-2xl text-center">
+                            <motion.div key="confirm-modal" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="fixed inset-0 bg-black/40 backdrop-blur-md z-[90] flex items-center justify-center p-4">
+                                <motion.div initial={{scale:0.9, y:20}} animate={{scale:1, y:0}} exit={{scale:0.9, y:20}} className="bg-white rounded-3xl p-6 md:p-8 max-w-sm w-full shadow-2xl text-center">
                                     <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4"><CheckCircle2 size={32}/></div>
                                     <h3 className="text-2xl font-extrabold mb-2 text-gray-900">Confirm Order</h3>
                                     <p className="text-gray-500 text-sm mb-6 font-medium">Review your order details.</p>
@@ -308,7 +308,7 @@ export default function App() {
                                         <button onClick={confirmOrderPlace} className="flex-1 py-3.5 bg-gray-900 text-white font-bold rounded-xl hover:bg-black transition shadow-xl shadow-gray-900/20">Confirm Place</button>
                                     </div>
                                 </motion.div>
-                            </div>
+                            </motion.div>
                         )}
 
                         {/* Order Success Styled UI Modal */}
