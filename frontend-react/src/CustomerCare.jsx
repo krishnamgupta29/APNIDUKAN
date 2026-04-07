@@ -36,12 +36,12 @@ export default function CustomerCare() {
                                 </div>
                             </a>
 
-                            <a href="mailto:support@apnidukaan.com" className="flex items-center gap-3 p-3 bg-gray-50 hover:bg-indigo-50 border border-gray-100 rounded-xl transition-colors group">
+                            <a href="mailto:supportspn07@gmail.com" className="flex items-center gap-3 p-3 bg-gray-50 hover:bg-indigo-50 border border-gray-100 rounded-xl transition-colors group">
                                 <div className="w-10 h-10 bg-white shadow-sm rounded-full flex items-center justify-center text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
                                     <Mail size={18} />
                                 </div>
                                 <div className="flex flex-col">
-                                    <span className="text-[13px] font-bold text-gray-900 truncate max-w-[130px]">support@apnidukaan.com</span>
+                                    <span className="text-[13px] font-bold text-gray-900 truncate max-w-[130px]">supportspn07@gmail.com</span>
                                     <span className="text-xs text-gray-500 font-medium tracking-wide">Drop an email</span>
                                 </div>
                             </a>
