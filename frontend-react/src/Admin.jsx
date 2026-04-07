@@ -26,6 +26,9 @@ export default function Admin() {
     const [orders, setOrders] = useState([]);
     const [products, setProducts] = useState([]);
 
+    // MUST be before any early returns (Rules of Hooks)
+    useEffect(() => { if (auth) { fetchOrders(); fetchProducts(); } }, [auth]);
+
     if (isMobile) {
         return (
             <div className="flex-1 w-full flex items-center justify-center bg-[#fdfbf7] p-6 text-center">
@@ -53,7 +56,6 @@ export default function Admin() {
         } 
     };
 
-    useEffect(() => { if (auth) { fetchOrders(); fetchProducts(); } }, [auth]);
 
     const fetchOrders = async () => axios.get(`${API_URL}/api/orders`, { headers: { 'x-admin-token': ADMIN_TOKEN } }).then(res => setOrders(res.data));
     const fetchProducts = async () => axios.get(`${API_URL}/api/products`).then(res => setProducts(res.data));
