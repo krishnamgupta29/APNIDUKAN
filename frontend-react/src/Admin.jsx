@@ -26,9 +26,6 @@ export default function Admin() {
     const [orders, setOrders] = useState([]);
     const [products, setProducts] = useState([]);
 
-    // Must be before any early returns - Rules of Hooks
-    useEffect(() => { if (auth) { fetchOrders(); fetchProducts(); } }, [auth]);
-
     if (isMobile) {
         return (
             <div className="flex-1 w-full flex items-center justify-center bg-[#fdfbf7] p-6 text-center">
@@ -56,7 +53,7 @@ export default function Admin() {
         } 
     };
 
-
+    useEffect(() => { if (auth) { fetchOrders(); fetchProducts(); } }, [auth]);
 
     const fetchOrders = async () => axios.get(`${API_URL}/api/orders`, { headers: { 'x-admin-token': ADMIN_TOKEN } }).then(res => setOrders(res.data));
     const fetchProducts = async () => axios.get(`${API_URL}/api/products`).then(res => setProducts(res.data));
@@ -86,7 +83,7 @@ export default function Admin() {
                 </AnimatePresence>
 
                 <input type="password" required autoFocus value={pass} onChange={e => {setPass(e.target.value); setError('');}} className={`w-full p-4 border rounded-2xl mb-6 text-center focus:ring-4 outline-none transition-all font-mono tracking-widest text-lg ${error ? 'border-red-300 focus:border-red-500 focus:ring-red-50 bg-red-50/30' : 'border-gray-200 focus:border-emerald-500 focus:ring-emerald-50 bg-white/50'}`} placeholder="••••••••••••" />
-                <button type="submit" className="w-full py-4 bg-gray-900 text-white text-lg font-bold rounded-2xl hover:bg-black hover:-translate-y-1 transition-all shadow-xl shadow-gray-900/20">Authorize Step</button>
+                <button className="w-full py-4 bg-gray-900 text-white text-lg font-bold rounded-2xl hover:bg-black hover:-translate-y-1 transition-all shadow-xl shadow-gray-900/20">Authorize Step</button>
             </motion.form>
         </div>
     );
@@ -96,16 +93,16 @@ export default function Admin() {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 md:mb-10 pb-6 border-b border-gray-100 gap-4">
                 <h1 className="text-3xl md:text-4xl font-bold text-gray-800 tracking-tight">Workspace<span className="text-emerald-500">.</span></h1>
                 <div className="flex w-full md:w-auto gap-2 p-1.5 bg-gray-100/80 rounded-xl overflow-x-auto">
-                    <button type="button" onClick={() => setView('catalog')} className={`flex-1 md:flex-none px-4 md:px-6 py-2.5 font-bold text-sm md:text-base rounded-lg transition-all whitespace-nowrap ${view === 'catalog' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-400 hover:text-gray-700'}`}>Add Product</button>
-                    <button type="button" onClick={() => setView('orders')} className={`flex-1 md:flex-none px-4 md:px-6 py-2.5 font-bold text-sm md:text-base rounded-lg transition-all whitespace-nowrap ${view === 'orders' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-400 hover:text-gray-700'}`}>Orders</button>
+                    <button onClick={() => setView('catalog')} className={`flex-1 md:flex-none px-4 md:px-6 py-2.5 font-bold text-sm md:text-base rounded-lg transition-all whitespace-nowrap ${view === 'catalog' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-400 hover:text-gray-700'}`}>Add Product</button>
+                    <button onClick={() => setView('orders')} className={`flex-1 md:flex-none px-4 md:px-6 py-2.5 font-bold text-sm md:text-base rounded-lg transition-all whitespace-nowrap ${view === 'orders' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-400 hover:text-gray-700'}`}>Orders</button>
                 </div>
             </div>
 
             {view === 'orders' && (
                 <div className="bg-white rounded-3xl p-4 md:p-8 shadow-sm border border-gray-100/50">
                     <div className="flex gap-2 mb-6 border-b border-gray-100 pb-4">
-                        <button type="button" onClick={() => setOrderTab('PENDING')} className={`px-5 py-2.5 text-sm font-bold rounded-xl transition-all ${orderTab === 'PENDING' ? 'bg-orange-50 text-orange-600 shadow-sm' : 'text-gray-400 bg-gray-50 hover:bg-gray-100'}`}>Pending Orders</button>
-                        <button type="button" onClick={() => setOrderTab('DELIVERED')} className={`px-5 py-2.5 text-sm font-bold rounded-xl transition-all ${orderTab === 'DELIVERED' ? 'bg-emerald-50 text-emerald-600 shadow-sm' : 'text-gray-400 bg-gray-50 hover:bg-gray-100'}`}>Delivered Orders</button>
+                        <button onClick={() => setOrderTab('PENDING')} className={`px-5 py-2.5 text-sm font-bold rounded-xl transition-all ${orderTab === 'PENDING' ? 'bg-orange-50 text-orange-600 shadow-sm' : 'text-gray-400 bg-gray-50 hover:bg-gray-100'}`}>Pending Orders</button>
+                        <button onClick={() => setOrderTab('DELIVERED')} className={`px-5 py-2.5 text-sm font-bold rounded-xl transition-all ${orderTab === 'DELIVERED' ? 'bg-emerald-50 text-emerald-600 shadow-sm' : 'text-gray-400 bg-gray-50 hover:bg-gray-100'}`}>Delivered Orders</button>
                     </div>
                     
                     <div className="overflow-x-auto w-full pb-4">
@@ -183,7 +180,7 @@ export default function Admin() {
                                                 {p.outOfStock && <span className="text-[10px] font-bold bg-red-100 text-red-700 px-2.5 py-1 rounded-full uppercase tracking-wider">Empty</span>}
                                             </div>
                                         </div>
-                                        <button type="button" onClick={async () => { await axios.delete(`${API_URL}/api/products/${p._id}`, { headers: { 'x-admin-token': ADMIN_TOKEN } }); fetchProducts(); }} className="absolute top-4 right-4 text-red-300 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-red-50 rounded-full"><Trash2 size={18} /></button>
+                                        <button onClick={async () => { await axios.delete(`${API_URL}/api/products/${p._id}`, { headers: { 'x-admin-token': ADMIN_TOKEN } }); fetchProducts(); }} className="absolute top-4 right-4 text-red-300 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-red-50 rounded-full"><Trash2 size={18} /></button>
                                     </motion.div>
                                 ))}
                             </AnimatePresence>
@@ -282,9 +279,9 @@ function AddProductForm({ refreshCatalog }) {
             <h3 className="font-bold text-2xl mb-8 text-gray-900">Create Product</h3>
 
             {/* Premium Dynamic Alert Toast */}
-            <AnimatePresence mode="wait">
+            <AnimatePresence>
                 {toast && (
-                    <motion.div key={toast.msg} initial={{opacity:0, y:-20}} animate={{opacity:1, y:0}} exit={{opacity:0}} className={`absolute top-0 left-0 w-full p-4 border-b font-bold flex items-center justify-center gap-2 z-10 transition-colors ${toast.type === 'error' ? 'bg-red-50 border-red-100 text-red-600' : 'bg-emerald-50 border-emerald-100 text-emerald-700'}`}>
+                    <motion.div initial={{opacity:0, y:-20}} animate={{opacity:1, y:0}} exit={{opacity:0}} className={`absolute top-0 left-0 w-full p-4 border-b font-bold flex items-center justify-center gap-2 z-10 transition-colors ${toast.type === 'error' ? 'bg-red-50 border-red-100 text-red-600' : 'bg-emerald-50 border-emerald-100 text-emerald-700'}`}>
                         {toast.type === 'error' ? <X size={18}/> : <CheckCircle size={18}/>} 
                         {toast.msg}
                     </motion.div>

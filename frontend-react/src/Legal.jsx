@@ -7,8 +7,8 @@ export default function Legal() {
         <div className="flex-1 w-full max-w-4xl mx-auto px-6 py-12 md:py-20">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="bg-white rounded-[2rem] shadow-sm border border-gray-100 p-8 md:p-12">
                 <div className="text-center mb-12">
-                    <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-4">Legal & Security – Apni Dukan Shahjahanpur</h1>
-                    <p className="text-gray-500 font-medium max-w-lg mx-auto">Providing a safe and trusted online shopping experience in Shahjahanpur. Read our policies below.</p>
+                    <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-4">Legal & Security</h1>
+                    <p className="text-gray-500 font-medium max-w-lg mx-auto">We value your privacy and security above all. Read our terms and policies below.</p>
                 </div>
 
                 <div className="space-y-12">
@@ -16,7 +16,7 @@ export default function Legal() {
                     <section>
                         <div className="flex items-center gap-3 mb-4 text-emerald-600">
                             <ShieldCheck size={28} />
-                            <h2 className="text-2xl font-bold text-gray-900">Secure Checkout in Shahjahanpur</h2>
+                            <h2 className="text-2xl font-bold text-gray-900">Platform Security</h2>
                         </div>
                         <p className="text-gray-600 leading-relaxed">
                             Your trust is our biggest asset. All transactions and interactions on ApniDukaan are completely secure. 
@@ -47,7 +47,7 @@ export default function Legal() {
                         </div>
                         <div className="text-gray-600 leading-relaxed space-y-3">
                             <p>By using ApniDukaan, you agree to our local service terms. Our delivery services are strictly operational within the boundaries of Shahjahanpur, Uttar Pradesh.</p>
-                            <p><strong>Order Fulfillment:</strong> We strive to fulfill all confirmed orders in Shahjahanpur within 24 hours. In case of unforeseen circumstances, delays will be communicated proactively.</p>
+                            <p><strong>Order Fulfillment:</strong> We strive to fulfill all confirmed orders within 24 hours. In case of unforeseen circumstances, delays will be communicated proactively.</p>
                             <p><strong>Right to Refuse:</strong> We reserve the right to cancel any order if the delivery location is outside our service area or if the product is out of stock. In such cases, no charges will be levied.</p>
                         </div>
                     </section>
@@ -55,10 +55,6 @@ export default function Legal() {
                 
                 <div className="mt-12 pt-8 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between text-sm text-gray-400">
                     <p>Last Updated: April 2026</p>
-                    <div className="flex items-center gap-2">
-                         <ShieldCheck size={16} className="text-emerald-500" />
-                         <span>Trusted Local Service in Shahjahanpur</span>
-                    </div>
                     <p className="flex items-center gap-1 mt-2 sm:mt-0">Made with <Heart size={14} className="text-rose-500 fill-rose-500" /> for Shahjahanpur</p>
                 </div>
             </motion.div>

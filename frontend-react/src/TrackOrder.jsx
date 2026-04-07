@@ -42,7 +42,7 @@ export default function TrackOrder() {
         <div className="flex-1 w-full max-w-4xl mx-auto px-6 py-12">
             <AnimatePresence>
                 {toast && (
-                    <motion.div key="toast-msg" initial={{opacity:0, y:-20}} animate={{opacity:1, y:0}} exit={{opacity:0}} className="fixed top-4 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full font-bold shadow-2xl z-[100]">
+                    <motion.div initial={{opacity:0, y:-20}} animate={{opacity:1, y:0}} exit={{opacity:0}} className="fixed top-4 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full font-bold shadow-2xl z-[100]">
                         {toast}
                     </motion.div>
                 )}
@@ -55,7 +55,7 @@ export default function TrackOrder() {
 
             <div className="flex gap-4 max-w-md mx-auto mb-16">
                 <input type="tel" className="flex-1 px-5 py-3 rounded-full border border-gray-200 outline-none focus:border-gray-900 transition bg-white" placeholder="+91 Phone Number" value={phone} onChange={e=>setPhone(e.target.value)} onKeyDown={e=>e.key==='Enter'&&handleSearch()} />
-                <button type="button" onClick={handleSearch} disabled={loading} className="px-6 py-3 rounded-full bg-gray-900 text-white font-bold hover:bg-black transition flex items-center gap-2">
+                <button onClick={handleSearch} disabled={loading} className="px-6 py-3 rounded-full bg-gray-900 text-white font-bold hover:bg-black transition flex items-center gap-2">
                     {loading ? '...' : <><Search size={18}/> Track</>}
                 </button>
             </div>
@@ -93,7 +93,7 @@ export default function TrackOrder() {
                             </div>
 
                             {o.status === 'DELIVERED' && !o.feedbackGiven && (
-                                <button type="button" onClick={()=>{setReviewOrder(o._id); setRating(0); setComment(''); setRatingLocked(false); setIsHovered(0);}} className="mt-8 w-full py-2.5 bg-blue-50 text-blue-600 font-bold rounded-xl hover:bg-blue-100 transition text-sm">Rate Your Experience ⭐</button>
+                                <button onClick={()=>{setReviewOrder(o._id); setRating(0); setComment(''); setRatingLocked(false); setIsHovered(0);}} className="mt-8 w-full py-2.5 bg-blue-50 text-blue-600 font-bold rounded-xl hover:bg-blue-100 transition text-sm">Rate Your Experience ⭐</button>
                             )}
                             {o.feedbackGiven && (
                                 <div className="mt-8 text-center text-sm font-bold text-gray-400">Thanks for rating {o.feedback?.rating || o.rating || 5} Stars!</div>
@@ -106,9 +106,9 @@ export default function TrackOrder() {
             {/* Rating Modal */}
             <AnimatePresence>
                 {reviewOrder && (
-                    <motion.div key="rating-modal-overlay" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="fixed inset-0 bg-black/40 backdrop-blur flex items-center justify-center z-50 p-4">
-                        <motion.div key="rating-modal-content" initial={{scale:0.9, opacity:0, y:20}} animate={{scale:1, opacity:1, y:0}} exit={{scale:0.95, opacity:0}} className="bg-white p-8 rounded-[2rem] w-full max-w-sm text-center shadow-2xl relative border border-gray-100">
-                            <button type="button" onClick={()=>setReviewOrder(null)} className="absolute top-6 right-6 text-gray-400 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 p-2 rounded-full transition"><X size={20}/></button>
+                    <div className="fixed inset-0 bg-black/40 backdrop-blur flex items-center justify-center z-50 p-4">
+                        <motion.div initial={{scale:0.9, opacity:0, y:20}} animate={{scale:1, opacity:1, y:0}} exit={{scale:0.95, opacity:0}} className="bg-white p-8 rounded-[2rem] w-full max-w-sm text-center shadow-2xl relative border border-gray-100">
+                            <button onClick={()=>setReviewOrder(null)} className="absolute top-6 right-6 text-gray-400 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 p-2 rounded-full transition"><X size={20}/></button>
                             <h3 className="text-2xl font-bold mb-2">Rate Order</h3>
                             <p className="text-gray-500 text-sm mb-6">How was your delivery experience?</p>
                             
@@ -131,15 +131,15 @@ export default function TrackOrder() {
                             
                             <AnimatePresence>
                                 {rating > 0 && (
-                                    <motion.div key="rating-comment" initial={{opacity:0, height:0}} animate={{opacity:1, height:'auto'}} exit={{opacity:0, height:0}} className="mb-6">
+                                    <motion.div initial={{opacity:0, height:0}} animate={{opacity:1, height:'auto'}} className="mb-6">
                                         <textarea value={comment} onChange={e=>setComment(e.target.value)} placeholder="Leave a comment (optional)..." className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 text-sm outline-none focus:ring-4 focus:ring-gray-100 focus:border-gray-300 resize-none transition-all" rows="3"></textarea>
                                     </motion.div>
                                 )}
                             </AnimatePresence>
 
-                            <button type="button" onClick={submitFeedback} className="w-full py-4 bg-gray-900 text-white font-bold rounded-2xl hover:bg-black transition shadow-xl shadow-gray-200">Submit Feedback</button>
+                            <button onClick={submitFeedback} className="w-full py-4 bg-gray-900 text-white font-bold rounded-2xl hover:bg-black transition shadow-xl shadow-gray-200">Submit Feedback</button>
                         </motion.div>
-                    </motion.div>
+                    </div>
                 )}
             </AnimatePresence>
         </div>
