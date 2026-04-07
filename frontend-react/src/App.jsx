@@ -178,8 +178,10 @@ export default function App() {
         setIsCheckoutOpen(false); setIsConfirmOpen(true);
     };
 
+    const navigate = useNavigate();
+
     return (
-        <BrowserRouter>
+        <>
             <AnimatePresence>{showIntro && <Intro onComplete={() => setShowIntro(false)} />}</AnimatePresence>
 
             {!showIntro && (
@@ -333,6 +335,6 @@ export default function App() {
                     </AnimatePresence>
                 </div>
             )}
-        </BrowserRouter>
+        </>
     );
 }
