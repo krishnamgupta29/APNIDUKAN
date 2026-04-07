@@ -56,12 +56,7 @@ export default function Footer() {
                             Developed by <a href="https://krishnamportfolio.netlify.app/" target="_blank" rel="noreferrer" className="text-blue-600 font-bold hover:underline">Krishnam Gupta</a>
                         </div>
                         <div className="text-xs text-gray-500 font-medium text-center md:text-right">
-                           <p>Visit us: Shahjahanpur, Uttar Pradesh, India</p>
-                           <p>Call: +91 [Insert Number]</p>
-                           <p>Email: contact@apnidukan.com</p>
-                           <a href="https://www.google.com/maps/search/Shahjahanpur,+Uttar+Pradesh" target="_blank" rel="noreferrer" className="text-blue-500 hover:underline flex items-center gap-1 justify-center md:justify-end mt-1">
-                               <MapPin size={12}/> View on Google Maps
-                           </a>
+                           Serving Shahjahanpur with pride.
                         </div>
                     </div>
                 </div>
