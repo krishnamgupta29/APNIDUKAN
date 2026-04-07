@@ -4,7 +4,7 @@ import { X, ChevronLeft, ChevronRight, ShoppingBag } from 'lucide-react';
 import API_URL from './api';
 import { getImageUrl } from './utils';
 
-export default function ProductModal({ product, onClose, onAdd }) {
+const ProductModal = React.forwardRef(({ product, onClose, onAdd }, ref) => {
     const sources = product.images?.length > 0 ? product.images.map(getImageUrl) : [getImageUrl(product.image)];
     const [curImg, setCurImg] = React.useState(0);
     const [isHovered, setIsHovered] = React.useState(false);
@@ -27,7 +27,7 @@ export default function ProductModal({ product, onClose, onAdd }) {
     }, [isHovered, total]);
 
     return (
-        <motion.div key="product-modal-root" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <motion.div ref={ref} key="product-modal-root" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-black/30 backdrop-blur-md" onClick={onClose} />
             <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
                 className="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl z-[101] overflow-hidden flex flex-col md:flex-row max-h-[90vh]">
@@ -95,4 +95,6 @@ export default function ProductModal({ product, onClose, onAdd }) {
             </motion.div>
         </motion.div>
     );
-}
+});
+
+export default ProductModal;

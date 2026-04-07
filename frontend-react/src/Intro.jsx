@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 
-export default function Intro({ onComplete }) {
+const Intro = React.forwardRef(({ onComplete }, ref) => {
     useEffect(() => {
         const timer = setTimeout(onComplete, 3500);
         return () => clearTimeout(timer);
@@ -9,6 +9,7 @@ export default function Intro({ onComplete }) {
 
     return (
         <motion.div 
+            ref={ref}
             initial={{ opacity: 1 }}
             exit={{ opacity: 0, scale: 1.05 }}
             transition={{ duration: 0.8, ease: "easeInOut" }}
@@ -46,4 +47,6 @@ export default function Intro({ onComplete }) {
             </motion.div>
         </motion.div>
     );
-}
+});
+
+export default Intro;
