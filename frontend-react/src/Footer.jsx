@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShieldCheck, ArrowRight, Heart } from 'lucide-react';
+import { ShieldCheck, ArrowRight, Heart, MapPin } from 'lucide-react';
 
 export default function Footer() {
     const navigate = useNavigate();
