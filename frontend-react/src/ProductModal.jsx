@@ -69,8 +69,13 @@ export default function ProductModal({ product, onClose, onAdd }) {
                         {product.originalPrice && product.originalPrice > product.price && <span className="text-xl text-red-500 line-through mb-1">₹{product.originalPrice}</span>}
                     </div>
 
-                    <div className="space-y-4 mb-8">
-                        <p className="text-gray-600 leading-relaxed text-sm md:text-base font-medium">{product.description}</p>
+                    <div className="space-y-5 mb-8">
+                        <div>
+                            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Description</h3>
+                            <p className="text-gray-700 leading-relaxed text-sm md:text-base font-medium">
+                                {product.description?.length > 250 ? product.description.slice(0, 250) + "..." : product.description}
+                            </p>
+                        </div>
                         
                         <div className="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100/50 flex flex-col gap-1 shadow-inner">
                            <strong className="text-xs tracking-wider uppercase text-emerald-800/80 font-bold mb-1">Delivery Information</strong>

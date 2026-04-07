@@ -17,20 +17,24 @@ export default function Home({ addToCart }) {
     return (
         <main className="flex-1 w-full flex flex-col items-center bg-[#fdfbf7]">
             {/* HERO */}
-            <section className="w-full max-w-7xl mx-auto px-6 py-20 lg:py-32 flex flex-col items-center text-center">
-                <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
-                    <div className="inline-block px-4 py-2 border border-blue-100 bg-white shadow-sm rounded-full text-sm font-semibold text-blue-600 mb-6 font-sans">
+            <section className="w-full max-w-7xl mx-auto px-6 py-16 sm:py-24 lg:py-32 flex flex-col items-center text-center">
+                <motion.div initial={{ opacity: 0, scale: 0.95, y: 30 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ duration: 0.7, ease: "easeOut" }} className="w-full">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 border border-blue-100 bg-blue-50/80 backdrop-blur-md rounded-full text-xs sm:text-sm font-semibold text-blue-700 mb-6 sm:mb-8 font-sans shadow-sm">
+                        <span className="relative flex h-3 w-3">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-600"></span>
+                        </span>
                         Shahjahanpur's #1 Delivery Network
                     </div>
-                    <h1 className="text-5xl md:text-7xl font-bold text-gray-900 tracking-tight leading-tight mb-6">
-                        Fast. Trusted. <br/>
-                        <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Local Delivery 🚀</span>
+                    <h1 className="text-4xl sm:text-5xl md:text-7xl font-extrabold text-gray-900 tracking-tight leading-tight mb-6 sm:mb-8">
+                        Fast. Trusted. <br className="hidden sm:block" />
+                        <span className="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 bg-clip-text text-transparent">Local Delivery 🚀</span>
                     </h1>
-                    <p className="text-lg text-gray-500 mb-10 max-w-xl mx-auto font-medium">
-                        24 Hour Delivery | Trusted in Shahjahanpur | Easy Ordering
+                    <p className="text-base sm:text-lg text-gray-600 mb-8 sm:mb-12 max-w-2xl mx-auto font-medium leading-relaxed px-4">
+                        Experience lightning-fast 24-hour delivery across Shahjahanpur. Shop your daily needs with our trusted and easy-to-use platform.
                     </p>
                     <div className="flex justify-center gap-4">
-                        <button onClick={()=>document.getElementById('shop').scrollIntoView({behavior:'smooth'})} className="px-8 py-3.5 bg-gray-900 text-white font-semibold rounded-full hover:scale-105 shadow-xl shadow-gray-200 transition-all flex items-center gap-2">
+                        <button onClick={()=>document.getElementById('shop').scrollIntoView({behavior:'smooth'})} className="px-8 sm:px-10 py-3.5 sm:py-4 bg-gray-900 text-white font-bold rounded-full hover:scale-105 hover:bg-black shadow-xl shadow-gray-200 transition-all flex items-center justify-center gap-2 w-full sm:w-auto">
                             Start Shopping <ArrowRight size={20}/>
                         </button>
                     </div>
@@ -38,31 +42,31 @@ export default function Home({ addToCart }) {
             </section>
 
             {/* FEATURES */}
-            <section className="w-full max-w-7xl mx-auto px-6 py-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
                 {[
-                    { title: "24h Delivery", icon: <Zap size={28}/>, desc: "Lightning fast processing" },
-                    { title: "Trusted Platform", icon: <ShieldCheck size={28}/>, desc: "Secure & reliable service" },
-                    { title: "Local Service", icon: <MapPin size={28}/>, desc: "Heart of Shahjahanpur" },
-                    { title: "Easy Ordering", icon: <ShoppingBag size={28}/>, desc: "Smooth checkout flow" }
+                    { title: "24h Delivery", icon: <Zap size={24}/>, desc: "Lightning fast processing" },
+                    { title: "Trusted Platform", icon: <ShieldCheck size={24}/>, desc: "Secure & reliable service" },
+                    { title: "Local Service", icon: <MapPin size={24}/>, desc: "Heart of Shahjahanpur" },
+                    { title: "Easy Ordering", icon: <ShoppingBag size={24}/>, desc: "Smooth checkout flow" }
                 ].map((f, i) => (
                     <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once:true }} transition={{ delay: i*0.1 }}
-                        className="bg-white border border-gray-100 p-8 rounded-3xl shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all flex flex-col items-center text-center group">
-                        <div className="w-14 h-14 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        className="bg-white/80 backdrop-blur-sm border border-gray-100/60 p-4 sm:p-8 rounded-2xl sm:rounded-3xl shadow-sm hover:shadow-xl hover:-translate-y-1 sm:hover:-translate-y-2 transition-all flex flex-col items-center text-center group">
+                        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mb-3 sm:mb-4 group-hover:scale-110 transition-transform">
                             {f.icon}
                         </div>
-                        <h3 className="text-xl font-bold text-gray-900 mb-2">{f.title}</h3>
-                        <p className="text-gray-500 text-sm">{f.desc}</p>
+                        <h3 className="text-sm sm:text-xl font-bold text-gray-900 mb-1 sm:mb-2">{f.title}</h3>
+                        <p className="hidden sm:block text-gray-500 text-xs sm:text-sm">{f.desc}</p>
                     </motion.div>
                 ))}
             </section>
 
             {/* SHOP GRID */}
-            <section id="shop" className="w-full max-w-7xl mx-auto px-4 md:px-6 py-20 relative">
-                <div className="flex flex-col items-center text-center mb-12">
-                    <h2 className="text-4xl font-bold text-gray-800 tracking-tight">Curated Selection</h2>
-                    <div className="w-20 h-1 bg-emerald-400 mt-4 rounded-full opacity-60"></div>
+            <section id="shop" className="w-full max-w-7xl mx-auto px-3 sm:px-6 py-16 sm:py-20 relative">
+                <div className="flex flex-col items-center text-center mb-10 sm:mb-12">
+                    <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-800 tracking-tight">Curated Selection</h2>
+                    <div className="w-16 sm:w-20 h-1 bg-emerald-400 mt-3 sm:mt-4 rounded-full opacity-80"></div>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 items-stretch">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5 items-stretch">
                     {products.map((p) => <ProductCard key={p._id} p={p} onClick={()=>setSelectedProduct(p)} onAdd={(e) => { e.stopPropagation(); addToCart(p); }} />)}
                 </div>
             </section>

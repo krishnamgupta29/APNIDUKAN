@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { Package, Trash2, ImagePlus, X, Check, UploadCloud } from 'lucide-react';
+import { Package, Trash2, ImagePlus, X, Check, UploadCloud, AlertOctagon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import API_URL from './api';
 import { getImageUrl } from './utils';
@@ -8,6 +8,14 @@ import { getImageUrl } from './utils';
 const ADMIN_TOKEN = 'apnidukanspn9140';
 
 export default function Admin() {
+    const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' && window.innerWidth < 1024);
+    
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 1024);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
     const [auth, setAuth] = useState(false); // Memory-only session
     const [pass, setPass] = useState('');
     const [error, setError] = useState('');
@@ -17,6 +25,20 @@ export default function Admin() {
 
     const [orders, setOrders] = useState([]);
     const [products, setProducts] = useState([]);
+
+    if (isMobile) {
+        return (
+            <div className="flex-1 w-full flex items-center justify-center bg-[#fdfbf7] p-6 text-center">
+                <div className="bg-white p-8 rounded-3xl shadow-lg border border-gray-100 max-w-sm">
+                    <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <AlertOctagon size={32} />
+                    </div>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Desktop Only</h2>
+                    <p className="text-gray-500 text-sm font-medium">Admin panel accessible only on desktop view. Please use a laptop or desktop to manage.</p>
+                </div>
+            </div>
+        );
+    }
 
     const login = (e) => { 
         e.preventDefault(); 
