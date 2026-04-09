@@ -62,11 +62,23 @@ export default function App() {
         setCart(prev => {
             const ext = prev.find(p => p.productId === product._id);
             if (ext) return prev.map(p => p.productId === product._id ? { ...p, quantity: p.quantity + 1 } : p);
-            return [...prev, { productId: product._id, name: product.name, price: product.price, quantity: 1, image: product.images?.[0] || product.image }];
+            return [...prev, { 
+                productId: product._id, 
+                name: product.name, 
+                price: product.price, 
+                deliveryCharge: product.isFreeDelivery ? 0 : (product.deliveryCharge || 0),
+                isFreeDelivery: product.isFreeDelivery,
+                quantity: 1, 
+                image: product.images?.[0] || product.image 
+            }];
         });
     };
     const remFromCart = (id) => setCart(prev => prev.filter(p => p.productId !== id));
-    const totalCalc = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
+    
+    // Detailed Calculations
+    const subtotal = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
+    const deliveryTotal = cart.reduce((s, i) => s + (i.deliveryCharge * i.quantity), 0);
+    const totalCalc = subtotal + deliveryTotal;
 
     const handleCheckoutSubmit = (e) => {
         e.preventDefault();
@@ -116,7 +128,8 @@ export default function App() {
         setLocationError('');
 
         setOrderPayload({
-            customerName, phone, address: addrText, items: cart, total: totalCalc
+            customerName, phone, address: addrText, items: cart, 
+            subtotal, deliveryTotal, total: totalCalc
         });
         setIsCheckoutOpen(false); setIsConfirmOpen(true);
     };
@@ -130,7 +143,7 @@ export default function App() {
             </AnimatePresence>
 
             {!showIntro && (
-                <div className="min-h-screen flex flex-col relative w-full overflow-hidden">
+                <div className="min-h-screen flex flex-col relative w-full overflow-x-hidden">
                     <Navigation cartCount={cart.reduce((a,c) => a + c.quantity, 0)} onCartClick={() => setIsCartOpen(true)} />
                     
                     <div className="pt-20 flex-1 flex flex-col w-full">
@@ -191,34 +204,40 @@ export default function App() {
 
                                     <form onSubmit={handleMapClickSubmit} className="p-6 space-y-4">
 
-                                        {/* GPS Button */}
                                         <button type="button" onClick={handleUseGPS} disabled={fetchingGPS}
-                                            className="w-full py-3 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 border-2 border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 transition-all disabled:opacity-60">
+                                            className="w-full py-4 px-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-3 border border-blue-500/20 bg-gradient-to-tr from-blue-500/5 to-blue-600/[0.02] text-blue-600 hover:from-blue-500/10 hover:to-blue-600/5 active:scale-[0.98] transition-all disabled:opacity-60 shadow-sm relative overflow-hidden group">
+                                            <div className="absolute inset-0 bg-white/40 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500" />
                                             {fetchingGPS
-                                                ? <><div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"/> Detecting Location...</>
-                                                : <><MapPin size={16}/> Use Current Location (GPS)</>}
+                                                ? <><div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"/> <span className="relative z-10">Detecting...</span></>
+                                                : <><MapPin size={18} className="relative z-10"/> <span className="relative z-10 font-extrabold uppercase tracking-tight">Detect via GPS</span></>}
                                         </button>
 
                                         <div><input name="name" required placeholder="Full Name" className="w-full p-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 font-medium outline-none" /></div>
                                         <div><input name="phone" required type="tel" placeholder="Phone Number" className="w-full p-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 font-medium outline-none" /></div>
 
-                                        <div>
+                                        <div className="relative group">
+                                            <div className="absolute left-3.5 top-4 text-gray-400 group-focus-within:text-blue-500 transition-colors pointer-events-none">
+                                                <MapPin size={18} />
+                                            </div>
                                             <textarea
-                                                name="address" required rows="3"
+                                                name="address" required rows="4"
                                                 value={addrText}
                                                 onChange={e => { setAddrText(e.target.value); setLocationError(''); }}
-                                                placeholder="Enter your full address (Shahjahanpur)"
-                                                className={`w-full p-3.5 bg-gray-50 border rounded-xl focus:bg-white font-medium outline-none resize-none transition-colors ${
-                                                    locationError ? 'border-red-400 focus:border-red-500 bg-red-50' : 'border-gray-200 focus:border-blue-500'
+                                                placeholder="Enter full address with landmarks (e.g. Near Big Temple, Civil Lines)"
+                                                className={`w-full p-3.5 pl-11 bg-gray-50 border rounded-2xl focus:bg-white font-medium outline-none resize-none transition-all text-sm ${
+                                                    locationError ? 'border-red-300 focus:border-red-500 bg-red-50/50' : 'border-gray-100 focus:border-blue-500 focus:ring-4 focus:ring-blue-50'
                                                 }`}
                                             />
-                                            {/* Inline Error Message */}
-                                            {locationError && (
-                                                <div className="mt-2 flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3">
-                                                    <span className="text-base leading-none mt-0.5">❌</span>
-                                                    <p className="text-sm font-semibold leading-snug">{locationError.replace('❌ ', '')}</p>
-                                                </div>
-                                            )}
+                                            <AnimatePresence>
+                                                {locationError && (
+                                                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="mt-2 overflow-hidden">
+                                                        <div className="bg-red-50 border border-red-100 text-red-600 rounded-xl px-4 py-2.5 text-xs font-bold flex items-center gap-2">
+                                                            <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
+                                                            {locationError.replace('❌ ', '')}
+                                                        </div>
+                                                    </motion.div>
+                                                )}
+                                            </AnimatePresence>
                                         </div>
 
                                         <div className="pt-2 border-t border-gray-100">
@@ -246,11 +265,33 @@ export default function App() {
                                     <h3 className="text-2xl font-extrabold mb-2 text-gray-900">Confirm Order</h3>
                                     <p className="text-gray-500 text-sm mb-6 font-medium">Review your order details.</p>
                                     
-                                    <div className="bg-gray-50 p-4 rounded-xl text-left text-sm space-y-2 mb-6 border border-gray-100">
-                                        <p className="font-bold text-gray-900">{orderPayload.customerName}</p>
-                                        <p className="text-gray-500 font-mono text-xs">{orderPayload.phone}</p>
-                                        <p className="text-gray-500 leading-relaxed max-h-20 overflow-y-auto">{orderPayload.address}</p>
-                                        <div className="pt-3 mt-3 border-t border-gray-200 font-bold flex justify-between text-base"><span>To Pay (COD)</span><span className="text-emerald-600">₹{orderPayload.total}</span></div>
+                                    <div className="bg-gray-50 p-5 rounded-2xl text-left text-sm space-y-3 mb-8 border border-gray-100 shadow-inner-sm">
+                                        <div className="flex justify-between items-start">
+                                            <p className="font-extrabold text-gray-900 tracking-tight">{orderPayload.customerName}</p>
+                                            <span className="text-[10px] bg-white px-2 py-0.5 rounded border border-gray-100 text-gray-400 font-mono italic">Customer</span>
+                                        </div>
+                                        <p className="text-gray-500 font-mono text-xs flex items-center gap-2">📞 {orderPayload.phone}</p>
+                                        <div className="bg-white/50 p-2.5 rounded-xl border border-gray-100/50">
+                                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 flex items-center gap-1"><MapPin size={10}/> Delivery Address</p>
+                                            <p className="text-gray-600 leading-relaxed max-h-24 overflow-y-auto text-xs font-medium">{orderPayload.address}</p>
+                                        </div>
+
+                                        <div className="space-y-2 pt-3 border-t border-gray-200/40">
+                                            <div className="flex justify-between text-xs text-gray-500 font-medium">
+                                                <span>Items Price</span>
+                                                <span>₹{orderPayload.subtotal}</span>
+                                            </div>
+                                            <div className="flex justify-between text-xs font-medium">
+                                                <span className="text-gray-500">Delivery Charge</span>
+                                                <span className={orderPayload.deliveryTotal > 0 ? 'text-gray-900' : 'text-emerald-600'}>
+                                                    {orderPayload.deliveryTotal > 0 ? `+ ₹${orderPayload.deliveryTotal}` : 'FREE'}
+                                                </span>
+                                            </div>
+                                            <div className="pt-2 mt-1 border-t border-gray-100 font-black flex justify-between text-base">
+                                                <span className="text-gray-900">Total To Pay</span>
+                                                <span className="text-emerald-600">₹{orderPayload.total}</span>
+                                            </div>
+                                        </div>
                                     </div>
 
                                     <div className="flex gap-3">

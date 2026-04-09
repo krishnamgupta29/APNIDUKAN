@@ -111,7 +111,7 @@ export default function Home({ addToCart }) {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: i * 0.08 }}
-                        className="bg-white/80 backdrop-blur-sm border border-gray-100/60 p-4 sm:p-8 rounded-2xl sm:rounded-3xl shadow-sm hover:shadow-xl active:scale-95 hover:-translate-y-1 sm:hover:-translate-y-2 transition-all flex flex-col items-center text-center group touch-manipulation"
+                        className="bg-white border border-gray-100/60 p-4 sm:p-8 rounded-2xl sm:rounded-3xl shadow-sm hover:shadow-xl active:scale-95 transform-gpu hover:-translate-y-1 sm:hover:-translate-y-2 transition-all flex flex-col items-center text-center group touch-manipulation"
                     >
                         <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mb-3 sm:mb-4 group-hover:scale-110 transition-transform">
                             {f.icon}
@@ -217,7 +217,7 @@ function ProductCard({ p, onClick, onAdd }) {
     return (
         <div
             onClick={p.outOfStock ? null : onClick}
-            className={`flex flex-col h-full bg-white/60 backdrop-blur-xl rounded-3xl p-3 md:p-5 shadow-sm border border-gray-100 relative group transition-all duration-200 ease-out active:scale-[0.97] hover:-translate-y-2 hover:shadow-xl cursor-pointer overflow-hidden touch-manipulation select-none ${p.outOfStock ? 'opacity-80' : ''}`}
+            className={`flex flex-col h-full bg-white rounded-3xl p-3 md:p-5 shadow-sm border border-gray-100 relative group transition-all duration-200 ease-out active:scale-[0.97] transform-gpu hover:-translate-y-2 hover:shadow-xl cursor-pointer overflow-hidden touch-manipulation select-none ${p.outOfStock ? 'opacity-80' : ''}`}
         >
             {/* Free Delivery Badge */}
             {p.isFreeDelivery && !p.outOfStock && (
@@ -268,8 +268,14 @@ function ProductCard({ p, onClick, onAdd }) {
 
                 {/* Price */}
                 <div className="flex items-baseline gap-2 mt-3 pt-3 border-t border-gray-100/60">
-                    <span className={`text-lg md:text-xl font-extrabold tracking-tight ${p.outOfStock ? 'text-gray-400' : 'text-emerald-800'}`}>₹{p.price}</span>
-                    {originalPrice && <span className="text-xs font-semibold text-red-400 line-through">₹{originalPrice}</span>}
+                    <span className={`text-lg md:text-xl font-extrabold tracking-tight ${p.outOfStock ? 'text-gray-400' : 'text-emerald-800'}`}>
+                        ₹{p.price + (p.isFreeDelivery ? 0 : (p.deliveryCharge || 0))}
+                    </span>
+                    {originalPrice && (
+                        <span className="text-xs font-semibold text-red-400 line-through">
+                            ₹{originalPrice + (p.isFreeDelivery ? 0 : (p.deliveryCharge || 0))}
+                        </span>
+                    )}
                 </div>
 
                 {p.outOfStock && (
