@@ -13,7 +13,7 @@ const Intro = React.forwardRef(({ onComplete }, ref) => {
             initial={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.4 }}
-            className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-white"
+            className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-gradient-to-br from-[#fbf8cc] via-[#fde4cf] to-[#ffcfd2]"
         >
             <motion.div 
                 initial={{ opacity: 0, y: 15 }}
