@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { Package, Trash2, ImagePlus, X, Check, UploadCloud, AlertOctagon } from 'lucide-react';
+import { Package, Trash2, X, Check, UploadCloud, AlertOctagon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import API_URL from './api';
 import { getImageUrl } from './utils';
@@ -62,6 +62,12 @@ export default function Admin() {
 
     const updateStatus = async (id, status) => {
         await axios.put(`${API_URL}/api/orders/${id}/status`, { status }, { headers: { 'x-admin-token': ADMIN_TOKEN } });
+        fetchOrders();
+    };
+
+    const deleteOrder = async (id) => {
+        if(!confirm("Are you sure you want to completely delete this order?")) return;
+        await axios.delete(`${API_URL}/api/orders/${id}`, { headers: { 'x-admin-token': ADMIN_TOKEN } });
         fetchOrders();
     };
 
@@ -130,12 +136,15 @@ export default function Admin() {
                                         <td className="font-extrabold text-emerald-600 pr-4 align-top">₹{o.total}</td>
                                         <td className="align-top">
                                             {orderTab === 'PENDING' ? (
-                                                <select value={o.status} onChange={e => updateStatus(o._id, e.target.value)} className="p-2 border border-gray-200 rounded-lg bg-white text-xs font-bold focus:border-blue-500 focus:ring-4 focus:ring-blue-50 outline-none text-gray-700 shadow-sm cursor-pointer transition-all">
-                                                    <option value="NEW">⏳ NEW</option>
-                                                    <option value="CONFIRMED">📦 CONFIRMED</option>
-                                                    <option value="DELIVERED">✅ DELIVERED</option>
-                                                    <option value="ARCHIVED">🗑️ ARCHIVED</option>
-                                                </select>
+                                                <div className="flex flex-col gap-2 items-start">
+                                                    <select value={o.status} onChange={e => updateStatus(o._id, e.target.value)} className="p-2 border border-gray-200 rounded-lg bg-white text-xs font-bold focus:border-blue-500 focus:ring-4 focus:ring-blue-50 outline-none text-gray-700 shadow-sm cursor-pointer transition-all">
+                                                        <option value="NEW">⏳ NEW</option>
+                                                        <option value="CONFIRMED">📦 CONFIRMED</option>
+                                                        <option value="DELIVERED">✅ DELIVERED</option>
+                                                        <option value="ARCHIVED">🗑️ ARCHIVED</option>
+                                                    </select>
+                                                    <button onClick={() => deleteOrder(o._id)} className="text-[10px] text-red-500 hover:text-red-700 font-bold flex items-center justify-start gap-1 mt-1 transition"><Trash2 size={12}/> Delete</button>
+                                                </div>
                                             ) : (
                                                 <div className="flex flex-col gap-1.5 items-start">
                                                     <span className="px-2.5 py-1 bg-emerald-100 border border-emerald-200 text-emerald-800 text-[10px] font-extrabold rounded-lg tracking-widest uppercase flex items-center gap-1.5 shadow-sm"><Check size={12} strokeWidth={3}/> Delivered</span>
@@ -145,6 +154,7 @@ export default function Admin() {
                                                             {o.feedback?.comment && <span className="text-gray-500 font-normal ml-1">"{o.feedback.comment}"</span>}
                                                         </span>
                                                     )}
+                                                    <button onClick={() => deleteOrder(o._id)} className="text-[10px] text-red-500 hover:text-red-700 font-bold flex items-center justify-start gap-1 mt-1 transition"><Trash2 size={12}/> Delete</button>
                                                 </div>
                                             )}
                                         </td>

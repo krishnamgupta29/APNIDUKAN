@@ -60,7 +60,6 @@ exports.deleteOrder = async (req, res) => {
     try {
         const order = await Order.findById(req.params.id);
         if(!order) return res.status(404).json({error: 'Not found'});
-        if(order.status !== 'DELIVERED' && order.status !== 'ARCHIVED') return res.status(400).json({error: 'Can only delete completed/archived orders'});
         await Order.findByIdAndDelete(req.params.id);
         res.json({ success: true, message: 'Order deleted' });
     } catch(err) { res.status(500).json({ error: err.message }); }

@@ -8,34 +8,12 @@ import Legal from './Legal';
 import Footer from './Footer';
 import CustomerCare from './CustomerCare';
 import HowToUse from './HowToUse';
-import { ShoppingBag, X, ArrowRight, CheckCircle2, MapPin, Navigation as NavIcon, HelpCircle } from 'lucide-react';
+import { ShoppingBag, X, ArrowRight, CheckCircle2, MapPin, HelpCircle } from 'lucide-react';
 import Intro from './Intro';
 import axios from 'axios';
 import API_URL from './api';
-import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import { getImageUrl } from './utils';
 
-// Fix Leaflet marker icon issue
-import iconRetinaUrl from 'leaflet/dist/images/marker-icon-2x.png';
-import iconUrl from 'leaflet/dist/images/marker-icon.png';
-import shadowUrl from 'leaflet/dist/images/marker-shadow.png';
-L.Icon.Default.mergeOptions({ iconRetinaUrl, iconUrl, shadowUrl });
-
-function LocationMarker({ position, setPosition }) {
-    const map = useMapEvents({
-        click(e) {
-            setPosition(e.latlng);
-            map.flyTo(e.latlng, map.getZoom());
-        },
-    });
-    
-    useEffect(() => {
-        if (position) map.flyTo(position, 15);
-    }, [position, map]);
-
-    return position === null ? null : <Marker position={position}></Marker>;
-}
 
 function Navigation({ cartCount, onCartClick }) {
     const navigate = useNavigate();
@@ -66,19 +44,19 @@ function Navigation({ cartCount, onCartClick }) {
 
 export default function App() {
     const [showIntro, setShowIntro] = useState(true);
-    const [cart, setCart] = useState(() => JSON.parse(localStorage.getItem('react-cart')) || []);
+    const [cart, setCart] = useState([]);
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [isHowToUseOpen, setIsHowToUseOpen] = useState(false);
     const [orderPayload, setOrderPayload] = useState({});
+    const [locationError, setLocationError] = useState('');
 
     useEffect(() => { 
-        localStorage.setItem('react-cart', JSON.stringify(cart)); 
         const openHowToUse = () => setIsHowToUseOpen(true);
         document.addEventListener('open-how-to-use', openHowToUse);
         return () => document.removeEventListener('open-how-to-use', openHowToUse);
-    }, [cart]);
+    }, []);
 
     const addToCart = (product) => {
         setCart(prev => {
@@ -108,8 +86,6 @@ export default function App() {
     };
     
     // GPS & Checkout Handlers
-    const [mapCenter, setMapCenter] = useState([27.8837, 79.9122]); // Default Shahjahanpur
-    const [mapPin, setMapPin] = useState(null);
     const [addrText, setAddrText] = useState('');
     const [fetchingGPS, setFetchingGPS] = useState(false);
     
@@ -126,9 +102,6 @@ export default function App() {
         setFetchingGPS(true);
         navigator.geolocation.getCurrentPosition(async (pos) => {
             const { latitude, longitude } = pos.coords;
-            const newPos = { lat: latitude, lng: longitude };
-            setMapPin(newPos);
-            setMapCenter([latitude, longitude]);
             const geo = await reverseGeocode(latitude, longitude);
             if (geo) setAddrText(geo.display_name);
             setFetchingGPS(false);
@@ -137,43 +110,12 @@ export default function App() {
 
     const handleMapClickSubmit = async (e) => {
         e.preventDefault();
-        
-        // Shahjahanpur restriction validation
-        let isValidLocation = false;
-        
-        // Let's reverse geocode the map pin to check city
-        setFetchingGPS(true);
-        if (mapPin) {
-            const geo = await reverseGeocode(mapPin.lat, mapPin.lng);
-            if (geo) {
-                const term = geo.display_name.toLowerCase();
-                if (term.includes('shahjahanpur') || term.includes('uttar pradesh')) {
-                    isValidLocation = true; // For local dev/demo we can accept UP as fallback, or strictly Shahjahanpur
-                    if (!term.includes('shahjahanpur')) {
-                        // Strict check requested
-                        alert("Delivery not available in this location. We only deliver in Shahjahanpur currently.");
-                        setFetchingGPS(false);
-                        return;
-                    }
-                }
-            }
-        }
-        
-        // Address validation from text input as fallback
-        const addrLower = addrText.toLowerCase();
-        if (!isValidLocation) {
-            if (!addrLower.includes('shahjahanpur')) {
-                 alert("Delivery not available in this location. Please enter a Shahjahanpur address.");
-                 setFetchingGPS(false);
-                 return;
-            }
-        }
-        
-        setFetchingGPS(false);
+        const customerName = e.target.name.value;
+        const phone = e.target.phone.value;
+        setLocationError('');
 
         setOrderPayload({
-            customerName: e.target.name.value, phone: e.target.phone.value,
-            address: addrText, items: cart, total: totalCalc
+            customerName, phone, address: addrText, items: cart, total: totalCalc
         });
         setIsCheckoutOpen(false); setIsConfirmOpen(true);
     };
@@ -216,7 +158,7 @@ export default function App() {
                                     <div className="p-6 flex-1 overflow-y-auto space-y-4">
                                         {cart.length===0 ? <p className="text-gray-400">Empty bag.</p> : cart.map(c => (
                                             <div key={c.productId} className="flex gap-4 items-center">
-                                                <img src={c.image} className="w-16 h-16 object-cover rounded-xl bg-gray-50"/>
+                                                <img src={getImageUrl(c.image)} className="w-16 h-16 object-cover rounded-xl bg-gray-50 border border-gray-100 shadow-sm" alt={c.name}/>
                                                 <div className="flex-1">
                                                     <h4 className="font-bold text-sm text-gray-900">{c.name}</h4>
                                                     <p className="text-sm text-gray-500">₹{c.price} x {c.quantity}</p>
@@ -238,46 +180,57 @@ export default function App() {
                     <AnimatePresence>
                         {isCheckoutOpen && (
                             <motion.div key="checkout-modal" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="fixed inset-0 bg-black/40 backdrop-blur-md z-[80] flex items-center justify-center p-4">
-                                <motion.div initial={{scale:0.95, y:20}} animate={{scale:1, y:0}} exit={{scale:0.95, y:20}} className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl relative flex flex-col md:flex-row">
-                                    {/* Left: Map */}
-                                    <div className="h-48 md:h-auto md:w-1/2 relative bg-gray-100">
-                                        <MapContainer center={mapCenter} zoom={13} scrollWheelZoom={true} className="w-full h-full z-10">
-                                            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap" />
-                                            <LocationMarker position={mapPin} setPosition={async (pos) => {
-                                                setMapPin(pos);
-                                                const geo = await reverseGeocode(pos.lat, pos.lng);
-                                                if(geo) setAddrText(geo.display_name);
-                                            }} />
-                                        </MapContainer>
-                                        <div className="absolute top-4 left-4 z-[9999] right-4 flex gap-2">
-                                            <button type="button" onClick={handleUseGPS} disabled={fetchingGPS} className="bg-white/90 backdrop-blur shadow-lg px-4 py-3 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-white transition-all text-blue-600 w-full justify-center">
-                                                {fetchingGPS ? <div className="w-4 h-4 border-2 border-blue-600 border-t-white rounded-full animate-spin"/> : <MapPin size={18} />} Use Current Location
-                                            </button>
+                                <motion.div initial={{scale:0.95, y:20}} animate={{scale:1, y:0}} exit={{scale:0.95, y:20}} className="bg-white rounded-3xl w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl relative">
+
+                                    {/* Header */}
+                                    <div className="px-6 pt-6 pb-4 flex items-center justify-between border-b border-gray-100">
+                                        <h3 className="text-2xl font-extrabold text-gray-900">Delivery Details</h3>
+                                        <button type="button" onClick={()=>{ setIsCheckoutOpen(false); setLocationError(''); }} className="p-2.5 bg-gray-100 hover:bg-gray-200 rounded-full transition"><X size={18}/></button>
+                                    </div>
+
+                                    <form onSubmit={handleMapClickSubmit} className="p-6 space-y-4">
+
+                                        {/* GPS Button */}
+                                        <button type="button" onClick={handleUseGPS} disabled={fetchingGPS}
+                                            className="w-full py-3 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 border-2 border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 transition-all disabled:opacity-60">
+                                            {fetchingGPS
+                                                ? <><div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"/> Detecting Location...</>
+                                                : <><MapPin size={16}/> Use Current Location (GPS)</>}
+                                        </button>
+
+                                        <div><input name="name" required placeholder="Full Name" className="w-full p-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 font-medium outline-none" /></div>
+                                        <div><input name="phone" required type="tel" placeholder="Phone Number" className="w-full p-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 font-medium outline-none" /></div>
+
+                                        <div>
+                                            <textarea
+                                                name="address" required rows="3"
+                                                value={addrText}
+                                                onChange={e => { setAddrText(e.target.value); setLocationError(''); }}
+                                                placeholder="Enter your full address (Shahjahanpur)"
+                                                className={`w-full p-3.5 bg-gray-50 border rounded-xl focus:bg-white font-medium outline-none resize-none transition-colors ${
+                                                    locationError ? 'border-red-400 focus:border-red-500 bg-red-50' : 'border-gray-200 focus:border-blue-500'
+                                                }`}
+                                            />
+                                            {/* Inline Error Message */}
+                                            {locationError && (
+                                                <div className="mt-2 flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3">
+                                                    <span className="text-base leading-none mt-0.5">❌</span>
+                                                    <p className="text-sm font-semibold leading-snug">{locationError.replace('❌ ', '')}</p>
+                                                </div>
+                                            )}
                                         </div>
-                                    </div>
 
-                                    {/* Right: Form */}
-                                    <div className="p-6 md:p-8 md:w-1/2 relative">
-                                        <button onClick={()=>setIsCheckoutOpen(false)} className="absolute top-4 right-4 p-2.5 bg-gray-100 hover:bg-gray-200 rounded-full transition z-10"><X size={18}/></button>
-                                        <h3 className="text-2xl font-extrabold mb-6 mt-4 md:mt-0">Delivery Details</h3>
-                                        <form onSubmit={handleMapClickSubmit} className="space-y-4">
-                                            <div><input name="name" required placeholder="Full Name" className="w-full p-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 font-medium outline-none" /></div>
-                                            <div><input name="phone" required type="tel" placeholder="Phone Number" className="w-full p-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 font-medium outline-none" /></div>
-                                            <div className="relative">
-                                                <textarea name="address" required rows="3" value={addrText} onChange={e=>setAddrText(e.target.value)} placeholder="Complete Address (Must be Shahjahanpur)" className="w-full p-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 font-medium outline-none resize-none pt-8" />
-                                                <div className="absolute top-3 left-3 flex items-center gap-1 text-[10px] font-black tracking-widest uppercase text-gray-400"><NavIcon size={12}/> Address / Pin Info</div>
-                                            </div>
-                                            
-                                            <div className="pt-4 border-t border-gray-100">
-                                                <label className="flex items-center gap-3 p-4 border-2 border-blue-500/30 bg-blue-50/50 rounded-xl cursor-pointer">
-                                                    <input type="radio" checked readOnly className="w-5 h-5 accent-blue-600" />
-                                                    <span className="font-bold text-gray-900 text-sm">Cash on Delivery (COD)</span>
-                                                </label>
-                                            </div>
+                                        <div className="pt-2 border-t border-gray-100">
+                                            <label className="flex items-center gap-3 p-4 border-2 border-blue-500/30 bg-blue-50/50 rounded-xl cursor-pointer">
+                                                <input type="radio" checked readOnly className="w-5 h-5 accent-blue-600" />
+                                                <span className="font-bold text-gray-900 text-sm">Cash on Delivery (COD)</span>
+                                            </label>
+                                        </div>
 
-                                            <button disabled={fetchingGPS} className="w-full py-4 mt-2 bg-gray-900 text-white font-bold rounded-xl flex justify-center items-center gap-2 hover:bg-black transition shadow-xl shadow-gray-900/10 disabled:opacity-50">Review Order <ArrowRight size={18}/></button>
-                                        </form>
-                                    </div>
+                                        <button className="w-full py-4 bg-gray-900 text-white font-bold rounded-xl flex justify-center items-center gap-2 hover:bg-black transition shadow-xl shadow-gray-900/10">
+                                            Review Order <ArrowRight size={18}/>
+                                        </button>
+                                    </form>
                                 </motion.div>
                             </motion.div>
                         )}

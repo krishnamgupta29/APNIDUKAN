@@ -77,8 +77,7 @@ export default function TrackOrder() {
                         <div className="flex-1 flex flex-col justify-center">
                             <div className="relative flex justify-between">
                                 <div className="absolute top-4 left-[10%] right-[10%] h-1 bg-gray-100 z-0"/>
-                                {['NEW', 'CONFIRMED', 'DELIVERED'].map((state, idx) => {
-                                    const statesMap = ['NEW', 'CONFIRMED', 'DELIVERED'];
+                                {['NEW', 'CONFIRMED', 'DELIVERED'].map((state, idx, statesMap) => {
                                     const curIdx = statesMap.indexOf(o.status);
                                     const isActive = idx <= curIdx;
                                     return (
