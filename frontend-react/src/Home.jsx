@@ -267,13 +267,20 @@ function ProductCard({ p, onClick, onAdd }) {
                 </div>
 
                 {/* Price */}
-                <div className="flex items-baseline gap-2 mt-3 pt-3 border-t border-gray-100/60">
-                    <span className={`text-lg md:text-xl font-extrabold tracking-tight ${p.outOfStock ? 'text-gray-400' : 'text-emerald-800'}`}>
-                        ₹{p.price + (p.isFreeDelivery ? 0 : (p.deliveryCharge || 0))}
-                    </span>
-                    {originalPrice && (
-                        <span className="text-xs font-semibold text-red-400 line-through">
-                            ₹{originalPrice + (p.isFreeDelivery ? 0 : (p.deliveryCharge || 0))}
+                <div className="flex flex-col gap-0.5 mt-3 pt-3 border-t border-gray-100/60">
+                    <div className="flex items-baseline gap-2">
+                        <span className={`text-lg md:text-xl font-extrabold tracking-tight ${p.outOfStock ? 'text-gray-400' : 'text-emerald-800'}`}>
+                            ₹{p.price}
+                        </span>
+                        {originalPrice && (
+                            <span className="text-xs font-semibold text-red-400/60 line-through">
+                                ₹{originalPrice}
+                            </span>
+                        )}
+                    </div>
+                    {!p.isFreeDelivery && (p.deliveryCharge || 0) > 0 && !p.outOfStock && (
+                        <span className="text-[10px] font-bold text-gray-500 uppercase tracking-tighter">
+                            + ₹{p.deliveryCharge} Delivery
                         </span>
                     )}
                 </div>
