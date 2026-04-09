@@ -105,7 +105,7 @@ export default function TrackOrder() {
             {/* Rating Modal */}
             <AnimatePresence>
                 {reviewOrder && (
-                    <motion.div key="rating-modal" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="fixed inset-0 bg-black/40 backdrop-blur flex items-center justify-center z-50 p-4">
+                    <motion.div key="rating-modal" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                         <motion.div initial={{scale:0.9, opacity:0, y:20}} animate={{scale:1, opacity:1, y:0}} exit={{scale:0.95, opacity:0}} className="bg-white p-8 rounded-[2rem] w-full max-w-sm text-center shadow-2xl relative border border-gray-100">
                             <button type="button" onClick={()=>setReviewOrder(null)} className="absolute top-6 right-6 text-gray-400 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 p-2 rounded-full transition"><X size={20}/></button>
                             <h3 className="text-2xl font-bold mb-2">Rate Order</h3>

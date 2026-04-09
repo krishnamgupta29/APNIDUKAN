@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Home from './Home';
 import TrackOrder from './TrackOrder';
@@ -51,6 +51,12 @@ export default function App() {
     const [isHowToUseOpen, setIsHowToUseOpen] = useState(false);
     const [orderPayload, setOrderPayload] = useState({});
     const [locationError, setLocationError] = useState('');
+
+    const { pathname } = useLocation();
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [pathname]);
 
     useEffect(() => { 
         const openHowToUse = () => setIsHowToUseOpen(true);
@@ -193,7 +199,7 @@ export default function App() {
                     {/* Checkout Details Modal */}
                     <AnimatePresence>
                         {isCheckoutOpen && (
-                            <motion.div key="checkout-modal" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="fixed inset-0 bg-black/40 backdrop-blur-md z-[80] flex items-center justify-center p-4">
+                            <motion.div key="checkout-modal" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[80] flex items-center justify-center p-4">
                                 <motion.div initial={{scale:0.95, y:20}} animate={{scale:1, y:0}} exit={{scale:0.95, y:20}} className="bg-white rounded-3xl w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl relative">
 
                                     {/* Header */}
@@ -259,7 +265,7 @@ export default function App() {
                     {/* Final Confirm Modal */}
                     <AnimatePresence>
                         {isConfirmOpen && !orderPayload.placedId && (
-                            <motion.div key="confirm-modal" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="fixed inset-0 bg-black/40 backdrop-blur-md z-[90] flex items-center justify-center p-4">
+                            <motion.div key="confirm-modal" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[90] flex items-center justify-center p-4">
                                 <motion.div initial={{scale:0.9, y:20}} animate={{scale:1, y:0}} exit={{scale:0.9, y:20}} className="bg-white rounded-3xl p-6 md:p-8 max-w-sm w-full shadow-2xl text-center">
                                     <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4"><CheckCircle2 size={32}/></div>
                                     <h3 className="text-2xl font-extrabold mb-2 text-gray-900">Confirm Order</h3>
@@ -304,7 +310,7 @@ export default function App() {
 
                         {/* Order Success Styled UI Modal */}
                         {orderPayload.placedId && (
-                            <motion.div key="order-success" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="fixed inset-0 bg-black/50 backdrop-blur-md z-[100] flex items-center justify-center p-4">
+                            <motion.div key="order-success" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
                                 <motion.div initial={{scale:0.8, opacity:0}} animate={{scale:1, opacity:1}} className="bg-gradient-to-b from-emerald-50 to-white rounded-3xl p-8 max-w-sm w-full shadow-2xl border border-emerald-100 text-center relative overflow-hidden">
                                     <div className="absolute top-0 left-0 w-full h-2 bg-emerald-500"></div>
                                     
