@@ -114,8 +114,8 @@ export default function Admin() {
                     </div>
                     
                     <div className="overflow-x-auto w-full pb-4">
-                        <table className="w-full text-left min-w-[650px] border-collapse">
-                            <thead><tr className="border-b border-gray-100 text-gray-400 text-xs tracking-wider uppercase"><th className="pb-4 pr-4 pl-2">Order Info</th><th className="pb-4 pr-4">Customer</th><th className="pb-4 pr-4">Items</th><th className="pb-4 pr-4">Total</th><th className="pb-4">Status & Action</th></tr></thead>
+                        <table className="w-full text-left min-w-[600px] border-collapse">
+                            <thead><tr className="border-b border-gray-100 text-gray-400 text-xs tracking-wider uppercase"><th className="pb-4 pr-4 pl-2">Order Info</th><th className="pb-4 pr-4">Customer & Address</th><th className="pb-4 pr-4">Items</th><th className="pb-4 pr-4">Total</th><th className="pb-4">Action</th></tr></thead>
                             <tbody>
                                 {orders.filter(o => orderTab === 'PENDING' ? o.status !== 'DELIVERED' && o.status !== 'ARCHIVED' : o.status === 'DELIVERED').map(o => (
                                     <tr key={o._id} className="border-b last:border-0 border-gray-50 hover:bg-gray-50/50 transition-colors">
@@ -124,9 +124,12 @@ export default function Admin() {
                                             <span className="text-[10px] 2xl:text-xs text-gray-400 whitespace-nowrap">{new Date(o.createdAt).toLocaleString()}</span>
                                             {o.status === 'NEW' && <span className="ml-2 px-1.5 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-extrabold rounded shadow-sm uppercase tracking-wide">New</span>}
                                         </td>
-                                        <td className="pr-4 align-top">
+                                        <td className="pr-4 align-top max-w-[220px]">
                                             <div className="font-bold text-gray-800 text-sm">{o.customerName}</div>
                                             <div className="text-xs text-gray-500 font-mono mt-0.5">{o.phone}</div>
+                                            <div className="text-xs text-gray-600 leading-relaxed mt-1 line-clamp-3 bg-gray-50 border border-gray-100 rounded-lg px-2 py-1">
+                                                {o.address || <span className="text-gray-300 italic">Address not provided</span>}
+                                            </div>
                                         </td>
                                         <td className="text-xs max-w-[200px] pr-4 align-top">
                                             <div className="flex flex-wrap gap-1">
@@ -143,7 +146,7 @@ export default function Admin() {
                                                         <option value="DELIVERED">✅ DELIVERED</option>
                                                         <option value="ARCHIVED">🗑️ ARCHIVED</option>
                                                     </select>
-                                                    <button onClick={() => deleteOrder(o._id)} className="text-[10px] text-red-500 hover:text-red-700 font-bold flex items-center justify-start gap-1 mt-1 transition"><Trash2 size={12}/> Delete</button>
+                                                    <button onClick={() => deleteOrder(o._id)} title="Delete Order" className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg mt-1 transition-all"><Trash2 size={14}/></button>
                                                 </div>
                                             ) : (
                                                 <div className="flex flex-col gap-1.5 items-start">
@@ -154,7 +157,7 @@ export default function Admin() {
                                                             {o.feedback?.comment && <span className="text-gray-500 font-normal ml-1">"{o.feedback.comment}"</span>}
                                                         </span>
                                                     )}
-                                                    <button onClick={() => deleteOrder(o._id)} className="text-[10px] text-red-500 hover:text-red-700 font-bold flex items-center justify-start gap-1 mt-1 transition"><Trash2 size={12}/> Delete</button>
+                                                    <button onClick={() => deleteOrder(o._id)} title="Delete Order" className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg mt-1 transition-all"><Trash2 size={14}/></button>
                                                 </div>
                                             )}
                                         </td>

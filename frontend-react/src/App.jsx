@@ -81,6 +81,7 @@ export default function App() {
         try {
             const res = await axios.post(`${API_URL}/api/orders`, orderPayload);
             setCart([]); setIsConfirmOpen(false);
+            setAddrText('');
             setOrderPayload(prev => ({...prev, placedId: res.data.orderId}));
         } catch(e) { alert("Failed placing order."); }
     };

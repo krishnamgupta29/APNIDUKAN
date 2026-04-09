@@ -15,3 +15,23 @@
         border: 1px solid rgba(255, 255, 255, 0.2);
     }
 }
+
+/* ── Shimmer skeleton animation ── */
+@keyframes shimmer {
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(200%); }
+}
+
+/* ── Global mobile smoothness ── */
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: none;
+}

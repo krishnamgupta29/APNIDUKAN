@@ -26,12 +26,12 @@ export default function CustomerCare() {
                         <div className="p-5 flex flex-col gap-3">
                             <p className="text-xs font-bold text-gray-500 uppercase tracking-widest text-center mb-1">Contact Support</p>
                             
-                            <a href="tel:+919876543210" className="flex items-center gap-3 p-3 bg-gray-50 hover:bg-blue-50 border border-gray-100 rounded-xl transition-colors group">
+                            <a href="tel:+918791393387" className="flex items-center gap-3 p-3 bg-gray-50 hover:bg-blue-50 border border-gray-100 rounded-xl transition-colors group">
                                 <div className="w-10 h-10 bg-white shadow-sm rounded-full flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
                                     <Phone size={18} />
                                 </div>
                                 <div className="flex flex-col">
-                                    <span className="text-sm font-extrabold text-gray-900">+91 98765 43210</span>
+                                    <span className="text-sm font-extrabold text-gray-900">+91 87913 93387</span>
                                     <span className="text-xs text-gray-500 font-medium tracking-wide">Call us instantly</span>
                                 </div>
                             </a>

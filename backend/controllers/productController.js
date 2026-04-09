@@ -1,7 +1,10 @@
 const Product = require('../models/Product');
 
 exports.getProducts = async (req, res) => {
-    try { res.json(await Product.find()); } 
+    try {
+        res.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=30');
+        res.json(await Product.find().lean());
+    } 
     catch (err) { res.status(500).json({ error: err.message }); }
 };
 
