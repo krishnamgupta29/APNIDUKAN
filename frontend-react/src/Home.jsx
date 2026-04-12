@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Star, ArrowRight, Zap, ShieldCheck, MapPin, ShoppingBag, Plus } from 'lucide-react';
+import { Star, ArrowRight, Zap, ShieldCheck, MapPin, ShoppingBag, Plus, Search } from 'lucide-react';
 import axios from 'axios';
 import ProductModal from './ProductModal';
 import API_URL from './api';
@@ -38,6 +38,8 @@ export default function Home({ addToCart }) {
     });
     const [loading, setLoading] = useState(products.length === 0);
     const [selectedProduct, setSelectedProduct] = useState(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('All');
 
     useEffect(() => {
         let cancelled = false;
@@ -59,6 +61,32 @@ export default function Home({ addToCart }) {
         fetchProducts();
         return () => { cancelled = true; };
     }, []);
+
+    const categorizeProduct = (p) => {
+        const text = ((p.name || "") + " " + (p.description || "")).toLowerCase();
+        if (text.match(/t-shirt|shirt|pant|jeans|dress|shoe|sneaker|wear|clothing|apparel|kurti|saree|jacket|suit/)) {
+            if (text.match(/boy|men|gents/)) return 'Boys & Men';
+            if (text.match(/girl|women|ladies/)) return 'Girls & Women';
+            if (text.match(/kid|baby|child/)) return 'Kids';
+            return 'Fashion';
+        }
+        if (text.match(/phone|laptop|earphone|headphone|cable|charger|watch|speaker|tv|monitor|electronics|battery/)) return 'Electronics';
+        if (text.match(/rice|dal|wheat|sugar|salt|oil|spices|masala|grocery|food|snack|drink|beverage|atta/)) return 'Groceries';
+        if (text.match(/soap|shampoo|cream|lotion|makeup|perfume|beauty|health|medicine|face/)) return 'Health & Beauty';
+        if (text.match(/toy|game|play|teddy/)) return 'Toys & Games';
+        if (text.match(/bag|purse|wallet|sunglass/)) return 'Accessories';
+        if (text.match(/home|bed|sheet|kitchen|cook|clean|wash/)) return 'Home & Kitchen';
+        return 'General';
+    };
+
+    const productsWithCategory = products.map(p => ({ ...p, category: categorizeProduct(p) }));
+    const availableCategories = ['All', ...Array.from(new Set(productsWithCategory.map(p => p.category)))];
+    
+    const filteredProducts = productsWithCategory.filter(p => {
+        const matchesCat = selectedCategory === 'All' || p.category === selectedCategory;
+        const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.description?.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesCat && matchesSearch;
+    });
 
     const skeletonCount = 6;
 
@@ -124,15 +152,47 @@ export default function Home({ addToCart }) {
 
             {/* ── SHOP GRID ─────────────────────────────────────────────── */}
             <section id="shop" className="w-full max-w-7xl mx-auto px-3 sm:px-6 py-14 sm:py-20">
-                <div className="flex flex-col items-center text-center mb-8 sm:mb-12">
+                <div className="flex flex-col items-center text-center mb-8">
                     <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-800 tracking-tight">Curated Selection</h2>
                     <div className="w-16 sm:w-20 h-1 bg-emerald-400 mt-3 rounded-full opacity-80" />
+                </div>
+
+                {/* ── SEARCH & FILTER ── */}
+                <div className="w-full max-w-4xl mx-auto flex flex-col gap-4 mb-10">
+                    <div className="relative group w-full px-2 sm:px-0">
+                        <div className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors">
+                            <Search size={22} />
+                        </div>
+                        <input 
+                            type="text" 
+                            placeholder="Search products, categories, features..." 
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full h-14 pl-14 pr-4 bg-white border border-gray-200 rounded-2xl shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-50 outline-none transition-all font-medium text-gray-800 text-sm sm:text-base placeholder-gray-400"
+                        />
+                    </div>
+                    
+                    <div className="flex items-center gap-2.5 overflow-x-auto pb-4 scrollbar-hide px-3 sm:px-0 scroll-smooth" style={{ WebkitOverflowScrolling: 'touch', msOverflowStyle: 'none', scrollbarWidth: 'none' }}>
+                        {availableCategories.map(cat => (
+                            <button
+                                key={cat}
+                                onClick={() => setSelectedCategory(cat)}
+                                className={`whitespace-nowrap px-5 py-2.5 rounded-full font-bold text-[13px] md:text-sm transition-all focus:outline-none ${
+                                    selectedCategory === cat 
+                                        ? 'bg-gray-900 text-white shadow-lg' 
+                                        : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300'
+                                }`}
+                            >
+                                {cat}
+                            </button>
+                        ))}
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5 items-stretch">
                     {loading
                         ? [...Array(skeletonCount)].map((_, i) => <SkeletonCard key={i} />)
-                        : products.map((p) => (
+                        : filteredProducts.map((p) => (
                             <ProductCard
                                 key={p._id}
                                 p={p}
@@ -144,10 +204,11 @@ export default function Home({ addToCart }) {
                 </div>
 
                 {/* No products state */}
-                {!loading && products.length === 0 && (
+                {!loading && filteredProducts.length === 0 && (
                     <div className="text-center py-20 text-gray-400 font-medium">
-                        <ShoppingBag size={48} className="mx-auto mb-4 opacity-30" />
-                        <p>Products loading soon…</p>
+                        <Search size={48} className="mx-auto mb-4 opacity-30" />
+                        <p className="text-lg text-gray-500">No items found matching "{searchQuery}"</p>
+                        <button onClick={() => {setSearchQuery(''); setSelectedCategory('All');}} className="mt-4 px-6 py-2 bg-blue-50 text-blue-600 font-bold rounded-xl hover:bg-blue-100 transition">View All Products</button>
                     </div>
                 )}
             </section>

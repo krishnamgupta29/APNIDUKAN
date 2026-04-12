@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Home from './Home';
 import TrackOrder from './TrackOrder';
 import Admin from './Admin';
+import ProductModal from './ProductModal';
 import Legal from './Legal';
 import Footer from './Footer';
 import CustomerCare from './CustomerCare';
@@ -49,6 +50,7 @@ export default function App() {
     const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [isHowToUseOpen, setIsHowToUseOpen] = useState(false);
+    const [selectedProductFromCart, setSelectedProductFromCart] = useState(null);
     const [orderPayload, setOrderPayload] = useState({});
     const [locationError, setLocationError] = useState('');
 
@@ -355,6 +357,20 @@ export default function App() {
                                     </button>
                                 </motion.div>
                             </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                    {/* Cart Product Modal */}
+                    <AnimatePresence>
+                        {selectedProductFromCart && (
+                            <ProductModal 
+                                product={selectedProductFromCart} 
+                                onClose={() => setSelectedProductFromCart(null)}
+                                onAdd={(qty) => {
+                                    addToCart(selectedProductFromCart, qty);
+                                    setSelectedProductFromCart(null);
+                                }}
+                            />
                         )}
                     </AnimatePresence>
                 </div>
