@@ -108,7 +108,7 @@ export default function Home({ addToCart }) {
                         Shahjahanpur's #1 Delivery Network
                     </div>
                     <h1 className="text-4xl sm:text-5xl md:text-7xl font-extrabold text-gray-900 tracking-tight leading-tight mb-6 sm:mb-8">
-                        Fast. Trusted. <br className="hidden sm:block" />
+                        Fast Trusted <br className="hidden sm:block" />
                         <span className="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 bg-clip-text text-transparent">
                             Local Delivery 🚀
                         </span>

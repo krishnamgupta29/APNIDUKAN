@@ -53,9 +53,9 @@ export default function TrackOrder() {
                 <p className="text-gray-500">Enter your phone number to get real-time tracking.</p>
             </div>
 
-            <div className="flex gap-4 max-w-md mx-auto mb-16">
-                <input type="tel" className="flex-1 px-5 py-3 rounded-full border border-gray-200 outline-none focus:border-gray-900 transition bg-white" placeholder="+91 Phone Number" value={phone} onChange={e=>setPhone(e.target.value)} onKeyDown={e=>e.key==='Enter'&&handleSearch()} />
-                <button onClick={handleSearch} disabled={loading} className="px-6 py-3 rounded-full bg-gray-900 text-white font-bold hover:bg-black transition flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto mb-16">
+                <input type="tel" className="w-full sm:flex-1 px-5 py-3.5 rounded-full border border-gray-200 outline-none focus:border-gray-900 transition bg-white text-base" placeholder="+91 Phone Number" value={phone} onChange={e=>setPhone(e.target.value)} onKeyDown={e=>e.key==='Enter'&&handleSearch()} />
+                <button onClick={handleSearch} disabled={loading} className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-gray-900 text-white font-bold hover:bg-black transition flex items-center justify-center gap-2 shrink-0">
                     {loading ? '...' : <><Search size={18}/> Track</>}
                 </button>
             </div>

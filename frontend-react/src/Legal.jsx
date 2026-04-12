@@ -55,7 +55,7 @@ export default function Legal() {
                 
                 <div className="mt-12 pt-8 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between text-sm text-gray-400">
                     <p>Last Updated: April 2026</p>
-                    <p className="flex items-center gap-1 mt-2 sm:mt-0">Made with <Heart size={14} className="text-rose-500 fill-rose-500" /> for Shahjahanpur</p>
+                    <p className="flex items-center justify-center gap-1 mt-2 sm:mt-0 whitespace-nowrap">Made with <Heart size={14} className="text-rose-500 fill-rose-500" /> for Shahjahanpur</p>
                 </div>
             </motion.div>
         </div>
