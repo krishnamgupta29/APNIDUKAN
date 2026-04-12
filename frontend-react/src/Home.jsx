@@ -86,7 +86,7 @@ export default function Home({ addToCart }) {
                         </span>
                     </h1>
                     <p className="text-base sm:text-lg text-gray-600 mb-8 sm:mb-12 max-w-2xl mx-auto font-medium leading-relaxed px-4">
-                        Experience lightning-fast 24-hour delivery across Shahjahanpur. Shop your daily needs with our trusted platform.
+                        Experience lightning-fast Delivery within 24h across Shahjahanpur. Shop your daily needs with our trusted platform.
                     </p>
                     <button
                         onClick={() => document.getElementById('shop').scrollIntoView({ behavior: 'smooth' })}
@@ -100,7 +100,7 @@ export default function Home({ addToCart }) {
             {/* ── FEATURES ─────────────────────────────────────────────── */}
             <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-16 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
                 {[
-                    { title: '24h Delivery', icon: <Zap size={22} />, desc: 'Lightning fast processing' },
+                    { title: 'Delivery within 24h', icon: <Zap size={22} />, desc: 'Lightning fast processing' },
                     { title: 'Trusted Platform', icon: <ShieldCheck size={22} />, desc: 'Secure & reliable service' },
                     { title: 'Local Service', icon: <MapPin size={22} />, desc: 'Heart of Shahjahanpur' },
                     { title: 'Easy Ordering', icon: <ShoppingBag size={22} />, desc: 'Smooth checkout flow' },
@@ -158,7 +158,7 @@ export default function Home({ addToCart }) {
                         key={selectedProduct._id}
                         product={selectedProduct}
                         onClose={() => setSelectedProduct(null)}
-                        onAdd={() => addToCart(selectedProduct)}
+                        onAdd={(qty) => addToCart(selectedProduct, qty)}
                     />
                 )}
             </AnimatePresence>
@@ -216,8 +216,8 @@ function ProductCard({ p, onClick, onAdd }) {
 
     return (
         <div
-            onClick={p.outOfStock ? null : onClick}
-            className={`flex flex-col h-full bg-white rounded-3xl p-3 md:p-5 shadow-sm border border-gray-100 relative group transition-all duration-200 ease-out active:scale-[0.97] transform-gpu hover:-translate-y-2 hover:shadow-xl cursor-pointer overflow-hidden touch-manipulation select-none ${p.outOfStock ? 'opacity-80' : ''}`}
+            onClick={onClick}
+            className={`flex flex-col h-full bg-white rounded-3xl p-3 md:p-5 shadow-sm border border-gray-100 relative group transition-all duration-200 ease-out active:scale-[0.97] transform-gpu hover:-translate-y-2 hover:shadow-xl cursor-pointer overflow-hidden touch-manipulation select-none`}
         >
             {/* Free Delivery Badge */}
             {p.isFreeDelivery && !p.outOfStock && (
@@ -243,9 +243,6 @@ function ProductCard({ p, onClick, onAdd }) {
                         decoding="async"
                     />
                 ))}
-                {p.outOfStock && (
-                    <div className="absolute inset-0 bg-gray-900/35 backdrop-blur-[2px] flex items-center justify-center z-10 pointer-events-none" />
-                )}
             </div>
 
             {/* Info */}

@@ -47,7 +47,7 @@ export default function Legal() {
                         </div>
                         <div className="text-gray-600 leading-relaxed space-y-3">
                             <p>By using ApniDukaan, you agree to our local service terms. Our delivery services are strictly operational within the boundaries of Shahjahanpur, Uttar Pradesh.</p>
-                            <p><strong>Order Fulfillment:</strong> We strive to fulfill all confirmed orders within 24 hours. In case of unforeseen circumstances, delays will be communicated proactively.</p>
+                            <p><strong>Order Fulfillment:</strong> We strive to fulfill all confirmed orders with Delivery within 24h. In case of unforeseen circumstances, delays will be communicated proactively.</p>
                             <p><strong>Right to Refuse:</strong> We reserve the right to cancel any order if the delivery location is outside our service area or if the product is out of stock. In such cases, no charges will be levied.</p>
                         </div>
                     </section>

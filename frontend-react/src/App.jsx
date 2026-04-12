@@ -52,6 +52,14 @@ export default function App() {
     const [orderPayload, setOrderPayload] = useState({});
     const [locationError, setLocationError] = useState('');
 
+    const openProductFromCart = (productId) => {
+        try {
+            const cached = JSON.parse(localStorage.getItem('apni_products_cache') || '[]');
+            const p = cached.find(x => x._id === productId);
+            if (p) setSelectedProductFromCart(p);
+        } catch(e){}
+    };
+
     const { pathname } = useLocation();
 
     useEffect(() => {
@@ -64,17 +72,17 @@ export default function App() {
         return () => document.removeEventListener('open-how-to-use', openHowToUse);
     }, []);
 
-    const addToCart = (product) => {
+    const addToCart = (product, qty = 1) => {
         setCart(prev => {
             const ext = prev.find(p => p.productId === product._id);
-            if (ext) return prev.map(p => p.productId === product._id ? { ...p, quantity: p.quantity + 1 } : p);
+            if (ext) return prev.map(p => p.productId === product._id ? { ...p, quantity: p.quantity + qty } : p);
             return [...prev, { 
                 productId: product._id, 
                 name: product.name, 
                 price: product.price, 
                 deliveryCharge: product.isFreeDelivery ? 0 : (product.deliveryCharge || 0),
                 isFreeDelivery: product.isFreeDelivery,
-                quantity: 1, 
+                quantity: qty, 
                 image: product.images?.[0] || product.image 
             }];
         });
@@ -169,7 +177,7 @@ export default function App() {
                     <AnimatePresence>
                         {isCartOpen && (
                             <motion.div key="cart-container" className="fixed inset-0 z-[60]">
-                                <motion.div key="cart-bg" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} onClick={()=>setIsCartOpen(false)} className="absolute inset-0 bg-black/20 backdrop-blur-sm"/>
+                                <motion.div key="cart-bg" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} onClick={()=>setIsCartOpen(false)} className="absolute inset-0 bg-black/50"/>
                                 <motion.div key="cart-panel" initial={{x:'100%'}} animate={{x:0}} exit={{x:'100%'}} transition={{type:'spring',damping:25,stiffness:200}} className="absolute top-0 right-0 h-full w-full max-w-sm bg-white shadow-2xl z-10 flex flex-col">
                                     <div className="p-6 border-b border-gray-100 flex justify-between items-center">
                                         <h2 className="text-xl font-bold">Your Bag</h2>
@@ -178,9 +186,11 @@ export default function App() {
                                     <div className="p-6 flex-1 overflow-y-auto space-y-4">
                                         {cart.length===0 ? <p className="text-gray-400">Empty bag.</p> : cart.map(c => (
                                             <div key={c.productId} className="flex gap-4 items-center">
-                                                <img src={getImageUrl(c.image)} className="w-16 h-16 object-cover rounded-xl bg-gray-50 border border-gray-100 shadow-sm" alt={c.name}/>
-                                                <div className="flex-1">
-                                                    <h4 className="font-bold text-sm text-gray-900">{c.name}</h4>
+                                                <div className="flex-shrink-0 cursor-pointer" onClick={() => openProductFromCart(c.productId)}>
+                                                    <img src={getImageUrl(c.image)} className="w-16 h-16 object-cover rounded-xl bg-gray-50 border border-gray-100 shadow-sm hover:opacity-80 transition" alt={c.name}/>
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <h4 className="font-bold text-sm text-gray-900 cursor-pointer hover:text-blue-600 transition truncate" onClick={() => openProductFromCart(c.productId)}>{c.name}</h4>
                                                     <p className="text-sm text-gray-500">₹{c.price} x {c.quantity}</p>
                                                 </div>
                                                 <button type="button" onClick={()=>remFromCart(c.productId)} className="text-red-500 p-2"><X size={16}/></button>
@@ -188,7 +198,21 @@ export default function App() {
                                         ))}
                                     </div>
                                     <div className="p-6 border-t border-gray-100 bg-gray-50">
-                                        <div className="flex justify-between font-bold text-lg mb-4"><span>Total</span><span>₹{totalCalc}</span></div>
+                                        <div className="max-h-32 overflow-y-auto mb-4 space-y-2 text-sm pr-2">
+                                            {cart.map(c => (
+                                                <div key={c.productId} className="flex justify-between items-start gap-2">
+                                                    <span className="text-gray-600 truncate flex-1">{c.name} <span className="text-xs text-gray-400">x{c.quantity}</span></span>
+                                                    <span className="font-semibold text-gray-800">₹{c.price * c.quantity}</span>
+                                                </div>
+                                            ))}
+                                            {cart.length > 0 && (
+                                                <div className="flex justify-between items-start gap-2 pt-2 border-t border-gray-200 mt-2">
+                                                    <span className="text-gray-600">Delivery Charge</span>
+                                                    <span className={deliveryTotal > 0 ? "font-semibold text-gray-800" : "font-black text-emerald-600 tracking-wider uppercase text-xs mt-0.5"}>{deliveryTotal > 0 ? `₹${deliveryTotal}` : 'FREE'}</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="flex justify-between font-bold text-lg mb-4"><span>Total To Pay</span><span className="text-emerald-600">₹{totalCalc}</span></div>
                                         <button type="button" onClick={()=>{setIsCartOpen(false); setIsCheckoutOpen(true);}} disabled={cart.length===0} className="w-full py-4 bg-gray-900 text-white rounded-xl font-bold hover:scale-[1.02] transition disabled:opacity-50">Secure Checkout</button>
                                     </div>
                                 </motion.div>
@@ -199,7 +223,7 @@ export default function App() {
                     {/* Checkout Details Modal */}
                     <AnimatePresence>
                         {isCheckoutOpen && (
-                            <motion.div key="checkout-modal" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[80] flex items-center justify-center p-4">
+                            <motion.div key="checkout-modal" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="fixed inset-0 bg-black/60 z-[80] flex items-center justify-center p-4">
                                 <motion.div initial={{scale:0.95, y:20}} animate={{scale:1, y:0}} exit={{scale:0.95, y:20}} className="bg-white rounded-3xl w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl relative">
 
                                     {/* Header */}

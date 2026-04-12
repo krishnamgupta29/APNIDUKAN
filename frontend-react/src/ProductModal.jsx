@@ -8,6 +8,7 @@ export default function ProductModal({ product, onClose, onAdd }) {
     const sources = product.images?.length > 0 ? product.images.map(getImageUrl) : [getImageUrl(product.image)];
     const [curImg, setCurImg] = useState(0);
     const [isHovered, setIsHovered] = useState(false);
+    const [qty, setQty] = useState(1);
     const total = sources.length;
 
     // Mobile Swipe Handler
@@ -28,7 +29,7 @@ export default function ProductModal({ product, onClose, onAdd }) {
 
     return (
         <motion.div key="product-modal" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100]">
-            <div className="absolute inset-0 bg-black/30 backdrop-blur-md" onClick={onClose} />
+            <div className="absolute inset-0 bg-black/60" onClick={onClose} />
             <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
                 className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-4xl bg-white rounded-3xl shadow-2xl z-10 overflow-hidden flex flex-col md:flex-row max-h-[90vh]">
                 
@@ -83,13 +84,20 @@ export default function ProductModal({ product, onClose, onAdd }) {
                         </div>
                     </div>
 
-                    <button 
-                        disabled={product.outOfStock}
-                        onClick={()=>{onAdd(); onClose();}} 
-                        className={`w-full py-4 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2 ${product.outOfStock ? 'bg-gray-200 text-gray-400 cursor-not-allowed border border-gray-300' : 'bg-gray-900 text-white hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-gray-900/20 hover:bg-black'}`}
-                    >
-                        <ShoppingBag size={20}/> {product.outOfStock ? 'Currently Unavailable' : 'Add to Cart'}
-                    </button>
+                    <div className="flex items-center gap-3 w-full">
+                        <div className="flex items-center justify-between border border-gray-200 bg-gray-50 rounded-xl overflow-hidden h-[56px] w-[120px] shrink-0">
+                            <button onClick={() => setQty(q => Math.max(1, q - 1))} className="flex-1 h-full hover:bg-gray-200 text-xl font-bold flex items-center justify-center text-gray-600 active:bg-gray-300 transition">-</button>
+                            <span className="font-extrabold text-lg text-gray-900">{qty}</span>
+                            <button onClick={() => setQty(q => q + 1)} className="flex-1 h-full hover:bg-gray-200 text-xl font-bold flex items-center justify-center text-gray-600 active:bg-gray-300 transition">+</button>
+                        </div>
+                        <button 
+                            disabled={product.outOfStock}
+                            onClick={()=>{onAdd(qty);}} 
+                            className={`flex flex-1 h-[56px] rounded-xl font-bold text-lg transition-all items-center justify-center gap-2 ${product.outOfStock ? 'bg-gray-200 text-gray-400 cursor-not-allowed border border-gray-300' : 'bg-gray-900 text-white hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-gray-900/20 hover:bg-black'}`}
+                        >
+                            <ShoppingBag size={20}/> {product.outOfStock ? 'Unavailable' : 'Add to Cart'}
+                        </button>
+                    </div>
                 </div>
             </motion.div>
         </motion.div>
