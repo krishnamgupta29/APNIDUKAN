@@ -20,22 +20,22 @@ function Navigation({ cartCount, onCartClick }) {
     const navigate = useNavigate();
     return (
         <nav className="fixed top-0 left-0 w-full h-20 glass z-40 transition-all flex items-center justify-center border-b border-gray-100/50">
-            <div className="max-w-7xl w-full px-6 md:px-8 flex justify-between items-center">
-                <div className="flex items-center gap-2 text-xl font-bold cursor-pointer" onClick={() => navigate('/')}>
+            <div className="max-w-7xl w-full px-3 sm:px-6 md:px-8 flex justify-between items-center gap-1">
+                <div className="flex items-center gap-2 text-[19px] sm:text-xl font-bold cursor-pointer shrink-0" onClick={() => navigate('/')}>
                     <span className="bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent tracking-tight">ApniDukaan</span>
                 </div>
                 <div className="hidden sm:flex gap-10">
-                    <button onClick={() => navigate('/')} className="font-bold text-gray-600 hover:text-gray-900 transition">Shop</button>
-                    <button onClick={() => navigate('/track')} className="font-bold text-gray-600 hover:text-gray-900 transition">Track Orders</button>
-                    <button onClick={() => document.dispatchEvent(new CustomEvent('open-how-to-use'))} className="font-bold text-gray-600 hover:text-gray-900 transition flex items-center gap-1"><HelpCircle size={16}/> How to Use</button>
+                    <button onClick={() => navigate('/')} className="font-bold text-gray-600 hover:text-gray-900 transition flex items-center shrink-0">Shop</button>
+                    <button onClick={() => navigate('/track')} className="font-bold text-gray-600 hover:text-gray-900 transition flex items-center shrink-0">Track Orders</button>
+                    <button onClick={() => document.dispatchEvent(new CustomEvent('open-how-to-use'))} className="font-bold text-gray-600 hover:text-gray-900 transition flex items-center gap-1 shrink-0"><HelpCircle size={16}/> How to Use</button>
                 </div>
-                <div className="flex gap-3 md:gap-4 items-center">
-                    <button onClick={() => navigate('/track')} className="text-xs font-bold text-gray-500 hover:text-gray-900 sm:hidden bg-gray-100 px-3 py-2 rounded-full">Track</button>
-                    <button onClick={() => document.dispatchEvent(new CustomEvent('open-how-to-use'))} className="text-xs font-bold text-blue-500 hover:text-blue-700 sm:hidden bg-blue-50 px-3 py-2 rounded-full flex items-center gap-1"><HelpCircle size={14}/> Help</button>
-                    <button onClick={() => navigate('/admin')} className="text-sm font-bold text-gray-400 hover:text-gray-900 hidden sm:block">Admin</button>
-                    <button onClick={onCartClick} className="relative w-11 h-11 rounded-full bg-gray-900 text-white flex items-center justify-center hover:scale-105 shadow-md shadow-gray-200 transition-all">
+                <div className="flex gap-2 sm:gap-3 md:gap-4 items-center shrink-0">
+                    <button onClick={() => navigate('/track')} className="text-xs font-bold text-gray-500 hover:text-gray-900 sm:hidden bg-gray-100 px-2.5 py-2 rounded-full shrink-0">Track</button>
+                    <button onClick={() => document.dispatchEvent(new CustomEvent('open-how-to-use'))} className="text-xs font-bold text-blue-500 hover:text-blue-700 sm:hidden bg-blue-50 px-2.5 py-2 rounded-full flex items-center gap-1 shrink-0"><HelpCircle size={14}/> Help</button>
+                    <button onClick={() => navigate('/admin')} className="text-sm font-bold text-gray-400 hover:text-gray-900 hidden sm:block shrink-0">Admin</button>
+                    <button onClick={onCartClick} className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-gray-900 text-white flex items-center justify-center hover:scale-105 shadow-md shadow-gray-200 transition-all shrink-0">
                         <ShoppingBag size={18} />
-                        <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-black w-5 h-5 flex items-center justify-center rounded-full border-2 border-white">{cartCount}</span>
+                        <span className="absolute -top-1 -right-1 sm:-top-1.5 sm:-right-1.5 bg-red-500 text-white text-[9px] sm:text-[10px] font-black w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center rounded-full border border-white sm:border-2">{cartCount}</span>
                     </button>
                 </div>
             </div>
