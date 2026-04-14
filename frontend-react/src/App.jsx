@@ -9,7 +9,7 @@ import Legal from './Legal';
 import Footer from './Footer';
 import CustomerCare from './CustomerCare';
 import HowToUse from './HowToUse';
-import { ShoppingBag, X, ArrowRight, CheckCircle2, MapPin, HelpCircle } from 'lucide-react';
+import { ShoppingBag, X, ArrowRight, CheckCircle2, MapPin, HelpCircle, Trash2, Minus, Plus } from 'lucide-react';
 import Intro from './Intro';
 import axios from 'axios';
 import API_URL from './api';
@@ -45,7 +45,16 @@ function Navigation({ cartCount, onCartClick }) {
 
 export default function App() {
     const [showIntro, setShowIntro] = useState(true);
-    const [cart, setCart] = useState([]);
+    const [cart, setCart] = useState(() => {
+        try {
+            const saved = localStorage.getItem('apni_cart');
+            return saved ? JSON.parse(saved) : [];
+        } catch { return []; }
+    });
+
+    useEffect(() => {
+        localStorage.setItem('apni_cart', JSON.stringify(cart));
+    }, [cart]);
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -90,10 +99,13 @@ export default function App() {
         });
     };
     const remFromCart = (id) => setCart(prev => prev.filter(p => p.productId !== id));
+    const decreaseQty = (id) => setCart(prev => prev.map(p => 
+        p.productId === id ? { ...p, quantity: p.quantity - 1 } : p
+    ).filter(p => p.quantity > 0));
     
     // Detailed Calculations
     const subtotal = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
-    const deliveryTotal = cart.reduce((s, i) => s + (i.deliveryCharge * i.quantity), 0);
+    const deliveryTotal = cart.length > 0 ? Math.max(...cart.map(i => i.deliveryCharge || 0)) : 0;
     const totalCalc = subtotal + deliveryTotal;
 
     const handleCheckoutSubmit = (e) => {
@@ -193,9 +205,16 @@ export default function App() {
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <h4 className="font-bold text-sm text-gray-900 cursor-pointer hover:text-blue-600 transition truncate" onClick={() => openProductFromCart(c.productId)}>{c.name}</h4>
-                                                    <p className="text-sm text-gray-500">₹{c.price} x {c.quantity}</p>
+                                                    <div className="flex items-center mt-1">
+                                                        <span className="text-sm font-semibold text-gray-900 mr-2">₹{c.price}</span>
+                                                        <div className="flex items-center bg-gray-100 rounded-lg">
+                                                            <button type="button" onClick={() => decreaseQty(c.productId)} className="p-1.5 hover:bg-gray-200 rounded-l-lg text-gray-600 transition"><Minus size={14}/></button>
+                                                            <span className="text-xs font-bold w-6 text-center">{c.quantity}</span>
+                                                            <button type="button" onClick={() => addToCart({_id: c.productId}, 1)} className="p-1.5 hover:bg-gray-200 rounded-r-lg text-gray-600 transition"><Plus size={14}/></button>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <button type="button" onClick={()=>remFromCart(c.productId)} className="text-red-500 p-2"><X size={16}/></button>
+                                                <button type="button" onClick={()=>remFromCart(c.productId)} className="text-red-500 p-2 hover:bg-red-50 rounded-full transition"><Trash2 size={18}/></button>
                                             </div>
                                         ))}
                                     </div>
@@ -245,7 +264,7 @@ export default function App() {
                                         </button>
 
                                         <div><input name="name" required placeholder="Full Name" className="w-full p-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 font-medium outline-none" /></div>
-                                        <div><input name="phone" required type="tel" placeholder="Phone Number" className="w-full p-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 font-medium outline-none" /></div>
+                                        <div><input name="phone" required type="tel" pattern="^[0-9]{10}$" title="Please enter a valid 10-digit mobile number" placeholder="Phone Number (10 digits)" className="w-full p-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 font-medium outline-none" /></div>
 
                                         <div className="relative group">
                                             <div className="absolute left-3.5 top-4 text-gray-400 group-focus-within:text-blue-500 transition-colors pointer-events-none">
