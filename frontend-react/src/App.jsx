@@ -118,17 +118,20 @@ export default function App() {
     };
 
     const confirmOrderPlace = async () => {
+        setIsPlacingOrder(true);
         try {
             const res = await axios.post(`${API_URL}/api/orders`, orderPayload);
             setCart([]); setIsConfirmOpen(false);
             setAddrText('');
             setOrderPayload(prev => ({...prev, placedId: res.data.orderId}));
         } catch(e) { alert("Failed placing order."); }
+        setIsPlacingOrder(false);
     };
     
     // GPS & Checkout Handlers
     const [addrText, setAddrText] = useState('');
     const [fetchingGPS, setFetchingGPS] = useState(false);
+    const [isPlacingOrder, setIsPlacingOrder] = useState(false);
     
     const reverseGeocode = async (lat, lon) => {
         try {
@@ -346,8 +349,10 @@ export default function App() {
                                     </div>
 
                                     <div className="flex gap-3">
-                                        <button onClick={()=>setIsConfirmOpen(false)} className="flex-1 py-3.5 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition">Go Back</button>
-                                        <button onClick={confirmOrderPlace} className="flex-1 py-3.5 bg-gray-900 text-white font-bold rounded-xl hover:bg-black transition shadow-xl shadow-gray-900/20">Confirm Place</button>
+                                        <button onClick={()=>setIsConfirmOpen(false)} disabled={isPlacingOrder} className={`flex-1 py-3.5 font-bold rounded-xl transition ${isPlacingOrder ? 'bg-gray-100 text-transparent animate-pulse cursor-not-allowed' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>Go Back</button>
+                                        <button onClick={confirmOrderPlace} disabled={isPlacingOrder} className={`flex-1 py-3.5 font-bold rounded-xl transition flex justify-center items-center ${isPlacingOrder ? 'bg-gray-300 text-transparent animate-pulse cursor-wait shadow-none' : 'bg-gray-900 text-white hover:bg-black shadow-xl shadow-gray-900/20'}`}>
+                                            Confirm Place
+                                        </button>
                                     </div>
                                 </motion.div>
                             </motion.div>

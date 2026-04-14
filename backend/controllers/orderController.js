@@ -19,10 +19,11 @@ exports.createOrder = async (req, res) => {
         const orderId = 'ORD-' + Math.floor(1000 + Math.random() * 9000);
         const savedOrder = await new Order({ orderId, customerName, phone, address, items, total }).save();
 
-        const msgBody = `Hi ${customerName},\nYour order at ApniDukaan has been received!\nOrder ID: ${orderId}\nTotal: ₹${total}`;
-        const adminMsg = `New Order! ID: ${orderId}, Total: ₹${total}`;
-        await sendWhatsApp(phone, msgBody);
-        if(process.env.ADMIN_WHATSAPP_NUMBER) await sendWhatsApp(process.env.ADMIN_WHATSAPP_NUMBER.replace('+91',''), adminMsg);
+        // WhatsApp disabled to improve speed / since it's not active
+        // const msgBody = `Hi ${customerName},\nYour order at ApniDukaan has been received!\nOrder ID: ${orderId}\nTotal: ₹${total}`;
+        // const adminMsg = `New Order! ID: ${orderId}, Total: ₹${total}`;
+        // sendWhatsApp(phone, msgBody);
+        // if(process.env.ADMIN_WHATSAPP_NUMBER) sendWhatsApp(process.env.ADMIN_WHATSAPP_NUMBER.replace('+91',''), adminMsg);
         
         res.status(201).json(savedOrder);
     } catch (err) { res.status(500).json({ error: err.message }); }
@@ -45,12 +46,12 @@ exports.updateOrderStatus = async (req, res) => {
     try {
         const { status } = req.body;
         const updatedOrder = await Order.findByIdAndUpdate(req.params.id, { status }, { new: true });
-        
-        let msg = `ApniDukaan: Your order ${updatedOrder.orderId} status is now ${status}.`;
-        if(status === 'CONFIRMED') msg = `ApniDukaan: Great news! Your order ${updatedOrder.orderId} is confirmed and being prepared.`;
-        if(status === 'DELIVERED') msg = `ApniDukaan: Your order ${updatedOrder.orderId} has been delivered. Enjoy and please leave feedback!`;
-        if(status === 'RETURNED') msg = `ApniDukaan: Your order ${updatedOrder.orderId} has been returned. Feel free to contact us for any issues.`;
-        if(status !== 'ARCHIVED') await sendWhatsApp(updatedOrder.phone, msg);
+        // WhatsApp disabled to improve speed / since it's not active
+        // let msg = `ApniDukaan: Your order ${updatedOrder.orderId} status is now ${status}.`;
+        // if(status === 'CONFIRMED') msg = `ApniDukaan: Great news! Your order ${updatedOrder.orderId} is confirmed and being prepared.`;
+        // if(status === 'DELIVERED') msg = `ApniDukaan: Your order ${updatedOrder.orderId} has been delivered. Enjoy and please leave feedback!`;
+        // if(status === 'RETURNED') msg = `ApniDukaan: Your order ${updatedOrder.orderId} has been returned. Feel free to contact us for any issues.`;
+        // if(status !== 'ARCHIVED') sendWhatsApp(updatedOrder.phone, msg); // Non-blocking background call
 
         res.json(updatedOrder);
     } 
