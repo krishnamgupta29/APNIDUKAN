@@ -14,7 +14,7 @@ const orderSchema = new mongoose.Schema({
         }
     ],
     total: { type: Number, required: true },
-    status: { type: String, default: 'NEW', enum: ['NEW', 'CONFIRMED', 'DELIVERED', 'ARCHIVED'] },
+    status: { type: String, default: 'NEW', enum: ['NEW', 'CONFIRMED', 'DELIVERED', 'RETURNED', 'ARCHIVED'] },
     feedbackGiven: { type: Boolean, default: false },
     feedback: {
         rating: { type: Number },

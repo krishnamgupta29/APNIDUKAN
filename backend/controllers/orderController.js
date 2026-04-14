@@ -49,6 +49,7 @@ exports.updateOrderStatus = async (req, res) => {
         let msg = `ApniDukaan: Your order ${updatedOrder.orderId} status is now ${status}.`;
         if(status === 'CONFIRMED') msg = `ApniDukaan: Great news! Your order ${updatedOrder.orderId} is confirmed and being prepared.`;
         if(status === 'DELIVERED') msg = `ApniDukaan: Your order ${updatedOrder.orderId} has been delivered. Enjoy and please leave feedback!`;
+        if(status === 'RETURNED') msg = `ApniDukaan: Your order ${updatedOrder.orderId} has been returned. Feel free to contact us for any issues.`;
         if(status !== 'ARCHIVED') await sendWhatsApp(updatedOrder.phone, msg);
 
         res.json(updatedOrder);

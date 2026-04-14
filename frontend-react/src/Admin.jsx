@@ -110,14 +110,14 @@ export default function Admin() {
                 <div className="bg-white rounded-3xl p-4 md:p-8 shadow-sm border border-gray-100/50">
                     <div className="flex gap-2 mb-6 border-b border-gray-100 pb-4">
                         <button onClick={() => setOrderTab('PENDING')} className={`px-5 py-2.5 text-sm font-bold rounded-xl transition-all ${orderTab === 'PENDING' ? 'bg-orange-50 text-orange-600 shadow-sm' : 'text-gray-400 bg-gray-50 hover:bg-gray-100'}`}>Pending Orders</button>
-                        <button onClick={() => setOrderTab('DELIVERED')} className={`px-5 py-2.5 text-sm font-bold rounded-xl transition-all ${orderTab === 'DELIVERED' ? 'bg-emerald-50 text-emerald-600 shadow-sm' : 'text-gray-400 bg-gray-50 hover:bg-gray-100'}`}>Delivered Orders</button>
+                        <button onClick={() => setOrderTab('DELIVERED')} className={`px-5 py-2.5 text-sm font-bold rounded-xl transition-all ${orderTab === 'DELIVERED' ? 'bg-emerald-50 text-emerald-600 shadow-sm' : 'text-gray-400 bg-gray-50 hover:bg-gray-100'}`}>Completed / Returned</button>
                     </div>
                     
                     <div className="overflow-x-auto w-full pb-4">
                         <table className="w-full text-left min-w-[600px] border-collapse">
                             <thead><tr className="border-b border-gray-100 text-gray-400 text-xs tracking-wider uppercase"><th className="pb-4 pr-4 pl-2">Order Info</th><th className="pb-4 pr-4">Customer & Address</th><th className="pb-4 pr-4">Items</th><th className="pb-4 pr-4">Total</th><th className="pb-4">Action</th></tr></thead>
                             <tbody>
-                                {orders.filter(o => orderTab === 'PENDING' ? o.status !== 'DELIVERED' : o.status === 'DELIVERED').map(o => (
+                                {orders.filter(o => orderTab === 'PENDING' ? (o.status !== 'DELIVERED' && o.status !== 'RETURNED') : (o.status === 'DELIVERED' || o.status === 'RETURNED')).map(o => (
                                     <tr key={o._id} className="border-b last:border-0 border-gray-50 hover:bg-gray-50/50 transition-colors">
                                         <td className="py-4 pr-4 pl-2 align-top">
                                             <strong className="text-gray-900 font-mono text-sm">{o.orderId}</strong><br />
@@ -149,18 +149,24 @@ export default function Admin() {
                                                         className={`p-2 pr-8 border rounded-xl text-[10px] font-black uppercase tracking-wider outline-none shadow-sm cursor-pointer transition-all appearance-none relative
                                                             ${o.status === 'NEW' ? 'bg-blue-50 border-blue-200 text-blue-700 focus:ring-blue-100' : ''}
                                                             ${o.status === 'CONFIRMED' ? 'bg-orange-50 border-orange-200 text-orange-700 focus:ring-orange-100' : ''}
-                                                            ${o.status === 'DELIVERED' ? 'bg-emerald-50 border-emerald-200 text-emerald-700 focus:ring-emerald-100' : ''}`}
+                                                            ${o.status === 'DELIVERED' ? 'bg-emerald-50 border-emerald-200 text-emerald-700 focus:ring-emerald-100' : ''}
+                                                            ${o.status === 'RETURNED' ? 'bg-yellow-50 border-yellow-200 text-yellow-700 focus:ring-yellow-100' : ''}`}
                                                         style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.5rem center', backgroundSize: '0.8rem' }}
                                                     >
                                                         <option value="NEW">⏳ NEW</option>
                                                         <option value="CONFIRMED">📦 CONFIRMED</option>
                                                         <option value="DELIVERED">✅ DELIVERED</option>
+                                                        <option value="RETURNED">🔄 RETURNED</option>
                                                     </select>
                                                     <button onClick={() => deleteOrder(o._id)} title="Delete Order" className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg mt-1 transition-all"><Trash2 size={14}/></button>
                                                 </div>
                                             ) : (
                                                 <div className="flex flex-col gap-1.5 items-start">
-                                                    <span className="px-2.5 py-1 bg-emerald-100 border border-emerald-200 text-emerald-800 text-[10px] font-extrabold rounded-lg tracking-widest uppercase flex items-center gap-1.5 shadow-sm"><Check size={12} strokeWidth={3}/> Delivered</span>
+                                                    {o.status === 'DELIVERED' ? (
+                                                        <span className="px-2.5 py-1 bg-emerald-100 border border-emerald-200 text-emerald-800 text-[10px] font-extrabold rounded-lg tracking-widest uppercase flex items-center gap-1.5 shadow-sm"><Check size={12} strokeWidth={3}/> Delivered</span>
+                                                    ) : (
+                                                        <span className="px-2.5 py-1 bg-yellow-100 border border-yellow-200 text-yellow-800 text-[10px] font-extrabold rounded-lg tracking-widest uppercase flex items-center gap-1.5 shadow-sm"><X size={12} strokeWidth={3}/> Returned</span>
+                                                    )}
                                                     {o.feedbackGiven && (
                                                         <span className="text-[10px] text-yellow-700 font-bold bg-yellow-50 border border-yellow-200 px-2.5 py-1 rounded-md flex items-center gap-1 shadow-sm">
                                                             ⭐ {o.feedback?.rating || o.rating || 5}/5
@@ -173,7 +179,7 @@ export default function Admin() {
                                         </td>
                                     </tr>
                                 ))}
-                                {orders.filter(o => orderTab === 'PENDING' ? o.status !== 'DELIVERED' : o.status === 'DELIVERED').length === 0 && (
+                                {orders.filter(o => orderTab === 'PENDING' ? (o.status !== 'DELIVERED' && o.status !== 'RETURNED') : (o.status === 'DELIVERED' || o.status === 'RETURNED')).length === 0 && (
                                     <tr><td colSpan="5" className="py-12 text-center text-sm font-bold text-gray-400 bg-gray-50/50 rounded-xl">No {orderTab.toLowerCase()} orders actively found.</td></tr>
                                 )}
                             </tbody>
