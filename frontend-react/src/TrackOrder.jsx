@@ -77,13 +77,17 @@ export default function TrackOrder() {
                         <div className="flex-1 flex flex-col justify-center">
                             <div className="relative flex justify-between">
                                 <div className="absolute top-4 left-[10%] right-[10%] h-1 bg-gray-100 z-0"/>
-                                {['NEW', 'CONFIRMED', 'DELIVERED'].map((state, idx, statesMap) => {
-                                    const curIdx = statesMap.indexOf(o.status);
-                                    const isActive = idx <= curIdx;
+                                {['NEW', 'CONFIRMED', o.status === 'RETURNED' ? 'RETURNED' : 'DELIVERED'].map((state, idx, statesMap) => {
+                                    const curIdx = (o.status === 'RETURNED' && state === 'RETURNED') ? 2 : statesMap.indexOf(o.status);
+                                    let isActive = false;
+                                    if(o.status === 'RETURNED') isActive = idx <= 2;
+                                    else isActive = idx <= curIdx;
+                                    const isReturnedNode = state === 'RETURNED';
+                                    
                                     return (
-                                        <div key={state} className={`relative z-10 flex flex-col items-center gap-2 ${isActive ? 'text-gray-900' : 'text-gray-300'}`}>
-                                            <div className={`w-9 h-9 rounded-full flex items-center justify-center border-4 border-white transition-colors duration-500 ${isActive ? 'bg-green-500 text-white' : 'bg-gray-200'}`}>
-                                                {isActive && <Check size={16} strokeWidth={3}/>}
+                                        <div key={state} className={`relative z-10 flex flex-col items-center gap-2 ${isActive ? (isReturnedNode ? 'text-yellow-600' : 'text-gray-900') : 'text-gray-300'}`}>
+                                            <div className={`w-9 h-9 rounded-full flex items-center justify-center border-4 border-white transition-colors duration-500 ${isActive ? (isReturnedNode ? 'bg-yellow-400 text-white' : 'bg-green-500 text-white') : 'bg-gray-200'}`}>
+                                                {isActive && (isReturnedNode ? <X size={16} strokeWidth={3}/> : <Check size={16} strokeWidth={3}/>)}
                                             </div>
                                             <span className="text-xs font-bold">{state}</span>
                                         </div>
