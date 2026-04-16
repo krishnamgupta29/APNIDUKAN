@@ -28,10 +28,13 @@ export default function TrackOrder() {
     };
 
     const submitFeedback = async () => {
-        if(!rating) return setToast("Please select a star rating!");
+        const orderStatus = orders.find(o => o._id === reviewOrder)?.status;
+        if(!rating && orderStatus !== 'RETURNED') return setToast("Please select a star rating!");
+        if(orderStatus === 'RETURNED' && !comment.trim()) return setToast("Please provide a reason for return!");
+
         try {
             await axios.post(`${API_URL}/api/orders/${reviewOrder}/feedback`, { rating, comment });
-            setToast("Thanks! Feedback submitted successfully.");
+            setToast(orderStatus === 'RETURNED' ? "Thanks! Reason submitted." : "Thanks! Feedback submitted successfully.");
             setReviewOrder(null);
             setTimeout(()=>setToast(null), 3000);
             handleSearch(); // refresh
@@ -95,11 +98,15 @@ export default function TrackOrder() {
                                 })}
                             </div>
 
-                            {o.status === 'DELIVERED' && !o.feedbackGiven && (
-                                <button onClick={()=>{setReviewOrder(o._id); setRating(0); setComment(''); setRatingLocked(false); setIsHovered(0);}} className="mt-8 w-full py-2.5 bg-blue-50 text-blue-600 font-bold rounded-xl hover:bg-blue-100 transition text-sm">Rate Your Experience ⭐</button>
+                            {(o.status === 'DELIVERED' || o.status === 'RETURNED') && !o.feedbackGiven && (
+                                <button onClick={()=>{setReviewOrder(o._id); setRating(0); setComment(''); setRatingLocked(false); setIsHovered(0);}} className={`mt-8 w-full py-2.5 font-bold rounded-xl transition text-sm ${o.status === 'RETURNED' ? 'bg-yellow-50 text-yellow-600 hover:bg-yellow-100' : 'bg-blue-50 text-blue-600 hover:bg-blue-100'}`}>
+                                    {o.status === 'RETURNED' ? 'Provide Return Reason 📝' : 'Rate Your Experience ⭐'}
+                                </button>
                             )}
                             {o.feedbackGiven && (
-                                <div className="mt-8 text-center text-sm font-bold text-gray-400">Thanks for rating {o.feedback?.rating || o.rating || 5} Stars!</div>
+                                <div className="mt-8 text-center text-sm font-bold text-gray-400">
+                                    {o.status === 'RETURNED' ? 'Return reason submitted.' : `Thanks for rating ${o.feedback?.rating || o.rating || 5} Stars!`}
+                                </div>
                             )}
                         </div>
                     </motion.div>
@@ -112,30 +119,36 @@ export default function TrackOrder() {
                     <motion.div key="rating-modal" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                         <motion.div initial={{scale:0.9, opacity:0, y:20}} animate={{scale:1, opacity:1, y:0}} exit={{scale:0.95, opacity:0}} className="bg-white p-8 rounded-[2rem] w-full max-w-sm text-center shadow-2xl relative border border-gray-100">
                             <button type="button" onClick={()=>setReviewOrder(null)} className="absolute top-6 right-6 text-gray-400 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 p-2 rounded-full transition"><X size={20}/></button>
-                            <h3 className="text-2xl font-bold mb-2">Rate Order</h3>
-                            <p className="text-gray-500 text-sm mb-6">How was your delivery experience?</p>
+                            <h3 className="text-2xl font-bold mb-2">
+                                {orders.find(o => o._id === reviewOrder)?.status === 'RETURNED' ? 'Return Info' : 'Rate Order'}
+                            </h3>
+                            <p className="text-gray-500 text-sm mb-6">
+                                {orders.find(o => o._id === reviewOrder)?.status === 'RETURNED' ? 'Why was this order returned?' : 'How was your delivery experience?'}
+                            </p>
                             
-                            <div className="flex justify-center gap-1 mb-6">
-                                {[1, 2, 3, 4, 5].map((star) => (
-                                    <svg key={star} viewBox="0 0 24 24" fill="none" strokeWidth="2"
-                                        onMouseEnter={() => !ratingLocked && setIsHovered(star)}
-                                        onMouseLeave={() => !ratingLocked && setIsHovered(0)}
-                                        onClick={() => { if(!ratingLocked) { setRating(star); setRatingLocked(true); } }}
-                                        className={`w-12 h-12 cursor-pointer transition-all duration-300 ease-in-out
-                                            ${(ratingLocked ? star <= rating : star <= isHovered) 
-                                                ? 'stroke-[#FFD700] fill-[#FFD700] scale-110 drop-shadow-[0_0_10px_rgba(255,215,0,0.4)]' 
-                                                : 'stroke-gray-300 fill-transparent scale-100'}
-                                        `}
-                                    >
-                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                                    </svg>
-                                ))}
-                            </div>
+                            {orders.find(o => o._id === reviewOrder)?.status !== 'RETURNED' && (
+                                <div className="flex justify-center gap-1 mb-6">
+                                    {[1, 2, 3, 4, 5].map((star) => (
+                                        <svg key={star} viewBox="0 0 24 24" fill="none" strokeWidth="2"
+                                            onMouseEnter={() => !ratingLocked && setIsHovered(star)}
+                                            onMouseLeave={() => !ratingLocked && setIsHovered(0)}
+                                            onClick={() => { if(!ratingLocked) { setRating(star); setRatingLocked(true); } }}
+                                            className={`w-12 h-12 cursor-pointer transition-all duration-300 ease-in-out
+                                                ${(ratingLocked ? star <= rating : star <= isHovered) 
+                                                    ? 'stroke-[#FFD700] fill-[#FFD700] scale-110 drop-shadow-[0_0_10px_rgba(255,215,0,0.4)]' 
+                                                    : 'stroke-gray-300 fill-transparent scale-100'}
+                                            `}
+                                        >
+                                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                        </svg>
+                                    ))}
+                                </div>
+                            )}
                             
                             <AnimatePresence>
-                                {rating > 0 && (
+                                {(rating > 0 || orders.find(o => o._id === reviewOrder)?.status === 'RETURNED') && (
                                     <motion.div key="rating-comment" initial={{opacity:0, height:0}} animate={{opacity:1, height:'auto'}} exit={{opacity:0, height:0}} className="mb-6">
-                                        <textarea value={comment} onChange={e=>setComment(e.target.value)} placeholder="Leave a comment (optional)..." className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 text-sm outline-none focus:ring-4 focus:ring-gray-100 focus:border-gray-300 resize-none transition-all" rows="3"></textarea>
+                                        <textarea value={comment} onChange={e=>setComment(e.target.value)} placeholder={orders.find(o => o._id === reviewOrder)?.status === 'RETURNED' ? "Reason for return (required)..." : "Leave a comment (optional)..."} className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 text-sm outline-none focus:ring-4 focus:ring-gray-100 focus:border-gray-300 resize-none transition-all" rows="3"></textarea>
                                     </motion.div>
                                 )}
                             </AnimatePresence>

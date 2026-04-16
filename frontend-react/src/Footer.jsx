@@ -14,12 +14,17 @@ export default function Footer() {
                         <div className="text-2xl font-extrabold tracking-tight mb-4 text-gray-900">
                             Apni<span className="text-blue-500">Dukaan</span>
                         </div>
-                        <p className="text-gray-500 font-medium mb-6 max-w-sm leading-relaxed">
-                            Shahjahanpur's premier local marketplace. We connect you with the best daily needs, ensuring fast delivery and top-notch quality right at your doorstep.
+                        <p className="text-gray-500 font-medium mb-4 max-w-sm leading-relaxed">
+                            Apni Dukan Shahjahanpur is your premier local marketplace. Experience the best online shopping and grocery delivery in Shahjahanpur, ensuring fast delivery right at your doorstep.
                         </p>
-                        <div className="flex items-center gap-2 text-sm font-bold text-emerald-600 bg-emerald-50 w-max px-3 py-1.5 rounded-full">
-                            <ShieldCheck size={16} /> 100% Secure & Trusted
+                        <div className="text-sm font-semibold text-gray-700 mb-6 flex flex-col gap-1.5">
+                            <div className="flex items-center gap-2">📍 <a href="https://maps.google.com/?q=Shahjahanpur,+Uttar+Pradesh" target="_blank" rel="noreferrer" className="hover:underline hover:text-blue-500 transition-colors">Shahjahanpur, Uttar Pradesh, India</a></div>
+                            <div className="flex items-center gap-2">📞 Contact Support: <a href="mailto:support@apnidukaan.com" className="hover:underline">support@apnidukaan.com</a></div>
                         </div>
+                        <div className="flex items-center gap-2 text-sm font-bold text-emerald-600 bg-emerald-50 w-max px-3 py-1.5 rounded-full mb-1">
+                            <ShieldCheck size={16} /> 100% Secure & Trusted Checkout
+                        </div>
+                        <div className="text-[11px] text-gray-400 font-medium ml-2">Your data is safe and encrypted.</div>
                     </div>
 
                     {/* Quick Links */}

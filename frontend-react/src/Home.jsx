@@ -108,9 +108,9 @@ export default function Home({ addToCart }) {
                         Shahjahanpur's #1 Delivery Network
                     </div>
                     <h1 className="text-4xl sm:text-5xl md:text-7xl font-extrabold text-gray-900 tracking-tight leading-tight mb-6 sm:mb-8">
-                        Fast Trusted <br className="hidden sm:block" />
+                        Apni Dukan <br className="hidden sm:block" />
                         <span className="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 bg-clip-text text-transparent">
-                            Local Delivery 🚀
+                            Shahjahanpur 🚀
                         </span>
                     </h1>
                     <p className="text-base sm:text-lg text-gray-600 mb-8 sm:mb-12 max-w-2xl mx-auto font-medium leading-relaxed px-4">
@@ -126,7 +126,12 @@ export default function Home({ addToCart }) {
             </section>
 
             {/* ── FEATURES ─────────────────────────────────────────────── */}
-            <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-16 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
+            <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
+                <div className="flex flex-col items-center text-center mb-10 w-full">
+                    <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-800 tracking-tight">Fast Delivery in Shahjahanpur</h2>
+                    <div className="w-16 h-1 bg-blue-400 mt-3 rounded-full opacity-80" />
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6 w-full">
                 {[
                     { title: 'Delivery within 24h', icon: <Zap size={22} />, desc: 'Lightning fast processing' },
                     { title: 'Trusted Platform', icon: <ShieldCheck size={22} />, desc: 'Secure & reliable service' },
@@ -148,12 +153,13 @@ export default function Home({ addToCart }) {
                         <p className="hidden sm:block text-gray-500 text-xs sm:text-sm">{f.desc}</p>
                     </motion.div>
                 ))}
+                </div>
             </section>
 
             {/* ── SHOP GRID ─────────────────────────────────────────────── */}
             <section id="shop" className="w-full max-w-7xl mx-auto px-3 sm:px-6 py-14 sm:py-20">
                 <div className="flex flex-col items-center text-center mb-8">
-                    <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-800 tracking-tight">Curated Selection</h2>
+                    <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-800 tracking-tight">Shop Products in Shahjahanpur</h2>
                     <div className="w-16 sm:w-20 h-1 bg-emerald-400 mt-3 rounded-full opacity-80" />
                 </div>
 

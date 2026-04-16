@@ -71,25 +71,27 @@ exports.submitFeedback = async (req, res) => {
     try {
         const { rating, comment } = req.body;
         const order = await Order.findById(req.params.id);
-        if (!order || order.status !== 'DELIVERED') return res.status(400).json({ error: 'Order not eligible for feedback' });
+        if (!order || (order.status !== 'DELIVERED' && order.status !== 'RETURNED')) return res.status(400).json({ error: 'Order not eligible for feedback' });
         if (order.feedbackGiven) return res.status(400).json({ error: 'Feedback already given' });
         
         order.feedbackGiven = true;
         order.feedback = { rating, comment, submittedAt: new Date() };
         await order.save();
 
-        order.items.forEach(async (item) => {
-            const product = await Product.findById(item.productId);
-            if(product) {
-                const total = product.totalReviews || 0;
-                const avg = product.averageRating || 0;
-                const newTotal = total + 1;
-                const newAvg = ((avg * total) + rating) / newTotal;
-                product.totalReviews = newTotal;
-                product.averageRating = parseFloat(newAvg.toFixed(1));
-                await product.save();
-            }
-        });
+        if (order.status === 'DELIVERED' && rating > 0) {
+            order.items.forEach(async (item) => {
+                const product = await Product.findById(item.productId);
+                if(product) {
+                    const total = product.totalReviews || 0;
+                    const avg = product.averageRating || 0;
+                    const newTotal = total + 1;
+                    const newAvg = ((avg * total) + rating) / newTotal;
+                    product.totalReviews = newTotal;
+                    product.averageRating = parseFloat(newAvg.toFixed(1));
+                    await product.save();
+                }
+            });
+        }
 
         res.json(order);
     } catch (err) { res.status(500).json({ error: err.message }); }

@@ -180,6 +180,9 @@ export default function App() {
                     <div className="pt-20 flex-1 flex flex-col w-full">
                         <Routes>
                             <Route path="/" element={<Home addToCart={addToCart} />} />
+                            <Route path="/products" element={<Home addToCart={addToCart} />} />
+                            <Route path="/category/:categoryName" element={<Home addToCart={addToCart} />} />
+                            <Route path="/product/:productId" element={<Home addToCart={addToCart} />} />
                             <Route path="/track" element={<TrackOrder />} />
                             <Route path="/admin" element={<Admin />} />
                             <Route path="/legal" element={<Legal />} />

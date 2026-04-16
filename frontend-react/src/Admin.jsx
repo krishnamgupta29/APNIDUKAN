@@ -168,10 +168,11 @@ export default function Admin() {
                                                         <span className="px-2.5 py-1 bg-yellow-100 border border-yellow-200 text-yellow-800 text-[10px] font-extrabold rounded-lg tracking-widest uppercase flex items-center gap-1.5 shadow-sm"><X size={12} strokeWidth={3}/> Returned</span>
                                                     )}
                                                     {o.feedbackGiven && (
-                                                        <span className="text-[10px] text-yellow-700 font-bold bg-yellow-50 border border-yellow-200 px-2.5 py-1 rounded-md flex items-center gap-1 shadow-sm">
-                                                            ⭐ {o.feedback?.rating || o.rating || 5}/5
-                                                            {o.feedback?.comment && <span className="text-gray-500 font-normal ml-1">"{o.feedback.comment}"</span>}
-                                                        </span>
+                                                        <div className={`mt-0.5 w-full text-[10px] ${o.status === 'RETURNED' ? 'text-red-700 bg-red-50 border-red-200' : 'text-yellow-700 bg-yellow-50 border-yellow-200'} font-bold border px-2.5 py-1.5 rounded-md flex flex-col gap-0.5 shadow-sm`}>
+                                                            {o.status !== 'RETURNED' && <div>⭐ {o.feedback?.rating || o.rating || 5}/5</div>}
+                                                            {o.status === 'RETURNED' && <div>📝 Return Reason:</div>}
+                                                            {o.feedback?.comment && <div className="text-gray-700 font-normal leading-tight mt-0.5">"{o.feedback.comment}"</div>}
+                                                        </div>
                                                     )}
                                                     <button onClick={() => deleteOrder(o._id)} title="Delete Order" className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg mt-1 transition-all"><Trash2 size={14}/></button>
                                                 </div>
