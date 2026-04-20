@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Analytics } from '@vercel/analytics/react';
 import Home from './Home';
 import TrackOrder from './TrackOrder';
 import Admin from './Admin';
@@ -402,6 +403,7 @@ export default function App() {
                     </AnimatePresence>
                 </div>
             )}
+            <Analytics />
         </>
     );
 }
