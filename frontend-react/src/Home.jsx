@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Star, ArrowRight, Zap, ShieldCheck, MapPin, ShoppingBag, Plus, Search } from 'lucide-react';
 import axios from 'axios';
-import ProductModal from './ProductModal';
+import { useNavigate } from 'react-router-dom';
 import API_URL from './api';
 import { getImageUrl } from './utils';
 
@@ -37,9 +37,9 @@ export default function Home({ addToCart }) {
         return [];
     });
     const [loading, setLoading] = useState(products.length === 0);
-    const [selectedProduct, setSelectedProduct] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('All');
+    const navigate = useNavigate();
 
     useEffect(() => {
         let cancelled = false;
@@ -202,7 +202,10 @@ export default function Home({ addToCart }) {
                             <ProductCard
                                 key={p._id}
                                 p={p}
-                                onClick={() => setSelectedProduct(p)}
+                                onClick={() => {
+                                    navigate(`/product/${p._id}`);
+                                    window.scrollTo(0, 0);
+                                }}
                                 onAdd={(e) => { e.stopPropagation(); addToCart(p); }}
                             />
                         ))
@@ -218,23 +221,12 @@ export default function Home({ addToCart }) {
                     </div>
                 )}
             </section>
-
-            <AnimatePresence>
-                {selectedProduct && (
-                    <ProductModal
-                        key={selectedProduct._id}
-                        product={selectedProduct}
-                        onClose={() => setSelectedProduct(null)}
-                        onAdd={(qty) => addToCart(selectedProduct, qty)}
-                    />
-                )}
-            </AnimatePresence>
         </main>
     );
 }
 
 // ─── Product Card ─────────────────────────────────────────────────────────────
-function ProductCard({ p, onClick, onAdd }) {
+export function ProductCard({ p, onClick, onAdd }) {
     const originalPrice = p.originalPrice && p.originalPrice > p.price ? p.originalPrice : null;
     const sources = p.images?.length > 0 ? p.images.map(getImageUrl) : [getImageUrl(p.image)];
 
@@ -249,8 +241,8 @@ function ProductCard({ p, onClick, onAdd }) {
             timeoutRef.current = setTimeout(() => {
                 intervalRef.current = setInterval(() => {
                     setHoverIdx(c => (c + 1) % sources.length);
-                }, 2000);
-            }, 1000);
+                }, 1000);
+            }, 300);
         } else {
             clearTimeout(timeoutRef.current);
             clearInterval(intervalRef.current);
@@ -305,7 +297,7 @@ function ProductCard({ p, onClick, onAdd }) {
                         key={idx}
                         src={src}
                         alt={p.name}
-                        className={`absolute w-full h-full object-contain p-4 md:p-6 transition-all duration-500 ease-in-out ${idx === hoverIdx ? 'opacity-100 scale-100 group-hover:scale-105' : 'opacity-0 scale-95 pointer-events-none'}`}
+                        className={`absolute w-full h-full object-contain p-4 md:p-6 transition-all duration-300 ease-in-out ${idx === hoverIdx ? 'opacity-100 scale-100 group-hover:scale-105' : 'opacity-0 scale-95 pointer-events-none'}`}
                         loading="lazy"
                         decoding="async"
                     />

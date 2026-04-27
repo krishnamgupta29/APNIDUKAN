@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShieldCheck, ArrowRight, Heart } from 'lucide-react';
+import { ShieldCheck, ArrowRight, Heart, Instagram } from 'lucide-react';
 
 export default function Footer() {
     const navigate = useNavigate();
@@ -50,7 +50,12 @@ export default function Footer() {
                         &copy; {new Date().getFullYear()} ApniDukaan. All rights reserved.
                     </div>
                     
-                    <div className="flex flex-col items-center md:items-end gap-1">
+                    <div className="flex flex-col items-center md:items-end gap-3">
+                        <div className="flex items-center gap-3">
+                            <a href="https://www.instagram.com/apni_dukan_shahjahanpur?igsh=MWdxaWlnaHdpM2VrYg==" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-500 hover:bg-[#E1306C] hover:text-white transition-colors">
+                                <Instagram size={16} />
+                            </a>
+                        </div>
                         <div className="text-xs font-bold text-gray-400 tracking-wider">
                             Developed in Shahjahanpur & operated locally
                         </div>

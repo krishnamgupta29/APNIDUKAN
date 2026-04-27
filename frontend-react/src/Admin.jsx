@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { Package, Trash2, X, Check, UploadCloud, AlertOctagon, MapPin } from 'lucide-react';
+import { Package, Trash2, X, Check, UploadCloud, AlertOctagon, MapPin, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import API_URL from './api';
 import { getImageUrl } from './utils';
@@ -71,6 +71,58 @@ export default function Admin() {
         fetchOrders();
     };
 
+    const downloadCSV = () => {
+        const completedOrders = orders.filter(o => o.status === 'DELIVERED' || o.status === 'RETURNED');
+        if(completedOrders.length === 0) return alert("No completed orders to download.");
+
+        const headers = ["Name", "Number", "Address", "Product", "Total Price", "Date of Order", "Date of Delivery/Return", "Status", "Feedback Rating", "Feedback Comment"];
+        
+        const rows = completedOrders.map(o => {
+            const itemsStr = o.items.map(i => `${i.quantity}x ${i.name}`).join('; ');
+            
+            // Fix Excel scientific notation for phone numbers
+            const phoneStr = `="${o.phone}"`; 
+
+            // Format dates nicely so Excel doesn't turn them into #######
+            const formatDate = (dateString) => {
+                if (!dateString) return 'N/A';
+                const d = new Date(dateString);
+                if (isNaN(d.getTime())) return 'N/A';
+                return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) + ' ' + d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            };
+
+            const orderDate = formatDate(o.createdAt);
+            const deliveryDate = o.updatedAt ? formatDate(o.updatedAt) : 'N/A';
+            
+            const rating = o.feedback?.rating || o.rating || 'N/A';
+            const comment = o.feedback?.comment || 'N/A';
+            const addr = (o.address || '').replace(/,/g, ' ');
+            
+            return [
+                o.customerName,
+                phoneStr,
+                addr,
+                itemsStr,
+                o.total,
+                orderDate,
+                deliveryDate,
+                o.status,
+                rating,
+                comment
+            ].map(String).map(s => `"${s.replace(/"/g, '""')}"`).join(",");
+        });
+
+        const csvContent = [headers.join(","), ...rows].join("\n");
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `ApniDukan_Orders_${new Date().toISOString().split('T')[0]}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     if (!auth) return (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-gray-900/40 backdrop-blur-md">
             <motion.form 
@@ -108,9 +160,14 @@ export default function Admin() {
 
             {view === 'orders' && (
                 <div className="bg-white rounded-3xl p-4 md:p-8 shadow-sm border border-gray-100/50">
-                    <div className="flex gap-2 mb-6 border-b border-gray-100 pb-4">
-                        <button onClick={() => setOrderTab('PENDING')} className={`px-5 py-2.5 text-sm font-bold rounded-xl transition-all ${orderTab === 'PENDING' ? 'bg-orange-50 text-orange-600 shadow-sm' : 'text-gray-400 bg-gray-50 hover:bg-gray-100'}`}>Pending Orders</button>
-                        <button onClick={() => setOrderTab('DELIVERED')} className={`px-5 py-2.5 text-sm font-bold rounded-xl transition-all ${orderTab === 'DELIVERED' ? 'bg-emerald-50 text-emerald-600 shadow-sm' : 'text-gray-400 bg-gray-50 hover:bg-gray-100'}`}>Completed / Returned</button>
+                    <div className="flex justify-between items-center mb-6 border-b border-gray-100 pb-4">
+                        <div className="flex gap-2">
+                            <button onClick={() => setOrderTab('PENDING')} className={`px-5 py-2.5 text-sm font-bold rounded-xl transition-all ${orderTab === 'PENDING' ? 'bg-orange-50 text-orange-600 shadow-sm' : 'text-gray-400 bg-gray-50 hover:bg-gray-100'}`}>Pending Orders</button>
+                            <button onClick={() => setOrderTab('DELIVERED')} className={`px-5 py-2.5 text-sm font-bold rounded-xl transition-all ${orderTab === 'DELIVERED' ? 'bg-emerald-50 text-emerald-600 shadow-sm' : 'text-gray-400 bg-gray-50 hover:bg-gray-100'}`}>Completed / Returned</button>
+                        </div>
+                        <button onClick={downloadCSV} title="Download Completed & Returned Orders" className="px-4 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 text-sm font-bold rounded-xl transition-all flex items-center gap-2 shadow-sm">
+                            <Download size={16} /> Export History
+                        </button>
                     </div>
                     
                     <div className="overflow-x-auto w-full pb-4">

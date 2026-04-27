@@ -1,9 +1,14 @@
-import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Search, ShoppingBag, CreditCard, CheckCircle2 } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { Search, ShoppingBag, CreditCard, CheckCircle2, ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-export default function HowToUse({ isOpen, onClose }) {
-    if (!isOpen) return null;
+export default function HowToUse() {
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
 
     const steps = [
         {
@@ -33,40 +38,52 @@ export default function HowToUse({ isOpen, onClose }) {
     ];
 
     return (
-        <AnimatePresence>
-            <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
-                <motion.div 
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    className="bg-white rounded-3xl w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl relative"
+        <main className="w-full min-h-[80vh] bg-[#fdfbf7] py-10 px-4 sm:px-6">
+            <div className="w-full max-w-4xl mx-auto">
+                <button 
+                    onClick={() => navigate(-1)} 
+                    className="flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-gray-900 mb-8 transition"
                 >
-                    <div className="sticky top-0 bg-white/90 backdrop-blur-md p-6 border-b border-gray-100 flex justify-between items-center z-10">
-                        <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">How to Use <span className="text-blue-500">ApniDukaan</span></h2>
-                        <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors"><X size={24} /></button>
+                    <ArrowLeft size={16} /> Back
+                </button>
+
+                <div className="bg-white rounded-3xl p-6 md:p-10 shadow-sm border border-gray-100">
+                    <div className="flex flex-col items-center text-center mb-10">
+                        <h1 className="text-3xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-4">
+                            How to Use <span className="text-blue-500">ApniDukaan</span>
+                        </h1>
+                        <p className="text-gray-500 font-medium max-w-xl mx-auto">
+                            Follow these simple steps to easily browse, order, and track your daily needs right to your doorstep.
+                        </p>
                     </div>
                     
-                    <div className="p-6 md:p-8 space-y-6">
-                        <div className="grid md:grid-cols-2 gap-6">
-                            {steps.map((step, idx) => (
-                                <div key={idx} className={`${step.bg} p-6 rounded-2xl border border-white shadow-sm flex flex-col items-start`}>
-                                    <div className="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center mb-4">
-                                        {step.icon}
-                                    </div>
-                                    <h3 className="text-lg font-bold text-gray-900 mb-2">{step.title}</h3>
-                                    <p className="text-gray-600 font-medium text-sm leading-relaxed">{step.desc}</p>
+                    <div className="grid md:grid-cols-2 gap-6 mb-10">
+                        {steps.map((step, idx) => (
+                            <motion.div 
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: idx * 0.1 }}
+                                key={idx} 
+                                className={`${step.bg} p-6 md:p-8 rounded-3xl border border-white shadow-sm flex flex-col items-start hover:shadow-md transition-shadow`}
+                            >
+                                <div className="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center mb-5">
+                                    {step.icon}
                                 </div>
-                            ))}
-                        </div>
-                        
-                        <div className="mt-8 bg-gray-900 text-white rounded-2xl p-6 text-center">
-                            <h3 className="text-xl font-bold mb-3">Ready to order?</h3>
-                            <p className="text-gray-400 font-medium text-sm mb-6 max-w-md mx-auto">Get your daily needs and curated products delivered to your doorstep at lightning speed.</p>
-                            <button onClick={onClose} className="px-8 py-3 bg-white text-gray-900 font-extrabold rounded-xl hover:scale-105 transition-transform">Start Shopping Now</button>
-                        </div>
+                                <h3 className="text-xl font-bold text-gray-900 mb-2">{step.title}</h3>
+                                <p className="text-gray-600 font-medium text-sm leading-relaxed">{step.desc}</p>
+                            </motion.div>
+                        ))}
                     </div>
-                </motion.div>
+                    
+                    <div className="bg-gray-900 text-white rounded-3xl p-8 text-center shadow-xl shadow-gray-900/10">
+                        <h3 className="text-2xl font-bold mb-3">Ready to order?</h3>
+                        <p className="text-gray-400 font-medium text-sm mb-6 max-w-md mx-auto">Get your daily needs and curated products delivered to your doorstep at lightning speed.</p>
+                        <button onClick={() => navigate('/')} className="px-8 py-3.5 bg-white text-gray-900 font-extrabold rounded-xl hover:scale-105 active:scale-95 transition-transform">
+                            Start Shopping Now
+                        </button>
+                    </div>
+                </div>
             </div>
-        </AnimatePresence>
+        </main>
     );
 }
