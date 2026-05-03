@@ -4,7 +4,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const productController = require('../controllers/productController');
-const auth = require('../middleware/auth');
+const { protect, authorize } = require('../middleware/auth');
 
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
@@ -26,7 +26,7 @@ const storage = new CloudinaryStorage({
 const upload = multer({ storage });
 
 router.get('/', productController.getProducts);
-router.post('/', auth, upload.array('images', 5), productController.createProduct);
-router.delete('/:id', auth, productController.deleteProduct);
+router.post('/', protect, authorize('admin'), upload.array('images', 5), productController.createProduct);
+router.delete('/:id', protect, authorize('admin'), productController.deleteProduct);
 
 module.exports = router;

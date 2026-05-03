@@ -1,5 +1,6 @@
 const Order = require('../models/Order');
 const Product = require('../models/Product');
+const DeliveryLog = require('../models/DeliveryLog');
 const twilio = require('twilio');
 const client = (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) ? twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN) : null;
 
@@ -45,13 +46,38 @@ exports.getOrderHistory = async (req, res) => {
 exports.updateOrderStatus = async (req, res) => {
     try {
         const { status } = req.body;
-        const updatedOrder = await Order.findByIdAndUpdate(req.params.id, { status }, { new: true });
-        // WhatsApp disabled to improve speed / since it's not active
-        // let msg = `ApniDukaan: Your order ${updatedOrder.orderId} status is now ${status}.`;
-        // if(status === 'CONFIRMED') msg = `ApniDukaan: Great news! Your order ${updatedOrder.orderId} is confirmed and being prepared.`;
-        // if(status === 'DELIVERED') msg = `ApniDukaan: Your order ${updatedOrder.orderId} has been delivered. Enjoy and please leave feedback!`;
-        // if(status === 'RETURNED') msg = `ApniDukaan: Your order ${updatedOrder.orderId} has been returned. Feel free to contact us for any issues.`;
-        // if(status !== 'ARCHIVED') sendWhatsApp(updatedOrder.phone, msg); // Non-blocking background call
+        const orderId = req.params.id;
+        const order = await Order.findById(orderId);
+        
+        if (!order) return res.status(404).json({ error: 'Order not found' });
+
+        // If delivery user, check assignment
+        if (req.user && req.user.role === 'delivery') {
+            if (!order.assignedTo || order.assignedTo.toString() !== req.user.id) {
+                return res.status(403).json({ error: 'You can only update your assigned orders' });
+            }
+            if (!['delivered', 'returned'].includes(status)) {
+                return res.status(400).json({ error: 'Delivery users can only mark delivered or returned' });
+            }
+        }
+
+        const oldStatus = order.status;
+        order.status = status;
+        
+        if (status === 'delivered' && req.user && req.user.role === 'delivery') {
+            order.deliveredBy = req.user.id;
+        }
+
+        const updatedOrder = await order.save();
+
+        if (req.user) {
+            await DeliveryLog.create({
+                orderId: updatedOrder._id,
+                deliveryUserId: req.user.id,
+                oldStatus,
+                newStatus: status
+            });
+        }
 
         res.json(updatedOrder);
     } 
@@ -71,14 +97,15 @@ exports.submitFeedback = async (req, res) => {
     try {
         const { rating, comment } = req.body;
         const order = await Order.findById(req.params.id);
-        if (!order || (order.status !== 'DELIVERED' && order.status !== 'RETURNED')) return res.status(400).json({ error: 'Order not eligible for feedback' });
+        const st = order?.status?.toUpperCase();
+        if (!order || (st !== 'DELIVERED' && st !== 'RETURNED')) return res.status(400).json({ error: 'Order not eligible for feedback' });
         if (order.feedbackGiven) return res.status(400).json({ error: 'Feedback already given' });
         
         order.feedbackGiven = true;
         order.feedback = { rating, comment, submittedAt: new Date() };
         await order.save();
 
-        if (order.status === 'DELIVERED' && rating > 0) {
+        if (st === 'DELIVERED' && rating > 0) {
             order.items.forEach(async (item) => {
                 const product = await Product.findById(item.productId);
                 if(product) {
@@ -94,5 +121,31 @@ exports.submitFeedback = async (req, res) => {
         }
 
         res.json(order);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+};
+
+exports.assignOrder = async (req, res) => {
+    try {
+        const { deliveryUserId } = req.body;
+        const order = await Order.findByIdAndUpdate(req.params.id, { 
+            assignedTo: deliveryUserId,
+            status: 'assigned' 
+        }, { new: true });
+        if (!order) return res.status(404).json({ error: 'Order not found' });
+        res.json(order);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+};
+
+exports.getMyDeliveries = async (req, res) => {
+    try {
+        const orders = await Order.find({ assignedTo: req.user.id }).sort({ createdAt: -1 });
+        res.json(orders);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+};
+
+exports.getDeliveryLogs = async (req, res) => {
+    try {
+        const logs = await DeliveryLog.find().populate('orderId deliveryUserId', 'orderId customerName username').sort({ timestamp: -1 });
+        res.json(logs);
     } catch (err) { res.status(500).json({ error: err.message }); }
 };

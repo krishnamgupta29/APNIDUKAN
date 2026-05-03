@@ -80,11 +80,17 @@ export default function TrackOrder() {
                         <div className="flex-1 flex flex-col justify-center">
                             <div className="relative flex justify-between">
                                 <div className="absolute top-4 left-[10%] right-[10%] h-1 bg-gray-100 z-0"/>
-                                {['NEW', 'CONFIRMED', o.status === 'RETURNED' ? 'RETURNED' : 'DELIVERED'].map((state, idx, statesMap) => {
-                                    const curIdx = (o.status === 'RETURNED' && state === 'RETURNED') ? 2 : statesMap.indexOf(o.status);
+                                {['NEW', 'ASSIGNED', (o.status === 'RETURNED' || o.status === 'returned') ? 'RETURNED' : 'DELIVERED'].map((state, idx, statesMap) => {
+                                    let normalizedStatus = o.status?.toUpperCase() || 'NEW';
+                                    if (normalizedStatus === 'PENDING') normalizedStatus = 'NEW';
+                                    if (normalizedStatus === 'CONFIRMED') normalizedStatus = 'ASSIGNED';
+
+                                    const curIdx = (normalizedStatus === 'RETURNED' && state === 'RETURNED') ? 2 : statesMap.indexOf(normalizedStatus);
                                     let isActive = false;
-                                    if(o.status === 'RETURNED') isActive = idx <= 2;
+                                    if(normalizedStatus === 'RETURNED') isActive = idx <= 2;
                                     else isActive = idx <= curIdx;
+                                    if(normalizedStatus === 'DELIVERED') isActive = true;
+
                                     const isReturnedNode = state === 'RETURNED';
                                     
                                     return (
@@ -98,14 +104,14 @@ export default function TrackOrder() {
                                 })}
                             </div>
 
-                            {(o.status === 'DELIVERED' || o.status === 'RETURNED') && !o.feedbackGiven && (
-                                <button onClick={()=>{setReviewOrder(o._id); setRating(0); setComment(''); setRatingLocked(false); setIsHovered(0);}} className={`mt-8 w-full py-2.5 font-bold rounded-xl transition text-sm ${o.status === 'RETURNED' ? 'bg-yellow-50 text-yellow-600 hover:bg-yellow-100' : 'bg-blue-50 text-blue-600 hover:bg-blue-100'}`}>
-                                    {o.status === 'RETURNED' ? 'Provide Return Reason 📝' : 'Rate Your Experience ⭐'}
+                            {(o.status === 'DELIVERED' || o.status === 'delivered' || o.status === 'RETURNED' || o.status === 'returned') && !o.feedbackGiven && (
+                                <button onClick={()=>{setReviewOrder(o._id); setRating(0); setComment(''); setRatingLocked(false); setIsHovered(0);}} className={`mt-8 w-full py-2.5 font-bold rounded-xl transition text-sm ${(o.status === 'RETURNED' || o.status === 'returned') ? 'bg-yellow-50 text-yellow-600 hover:bg-yellow-100' : 'bg-blue-50 text-blue-600 hover:bg-blue-100'}`}>
+                                    {(o.status === 'RETURNED' || o.status === 'returned') ? 'Provide Return Reason 📝' : 'Rate Your Experience ⭐'}
                                 </button>
                             )}
                             {o.feedbackGiven && (
                                 <div className="mt-8 text-center text-sm font-bold text-gray-400">
-                                    {o.status === 'RETURNED' ? 'Return reason submitted.' : `Thanks for rating ${o.feedback?.rating || o.rating || 5} Stars!`}
+                                    {(o.status === 'RETURNED' || o.status === 'returned') ? 'Return reason submitted.' : `Thanks for rating ${o.feedback?.rating || o.rating || 5} Stars!`}
                                 </div>
                             )}
                         </div>
@@ -120,13 +126,13 @@ export default function TrackOrder() {
                         <motion.div initial={{scale:0.9, opacity:0, y:20}} animate={{scale:1, opacity:1, y:0}} exit={{scale:0.95, opacity:0}} className="bg-white p-8 rounded-[2rem] w-full max-w-sm text-center shadow-2xl relative border border-gray-100">
                             <button type="button" onClick={()=>setReviewOrder(null)} className="absolute top-6 right-6 text-gray-400 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 p-2 rounded-full transition"><X size={20}/></button>
                             <h3 className="text-2xl font-bold mb-2">
-                                {orders.find(o => o._id === reviewOrder)?.status === 'RETURNED' ? 'Return Info' : 'Rate Order'}
+                                {(orders.find(o => o._id === reviewOrder)?.status === 'RETURNED' || orders.find(o => o._id === reviewOrder)?.status === 'returned') ? 'Return Info' : 'Rate Order'}
                             </h3>
                             <p className="text-gray-500 text-sm mb-6">
-                                {orders.find(o => o._id === reviewOrder)?.status === 'RETURNED' ? 'Why was this order returned?' : 'How was your delivery experience?'}
+                                {(orders.find(o => o._id === reviewOrder)?.status === 'RETURNED' || orders.find(o => o._id === reviewOrder)?.status === 'returned') ? 'Why was this order returned?' : 'How was your delivery experience?'}
                             </p>
                             
-                            {orders.find(o => o._id === reviewOrder)?.status !== 'RETURNED' && (
+                            {(orders.find(o => o._id === reviewOrder)?.status !== 'RETURNED' && orders.find(o => o._id === reviewOrder)?.status !== 'returned') && (
                                 <div className="flex justify-center gap-1 mb-6">
                                     {[1, 2, 3, 4, 5].map((star) => (
                                         <svg key={star} viewBox="0 0 24 24" fill="none" strokeWidth="2"
@@ -146,9 +152,9 @@ export default function TrackOrder() {
                             )}
                             
                             <AnimatePresence>
-                                {(rating > 0 || orders.find(o => o._id === reviewOrder)?.status === 'RETURNED') && (
+                                {(rating > 0 || orders.find(o => o._id === reviewOrder)?.status === 'RETURNED' || orders.find(o => o._id === reviewOrder)?.status === 'returned') && (
                                     <motion.div key="rating-comment" initial={{opacity:0, height:0}} animate={{opacity:1, height:'auto'}} exit={{opacity:0, height:0}} className="mb-6">
-                                        <textarea value={comment} onChange={e=>setComment(e.target.value)} placeholder={orders.find(o => o._id === reviewOrder)?.status === 'RETURNED' ? "Reason for return (required)..." : "Leave a comment (optional)..."} className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 text-sm outline-none focus:ring-4 focus:ring-gray-100 focus:border-gray-300 resize-none transition-all" rows="3"></textarea>
+                                        <textarea value={comment} onChange={e=>setComment(e.target.value)} placeholder={(orders.find(o => o._id === reviewOrder)?.status === 'RETURNED' || orders.find(o => o._id === reviewOrder)?.status === 'returned') ? "Reason for return (required)..." : "Leave a comment (optional)..."} className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 text-sm outline-none focus:ring-4 focus:ring-gray-100 focus:border-gray-300 resize-none transition-all" rows="3"></textarea>
                                     </motion.div>
                                 )}
                             </AnimatePresence>

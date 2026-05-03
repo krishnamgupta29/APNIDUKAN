@@ -6,6 +6,7 @@ const path = require('path');
 
 const productRoutes = require('./routes/products');
 const orderRoutes = require('./routes/orders');
+const authRoutes = require('./routes/auth');
 
 const app = express();
 
@@ -18,6 +19,7 @@ app.get('/', (req, res) => {
     res.json({ status: 'ok', message: '🚀 ApniDukaan API is running!', version: '1.0.0' });
 });
 
+app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 

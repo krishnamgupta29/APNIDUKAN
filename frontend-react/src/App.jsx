@@ -18,7 +18,8 @@ import Checkout from './Checkout';
 import ConfirmOrder from './ConfirmOrder';
 import OrderSuccess from './OrderSuccess';
 import FAQs from './FAQs';
-
+import Login from './Login';
+import DeliveryPanel from './DeliveryPanel';
 
 function Navigation({ cartCount, onCartClick }) {
     const navigate = useNavigate();
@@ -119,7 +120,9 @@ export default function App() {
                             <Route path="/category/:categoryName" element={<Home addToCart={addToCart} />} />
                             <Route path="/product/:productId" element={<ProductPage addToCart={addToCart} />} />
                             <Route path="/track" element={<TrackOrder />} />
+                            <Route path="/login" element={<Login />} />
                             <Route path="/admin" element={<Admin />} />
+                            <Route path="/delivery" element={<DeliveryPanel />} />
                             <Route path="/legal" element={<Legal />} />
                             <Route path="/support" element={<SupportPage />} />
                             <Route path="/how-to-use" element={<HowToUse />} />
