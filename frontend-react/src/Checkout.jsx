@@ -1,13 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, ArrowRight, ArrowLeft } from 'lucide-react';
+import { MapPin, ArrowRight, ArrowLeft, History } from 'lucide-react';
 
 export default function Checkout({ cart, subtotal, deliveryTotal, totalCalc, setOrderPayload }) {
     const navigate = useNavigate();
+    const [nameText, setNameText] = useState('');
+    const [phoneText, setPhoneText] = useState('');
     const [addrText, setAddrText] = useState('');
     const [fetchingGPS, setFetchingGPS] = useState(false);
     const [locationError, setLocationError] = useState('');
+    const [savedDetails, setSavedDetails] = useState(null);
+
+    useEffect(() => {
+        const saved = localStorage.getItem('apnidukan_user_details');
+        if (saved) {
+            setSavedDetails(JSON.parse(saved));
+        }
+    }, []);
+
+    const handleAutoFill = () => {
+        if (savedDetails) {
+            setNameText(savedDetails.name || '');
+            setPhoneText(savedDetails.phone || '');
+            setAddrText(savedDetails.address || '');
+        }
+    };
 
     const reverseGeocode = async (lat, lon) => {
         try {
@@ -30,9 +48,15 @@ export default function Checkout({ cart, subtotal, deliveryTotal, totalCalc, set
 
     const handleMapClickSubmit = async (e) => {
         e.preventDefault();
-        const customerName = e.target.name.value;
-        const phone = e.target.phone.value;
+        const customerName = nameText;
+        const phone = phoneText;
         setLocationError('');
+
+        localStorage.setItem('apnidukan_user_details', JSON.stringify({
+            name: customerName,
+            phone: phone,
+            address: addrText
+        }));
 
         setOrderPayload({
             customerName, phone, address: addrText, items: cart, 
@@ -66,19 +90,28 @@ export default function Checkout({ cart, subtotal, deliveryTotal, totalCalc, set
                 <h3 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-6">Delivery Details</h3>
 
                 <form onSubmit={handleMapClickSubmit} className="space-y-4">
-                    <button type="button" onClick={handleUseGPS} disabled={fetchingGPS}
-                        className="w-full py-4 px-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-3 border border-blue-500/20 bg-gradient-to-tr from-blue-500/5 to-blue-600/[0.02] text-blue-600 hover:from-blue-500/10 hover:to-blue-600/5 active:scale-[0.98] transition-all disabled:opacity-60 shadow-sm relative overflow-hidden group">
-                        <div className="absolute inset-0 bg-white/40 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500" />
-                        {fetchingGPS
-                            ? <><div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"/> <span className="relative z-10">Detecting...</span></>
-                            : <><MapPin size={18} className="relative z-10"/> <span className="relative z-10 font-extrabold uppercase tracking-tight">Detect via GPS</span></>}
-                    </button>
+                    <div className="flex gap-2">
+                        <button type="button" onClick={handleUseGPS} disabled={fetchingGPS}
+                            className="flex-1 py-4 px-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 border border-blue-500/20 bg-gradient-to-tr from-blue-500/5 to-blue-600/[0.02] text-blue-600 hover:from-blue-500/10 hover:to-blue-600/5 active:scale-[0.98] transition-all disabled:opacity-60 shadow-sm relative overflow-hidden group">
+                            <div className="absolute inset-0 bg-white/40 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500" />
+                            {fetchingGPS
+                                ? <><div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"/> <span className="relative z-10">Detecting...</span></>
+                                : <><MapPin size={18} className="relative z-10"/> <span className="relative z-10 font-extrabold uppercase tracking-tight">GPS</span></>}
+                        </button>
+                        
+                        {savedDetails && (
+                            <button type="button" onClick={handleAutoFill}
+                                className="flex-1 py-4 px-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 border border-purple-500/20 bg-gradient-to-tr from-purple-500/5 to-purple-600/[0.02] text-purple-600 hover:from-purple-500/10 hover:to-purple-600/5 active:scale-[0.98] transition-all shadow-sm relative overflow-hidden group">
+                                <History size={18} /> <span className="font-extrabold uppercase tracking-tight">Auto-fill</span>
+                            </button>
+                        )}
+                    </div>
 
                     <div>
-                        <input name="name" required placeholder="Full Name" className="w-full p-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 font-medium outline-none transition" />
+                        <input name="name" required value={nameText} onChange={e => setNameText(e.target.value)} placeholder="Full Name" className="w-full p-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 font-medium outline-none transition" />
                     </div>
                     <div>
-                        <input name="phone" required type="tel" pattern="^[0-9]{10}$" title="Please enter a valid 10-digit mobile number" placeholder="Phone Number (10 digits)" className="w-full p-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 font-medium outline-none transition" />
+                        <input name="phone" required value={phoneText} onChange={e => setPhoneText(e.target.value)} type="tel" pattern="^[0-9]{10}$" title="Please enter a valid 10-digit mobile number" placeholder="Phone Number (10 digits)" className="w-full p-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 font-medium outline-none transition" />
                     </div>
 
                     <div className="relative group">
