@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">ApniDukan Shahjahanpur</string>
+    <string name="title_activity_main">ApniDukan Shahjahanpur</string>
+    <string name="package_name">com.apnidukanshahjahanpur.app</string>
+    <string name="custom_url_scheme">com.apnidukanshahjahanpur.app</string>
+</resources>

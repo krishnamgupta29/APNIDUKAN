@@ -27,7 +27,7 @@ function SkeletonCard() {
     );
 }
 
-export default function Home({ addToCart }) {
+export default function Home({ addToCart, onAppDownloadClick }) {
     const [products, setProducts] = useState(() => {
         // Instant load from cache on first render — avoids blank screen
         try {
@@ -116,12 +116,20 @@ export default function Home({ addToCart }) {
                     <p className="text-base sm:text-lg text-gray-600 mb-8 sm:mb-12 max-w-2xl mx-auto font-medium leading-relaxed px-4">
                         Experience lightning-fast Delivery within 24h across Shahjahanpur. Shop your daily needs with our trusted platform.
                     </p>
-                    <button
-                        onClick={() => document.getElementById('shop').scrollIntoView({ behavior: 'smooth' })}
-                        className="px-8 sm:px-10 py-3.5 sm:py-4 bg-gray-900 text-white font-bold rounded-full hover:scale-105 active:scale-95 hover:bg-black shadow-xl shadow-gray-200 transition-all flex items-center justify-center gap-2 w-full sm:w-auto mx-auto touch-manipulation"
-                    >
-                        Start Shopping <ArrowRight size={20} />
-                    </button>
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto mx-auto">
+                        <button
+                            onClick={() => document.getElementById('shop').scrollIntoView({ behavior: 'smooth' })}
+                            className="px-8 sm:px-10 py-3.5 sm:py-4 bg-gray-900 text-white font-bold rounded-full hover:scale-105 active:scale-95 hover:bg-black shadow-xl shadow-gray-200 transition-all flex items-center justify-center gap-2 w-full sm:w-auto touch-manipulation"
+                        >
+                            Start Shopping <ArrowRight size={20} />
+                        </button>
+                        <button
+                            onClick={onAppDownloadClick}
+                            className="px-8 sm:px-10 py-3.5 sm:py-4 bg-emerald-100 text-emerald-800 font-bold rounded-full hover:scale-105 active:scale-95 hover:bg-emerald-200 transition-all flex items-center justify-center gap-2 w-full sm:w-auto touch-manipulation border border-emerald-200"
+                        >
+                            <Zap size={20} className="text-emerald-600" /> Install App
+                        </button>
+                    </div>
                 </motion.div>
             </section>
 

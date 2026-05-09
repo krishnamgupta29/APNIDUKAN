@@ -1,8 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShieldCheck, ArrowRight, Heart, Instagram } from 'lucide-react';
+import { ShieldCheck, ArrowRight, Heart, Instagram, Download } from 'lucide-react';
 
-export default function Footer() {
+export default function Footer({ onAppDownloadClick }) {
     const navigate = useNavigate();
     
     return (
@@ -18,10 +18,16 @@ export default function Footer() {
                             Apni Dukan Shahjahanpur is your premier local marketplace. Experience the best online shopping and grocery delivery in Shahjahanpur, ensuring fast delivery right at your doorstep.
                         </p>
 
-                        <div className="flex items-center gap-2 text-sm font-bold text-emerald-600 bg-emerald-50 w-max px-3 py-1.5 rounded-full mb-1">
+                        <div className="flex items-center gap-2 text-sm font-bold text-emerald-600 bg-emerald-50 w-max px-3 py-1.5 rounded-full mb-4 mt-2">
                             <ShieldCheck size={16} /> 100% Secure & Trusted Checkout
                         </div>
-                        <div className="text-[11px] text-gray-400 font-medium ml-2">Your data is safe and encrypted.</div>
+                        
+                        <button 
+                            onClick={onAppDownloadClick}
+                            className="bg-gray-900 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-gray-800 transition shadow-lg shadow-gray-200"
+                        >
+                            <Download size={18} /> Download Official App
+                        </button>
                     </div>
 
                     {/* Quick Links */}

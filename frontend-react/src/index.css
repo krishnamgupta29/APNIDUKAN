@@ -28,12 +28,23 @@
 /* ── Global mobile smoothness ── */
 * {
     -webkit-tap-highlight-color: transparent;
+    user-select: none; /* Disable text selection for app-like feel */
+}
+
+input, textarea, p, h1, h2, h3, h4, h5, h6, span, div {
+    /* Allow selection only on inputs, or if explicitly needed but we disable global selection */
+}
+
+input, textarea {
+    user-select: auto;
 }
 
 html {
+    overscroll-behavior-y: none; /* Prevent pull-to-refresh on mobile */
 }
 
 body {
     -webkit-overflow-scrolling: touch;
-    overscroll-behavior-y: auto;
+    overscroll-behavior-y: none;
+    touch-action: pan-y;
 }
