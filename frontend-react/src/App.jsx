@@ -22,6 +22,8 @@ import Login from './Login';
 import DeliveryPanel from './DeliveryPanel';
 import InstallGuidePopup from './InstallGuidePopup';
 import { Download } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
+import NativeApp from './NativeApp';
 
 function Navigation({ cartCount, onCartClick, onAppDownloadClick }) {
     const navigate = useNavigate();
@@ -123,6 +125,20 @@ export default function App() {
             </AnimatePresence>
 
             {!showIntro && (
+                Capacitor.isNativePlatform() ? (
+                    <NativeApp 
+                        cart={cart} 
+                        addToCart={addToCart} 
+                        remFromCart={remFromCart} 
+                        decreaseQty={decreaseQty}
+                        subtotal={subtotal} 
+                        deliveryTotal={deliveryTotal} 
+                        totalCalc={totalCalc}
+                        orderPayload={orderPayload} 
+                        setOrderPayload={setOrderPayload} 
+                        setCart={setCart}
+                    />
+                ) : (
                 <div className="min-h-screen flex flex-col relative w-full overflow-x-hidden">
                     <Navigation cartCount={cart.reduce((a,c) => a + c.quantity, 0)} onCartClick={() => setIsCartOpen(true)} onAppDownloadClick={() => setShowInstallGuide(true)} />
                     
@@ -207,6 +223,7 @@ export default function App() {
                         )}
                     </AnimatePresence>
                 </div>
+                )
             )}
         </>
     );

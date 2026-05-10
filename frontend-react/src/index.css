@@ -5,6 +5,11 @@
     --color-primary: #a3c4f3;
     --color-primary-dark: #8bb2e8;
     --color-accent: #f1c0e8;
+    --color-pink-orchid: #cdb4db;
+    --color-pastel-petal: #ffc8dd;
+    --color-blush-pop: #ffafcc;
+    --color-icy-blue: #bde0fe;
+    --color-sky-blue: #a2d2ff;
 }
 
 @layer utilities {
