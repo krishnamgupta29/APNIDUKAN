@@ -1,181 +1,316 @@
-import React, { useState, useEffect } from 'react';
-import { Search, Zap, Star, Plus } from 'lucide-react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect, useRef } from 'react';
+import { Search, Plus, Truck } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import API_URL from './api';
 import { getImageUrl } from './utils';
 
-function NativeSkeletonCard() {
+/* ─── Banner Data ─────────────────────────────────────────── */
+const BANNERS = [
+    { id: 1, tag: 'Express Delivery', title: 'Same Day\nDelivery', sub: 'Anywhere in Shahjahanpur', icon: '⚡', cta: 'Shop Now', grad: 'linear-gradient(135deg,#f72585 0%,#7209b7 100%)' },
+    { id: 2, tag: 'Festival Special',  title: 'Upto 40%\nOFF',      sub: 'On selected products',         icon: '🎉', cta: 'Explore Deals', grad: 'linear-gradient(135deg,#3f37c9 0%,#4cc9f0 100%)' },
+    { id: 3, tag: 'Handmade & Artisan',title: 'Local\nGifts',        sub: 'Crafted with love',            icon: '🎁', cta: 'View Collection', grad: 'linear-gradient(135deg,#560bad 0%,#f72585 100%)' },
+    { id: 4, tag: 'Free Delivery',     title: 'Free Shipping\nAvailable', sub: 'On select products',     icon: '🚚', cta: 'Start Shopping', grad: 'linear-gradient(135deg,#4361ee 0%,#4cc9f0 100%)' },
+    { id: 5, tag: 'Trending Now',      title: 'Most Loved\nProducts', sub: 'Trending in your city',      icon: '🔥', cta: 'See All', grad: 'linear-gradient(135deg,#b5179e 0%,#3f37c9 100%)' },
+];
+
+const CATEGORY_CONFIG = [
+    { id: 'All',         emoji: '🏪' },
+    { id: 'Fashion',     emoji: '👗' },
+    { id: 'Electronics', emoji: '📱' },
+    { id: 'Groceries',   emoji: '🛒' },
+    { id: 'Beauty',      emoji: '💄' },
+    { id: 'General',     emoji: '📦' },
+];
+
+/* ─── Banner Carousel ─────────────────────────────────────── */
+function BannerCarousel() {
+    const [cur, setCur] = useState(0);
+    const timerRef = useRef(null);
+    let tx = 0;
+
+    const restart = (next) => {
+        clearInterval(timerRef.current);
+        setCur(next);
+        timerRef.current = setInterval(() => setCur(c => (c + 1) % BANNERS.length), 3200);
+    };
+
+    useEffect(() => {
+        timerRef.current = setInterval(() => setCur(c => (c + 1) % BANNERS.length), 3200);
+        return () => clearInterval(timerRef.current);
+    }, []);
+
+    const b = BANNERS[cur];
+
     return (
-        <div className="flex flex-col h-full bg-white/80 rounded-[20px] p-3 shadow-sm border border-[var(--color-pink-orchid)]/20 overflow-hidden relative backdrop-blur-sm">
-            <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.4s_infinite] bg-gradient-to-r from-transparent via-white/80 to-transparent z-10" />
-            <div className="w-full aspect-square rounded-[14px] bg-[var(--color-icy-blue)]/30 mb-3" />
-            <div className="h-3 bg-[var(--color-icy-blue)]/50 rounded-full w-3/4 mb-1.5" />
-            <div className="h-2.5 bg-[var(--color-icy-blue)]/50 rounded-full w-1/2 mb-3" />
-            <div className="h-4 bg-[var(--color-icy-blue)]/50 rounded-full w-1/3 mt-auto" />
+        <div className="px-4 mb-5">
+            <div
+                className="relative rounded-[24px] overflow-hidden"
+                style={{ height: 162 }}
+                onTouchStart={e => { tx = e.changedTouches[0].screenX; }}
+                onTouchEnd={e => {
+                    const d = e.changedTouches[0].screenX;
+                    if (d < tx - 40) restart((cur + 1) % BANNERS.length);
+                    if (d > tx + 40) restart((cur - 1 + BANNERS.length) % BANNERS.length);
+                }}
+            >
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        key={b.id}
+                        initial={{ opacity: 0, x: 50 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -50 }}
+                        transition={{ duration: 0.32, ease: 'easeInOut' }}
+                        className="absolute inset-0 p-5 flex flex-col justify-between"
+                        style={{ background: b.grad }}
+                    >
+                        <div className="absolute right-3 bottom-0 text-[110px] leading-none opacity-15 select-none">{b.icon}</div>
+                        <div className="absolute -right-8 -top-8 w-28 h-28 rounded-full bg-white/10" />
+                        <div className="absolute -left-4 bottom-2 w-16 h-16 rounded-full bg-white/10" />
+                        <span className="relative z-10 text-[9px] font-extrabold tracking-widest uppercase text-white/80 bg-white/15 self-start px-2.5 py-1 rounded-full backdrop-blur-sm">
+                            {b.tag}
+                        </span>
+                        <div className="relative z-10">
+                            <h2 className="text-[22px] font-black text-white leading-tight whitespace-pre-line drop-shadow">{b.title}</h2>
+                            <p className="text-white/70 text-[11px] font-semibold mt-0.5">{b.sub}</p>
+                            <span className="inline-block mt-2 text-[10px] font-extrabold text-white bg-white/20 px-3 py-1 rounded-full">{b.cta} →</span>
+                        </div>
+                    </motion.div>
+                </AnimatePresence>
+                {/* Dot indicators */}
+                <div className="absolute bottom-3 right-4 flex gap-1.5 z-20">
+                    {BANNERS.map((_, i) => (
+                        <button
+                            key={i}
+                            onClick={() => restart(i)}
+                            className={`rounded-full transition-all duration-300 ${i === cur ? 'w-5 h-1.5 bg-white' : 'w-1.5 h-1.5 bg-white/40'}`}
+                        />
+                    ))}
+                </div>
+            </div>
         </div>
     );
 }
 
+/* ─── Skeleton Card ───────────────────────────────────────── */
+function SkeletonCard() {
+    return (
+        <div className="flex flex-col bg-white rounded-[18px] overflow-hidden relative" style={{ boxShadow: '0 2px 12px rgba(67,97,238,0.07)' }}>
+            <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.4s_infinite] bg-gradient-to-r from-transparent via-gray-100 to-transparent z-10" />
+            <div className="w-full aspect-square bg-gray-100" />
+            <div className="p-3 space-y-2">
+                <div className="h-2.5 bg-gray-100 rounded-full w-3/4" />
+                <div className="h-2.5 bg-gray-100 rounded-full w-1/2" />
+                <div className="h-4 bg-gray-100 rounded-full w-1/3 mt-1" />
+            </div>
+        </div>
+    );
+}
+
+/* ─── Product Card ────────────────────────────────────────── */
 export function NativeProductCard({ p, onClick, onAdd }) {
-    const originalPrice = p.originalPrice && p.originalPrice > p.price ? p.originalPrice : null;
-    const src = p.images?.length > 0 ? getImageUrl(p.images[0]) : getImageUrl(p.image);
+    const origPrice = p.originalPrice && p.originalPrice > p.price ? p.originalPrice : null;
+    const discPct   = origPrice ? Math.round(((origPrice - p.price) / origPrice) * 100) : null;
+    const src       = p.images?.length > 0 ? getImageUrl(p.images[0]) : getImageUrl(p.image);
+    const rating    = parseFloat(p.averageRating) || 4.5;
 
     return (
         <div
             onClick={onClick}
-            className="flex flex-col h-full bg-white/90 backdrop-blur-md rounded-[20px] p-2.5 shadow-sm border border-white/40 relative active:scale-95 transition-transform overflow-hidden"
+            className="flex flex-col bg-white rounded-[18px] overflow-hidden relative active:scale-[0.97] transition-transform duration-150"
+            style={{ boxShadow: '0 2px 14px rgba(67,97,238,0.08)' }}
         >
-            {p.isFreeDelivery && !p.outOfStock && (
-                <div className="absolute top-2 left-2 bg-gradient-to-r from-[var(--color-pink-orchid)] to-[var(--color-pastel-petal)] text-white text-[8px] font-extrabold px-1.5 py-0.5 rounded-full z-10 tracking-wider shadow-sm">
-                    FREE DEL
-                </div>
-            )}
-            <div className="w-full aspect-square rounded-[14px] bg-gradient-to-br from-[var(--color-icy-blue)]/20 to-[var(--color-sky-blue)]/10 overflow-hidden relative mb-2 flex items-center justify-center p-2">
-                <img src={src} alt={p.name} className="w-full h-full object-contain mix-blend-multiply" />
+            {/* ── Image ── */}
+            <div className="relative w-full" style={{ aspectRatio: '1/1', background: '#f6f7fb' }}>
+                <img
+                    src={src}
+                    alt={p.name}
+                    className="absolute inset-0 w-full h-full object-contain p-2 mix-blend-multiply"
+                    loading="lazy"
+                />
+                {/* Badges */}
+                {p.isFreeDelivery && !p.outOfStock && (
+                    <span className="absolute top-1.5 left-1.5 bg-emerald-500 text-white text-[7px] font-extrabold px-1.5 py-0.5 rounded-full z-10 tracking-wider">FREE DEL</span>
+                )}
+                {discPct && !p.outOfStock && (
+                    <span className="absolute top-1.5 right-1.5 text-white text-[7px] font-extrabold px-1.5 py-0.5 rounded-full z-10" style={{ background: '#f72585' }}>
+                        {discPct}% OFF
+                    </span>
+                )}
+                {p.outOfStock && (
+                    <span className="absolute top-1.5 left-1.5 bg-gray-700/85 text-white text-[7px] font-extrabold px-1.5 py-0.5 rounded-full z-10 backdrop-blur-sm">OUT OF STOCK</span>
+                )}
             </div>
-            <div className="flex flex-col flex-1 px-0.5">
-                <h3 className="font-semibold text-xs text-gray-800 line-clamp-2 leading-tight mb-1">{p.name}</h3>
-                <div className="flex items-center gap-0.5 mb-auto">
-                    <Star size={10} className="fill-[var(--color-pink-orchid)] text-[var(--color-pink-orchid)]" />
-                    <span className="text-[9px] font-medium text-gray-500">{p.averageRating || '4.5'}</span>
+
+            {/* ── Info ── */}
+            <div className="px-2.5 pb-2.5 pt-2 flex flex-col flex-1">
+                <h3 className="font-semibold text-[11px] text-gray-800 line-clamp-2 leading-tight mb-1.5">{p.name}</h3>
+
+                {/* Stars */}
+                <div className="flex items-center gap-1 mb-2">
+                    <div className="flex">
+                        {[1,2,3,4,5].map(s => (
+                            <span key={s} style={{ fontSize: 9, color: s <= Math.round(rating) ? '#f59e0b' : '#e5e7eb' }}>★</span>
+                        ))}
+                    </div>
+                    <span className="text-[9px] text-gray-400 font-medium">{rating.toFixed(1)}</span>
                 </div>
-                <div className="flex items-end justify-between mt-2 pt-1 border-t border-[var(--color-pink-orchid)]/10">
-                    <div className="flex flex-col">
-                        <span className="text-sm font-black text-gray-900 tracking-tight">₹{p.price}</span>
-                        {originalPrice && <span className="text-[9px] font-medium text-gray-400 line-through">₹{originalPrice}</span>}
+
+                {/* Price + Add button */}
+                <div className="flex items-end justify-between mt-auto gap-1">
+                    <div>
+                        <div className="text-sm font-extrabold text-gray-900 leading-none">₹{p.price}</div>
+                        {origPrice && <div className="text-[10px] font-medium text-red-400 line-through mt-0.5 leading-none">₹{origPrice}</div>}
                     </div>
                     <button
-                        onClick={(e) => { e.stopPropagation(); onAdd(p); }}
+                        onClick={e => { e.stopPropagation(); onAdd(p); }}
                         disabled={p.outOfStock}
-                        className={`w-7 h-7 rounded-[10px] flex items-center justify-center shadow-sm transition-all ${
-                            p.outOfStock ? 'bg-gray-200 text-gray-400' : 'bg-gradient-to-br from-[var(--color-pink-orchid)] to-[var(--color-pastel-petal)] text-white active:scale-90'
-                        }`}
+                        className={`w-8 h-8 rounded-[10px] flex items-center justify-center transition-all active:scale-90 flex-shrink-0 ${p.outOfStock ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'text-white shadow-md'}`}
+                        style={!p.outOfStock ? { background: 'linear-gradient(135deg,#f72585,#4361ee)', boxShadow: '0 3px 10px rgba(247,37,133,0.35)' } : {}}
                     >
                         <Plus size={14} strokeWidth={3} />
                     </button>
                 </div>
+
+                {/* Delivery */}
+                {!p.outOfStock && (
+                    <div className="mt-1.5 flex items-center gap-0.5">
+                        <Truck size={8} className="text-gray-400 flex-shrink-0" />
+                        {p.isFreeDelivery
+                            ? <span className="text-[9px] font-bold text-emerald-500">Free delivery</span>
+                            : <span className="text-[9px] text-gray-400 font-medium">₹{p.deliveryCharge} delivery</span>
+                        }
+                    </div>
+                )}
             </div>
-            {p.outOfStock && (
-                <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] flex items-center justify-center z-20">
-                    <span className="bg-red-500/90 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-lg transform -rotate-12">OUT OF STOCK</span>
-                </div>
-            )}
         </div>
     );
 }
 
+/* ─── Categorize Helper ───────────────────────────────────── */
+function categorize(p) {
+    const t = ((p.name || '') + ' ' + (p.description || '')).toLowerCase();
+    if (t.match(/t-shirt|shirt|pant|jeans|dress|shoe|wear|kurti|saree|jacket|suit/)) return 'Fashion';
+    if (t.match(/phone|laptop|earphone|headphone|cable|charger|watch|speaker|battery/)) return 'Electronics';
+    if (t.match(/rice|dal|wheat|sugar|salt|oil|masala|grocery|food|snack|drink|atta/)) return 'Groceries';
+    if (t.match(/soap|shampoo|cream|lotion|makeup|perfume|beauty|health|medicine/)) return 'Beauty';
+    return 'General';
+}
+
+/* ─── NativeHome ──────────────────────────────────────────── */
 export default function NativeHome({ addToCart }) {
     const [products, setProducts] = useState(() => {
-        try {
-            const cached = localStorage.getItem('apni_products_cache');
-            if (cached) return JSON.parse(cached);
-        } catch {}
-        return [];
+        try { const c = localStorage.getItem('apni_products_cache'); return c ? JSON.parse(c) : []; } catch { return []; }
     });
     const [loading, setLoading] = useState(products.length === 0);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState('All');
+    const [search, setSearch] = useState('');
+    const [cat, setCat] = useState('All');
     const navigate = useNavigate();
 
     useEffect(() => {
-        let cancelled = false;
-        const fetchProducts = async () => {
-            try {
-                const res = await axios.get(`${API_URL}/api/products`);
-                if (!cancelled) {
-                    setProducts(res.data);
-                    setLoading(false);
-                    try { localStorage.setItem('apni_products_cache', JSON.stringify(res.data)); } catch {}
-                }
-            } catch {
-                if (!cancelled) setLoading(false);
-            }
-        };
-        fetchProducts();
-        return () => { cancelled = true; };
+        let dead = false;
+        axios.get(`${API_URL}/api/products`).then(r => {
+            if (dead) return;
+            setProducts(r.data);
+            setLoading(false);
+            try { localStorage.setItem('apni_products_cache', JSON.stringify(r.data)); } catch {}
+        }).catch(() => { if (!dead) setLoading(false); });
+        return () => { dead = true; };
     }, []);
 
-    const categorizeProduct = (p) => {
-        const text = ((p.name || "") + " " + (p.description || "")).toLowerCase();
-        if (text.match(/t-shirt|shirt|pant|jeans|dress|shoe|sneaker|wear|clothing|apparel|kurti|saree|jacket|suit/)) return 'Fashion';
-        if (text.match(/phone|laptop|earphone|headphone|cable|charger|watch|speaker|tv|monitor|electronics|battery/)) return 'Electronics';
-        if (text.match(/rice|dal|wheat|sugar|salt|oil|spices|masala|grocery|food|snack|drink|beverage|atta/)) return 'Groceries';
-        if (text.match(/soap|shampoo|cream|lotion|makeup|perfume|beauty|health|medicine|face/)) return 'Beauty';
-        return 'General';
-    };
-
-    const productsWithCategory = products.map(p => ({ ...p, category: categorizeProduct(p) }));
-    const availableCategories = ['All', ...Array.from(new Set(productsWithCategory.map(p => p.category)))];
-    
-    const filteredProducts = productsWithCategory.filter(p => {
-        const matchesCat = selectedCategory === 'All' || p.category === selectedCategory;
-        const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
-        return matchesCat && matchesSearch;
+    const withCat = products.map(p => ({ ...p, _cat: categorize(p) }));
+    const cats    = ['All', ...Array.from(new Set(withCat.map(p => p._cat)))];
+    const filtered = withCat.filter(p => {
+        const mc = cat === 'All' || p._cat === cat;
+        const ms = p.name.toLowerCase().includes(search.toLowerCase());
+        return mc && ms;
     });
 
+    const catEmoji = { All: '🏪', Fashion: '👗', Electronics: '📱', Groceries: '🛒', Beauty: '💄', General: '📦' };
+
     return (
-        <div className="flex flex-col min-h-screen bg-gradient-to-br from-[#f8f9fa] to-[var(--color-icy-blue)]/20 pb-24">
-            {/* Header / Search */}
-            <div className="sticky top-0 z-40 bg-white/70 backdrop-blur-xl border-b border-[var(--color-pink-orchid)]/10 px-4 pt-10 pb-3 shadow-sm">
+        <div className="flex flex-col min-h-screen pb-28" style={{ background: '#f0f1f7' }}>
+
+            {/* ── Header ── */}
+            <div
+                className="sticky top-0 z-40 px-4 pt-10 pb-4"
+                style={{ background: 'linear-gradient(160deg,#0d0221 0%,#240046 100%)', boxShadow: '0 4px 24px rgba(0,0,0,0.3)' }}
+            >
                 <div className="flex items-center justify-between mb-3">
-                    <h1 className="text-xl font-extrabold bg-gradient-to-r from-[var(--color-pink-orchid)] to-[var(--color-sky-blue)] bg-clip-text text-transparent">
-                        ApniDukan
-                    </h1>
-                    <div className="bg-[var(--color-blush-pop)]/20 text-[var(--color-pink-orchid)] text-[10px] font-bold px-2 py-1 rounded-full flex items-center gap-1">
-                        <Zap size={10} className="fill-current" /> Fast Del
+                    <div className="flex items-center gap-3">
+                        <img src="/assets/app-logo.png" className="w-10 h-10 rounded-[12px] shadow-lg border border-white/10" alt="Logo" />
+                        <div>
+                            <p className="text-white/50 text-[10px] font-semibold tracking-widest uppercase">Shahjahanpur</p>
+                            <h1
+                                className="text-xl font-black tracking-tight"
+                                style={{ background: 'linear-gradient(90deg,#f72585,#4cc9f0)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}
+                            >
+                                ApniDukan
+                            </h1>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-1.5 bg-white/10 px-3 py-1.5 rounded-full backdrop-blur-sm">
+                        <span className="text-[10px]">⚡</span>
+                        <span className="text-white text-[10px] font-bold">Fast Delivery</span>
                     </div>
                 </div>
-                <div className="relative w-full">
-                    <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input 
-                        type="text" 
-                        placeholder="Search for products..." 
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full h-11 pl-10 pr-4 bg-white border-0 rounded-[16px] shadow-[0_2px_10px_rgba(205,180,219,0.15)] focus:ring-2 focus:ring-[var(--color-pink-orchid)]/50 outline-none text-sm font-medium placeholder-gray-400"
+
+                {/* Search */}
+                <div className="relative">
+                    <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                        type="text"
+                        placeholder="Search products..."
+                        value={search}
+                        onChange={e => setSearch(e.target.value)}
+                        className="w-full h-11 pl-10 pr-4 rounded-[14px] text-sm font-medium outline-none"
+                        style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }}
                     />
                 </div>
             </div>
 
-            {/* Categories */}
-            <div className="px-4 py-4">
-                <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                    {availableCategories.map(cat => (
+            {/* ── Categories ── */}
+            <div className="px-4 py-3">
+                <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1">
+                    {cats.map(c => (
                         <button
-                            key={cat}
-                            onClick={() => setSelectedCategory(cat)}
-                            className={`whitespace-nowrap px-4 py-1.5 rounded-full font-bold text-xs transition-all shadow-sm ${
-                                selectedCategory === cat 
-                                    ? 'bg-gradient-to-r from-[var(--color-pink-orchid)] to-[var(--color-sky-blue)] text-white scale-105' 
-                                    : 'bg-white text-gray-500 border border-[var(--color-pink-orchid)]/20'
+                            key={c}
+                            onClick={() => setCat(c)}
+                            className={`flex-shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full font-bold text-[11px] transition-all duration-200 ${
+                                cat === c
+                                    ? 'text-white shadow-lg scale-105'
+                                    : 'bg-white text-gray-500 border border-gray-200'
                             }`}
+                            style={cat === c ? { background: 'linear-gradient(135deg,#f72585,#7209b7)', boxShadow: '0 4px 12px rgba(247,37,133,0.35)' } : {}}
                         >
-                            {cat}
+                            <span>{catEmoji[c] || '📦'}</span>
+                            <span>{c}</span>
                         </button>
                     ))}
                 </div>
             </div>
 
-            {/* Banner */}
-            {!searchQuery && selectedCategory === 'All' && (
-                <div className="px-4 mb-4">
-                    <div className="w-full h-28 rounded-[20px] bg-gradient-to-br from-[var(--color-pink-orchid)] to-[var(--color-pastel-petal)] p-4 text-white relative overflow-hidden shadow-md">
-                        <div className="relative z-10">
-                            <span className="text-[10px] font-bold tracking-widest uppercase bg-white/20 px-2 py-0.5 rounded-full backdrop-blur-sm">Premium Delivery</span>
-                            <h2 className="text-xl font-black mt-2 leading-tight">Same Day<br/>in Shahjahanpur</h2>
-                        </div>
-                        <Zap size={80} className="absolute -right-4 -bottom-4 text-white/10 rotate-12" />
+            {/* ── Banners ── */}
+            {!search && cat === 'All' && <BannerCarousel />}
+
+            {/* ── Section Title ── */}
+            {!search && (
+                <div className="px-4 mb-3 flex items-center justify-between">
+                    <div>
+                        <h2 className="text-base font-extrabold text-gray-900 leading-tight">
+                            {cat === 'All' ? 'All Products' : cat}
+                        </h2>
+                        <p className="text-[11px] text-gray-400 font-medium">{filtered.length} items available</p>
                     </div>
                 </div>
             )}
 
-            {/* Product Grid */}
-            <div className="px-4 grid grid-cols-2 gap-3 pb-8">
+            {/* ── Product Grid ── */}
+            <div className="px-3 grid grid-cols-2 gap-2.5 pb-6">
                 {loading
-                    ? [...Array(6)].map((_, i) => <NativeSkeletonCard key={i} />)
-                    : filteredProducts.map((p) => (
+                    ? [...Array(6)].map((_, i) => <SkeletonCard key={i} />)
+                    : filtered.map(p => (
                         <NativeProductCard
                             key={p._id}
                             p={p}
@@ -186,9 +321,11 @@ export default function NativeHome({ addToCart }) {
                 }
             </div>
 
-            {!loading && filteredProducts.length === 0 && (
-                <div className="text-center py-10 px-4">
-                    <p className="text-gray-400 text-sm">No products found.</p>
+            {!loading && filtered.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+                    <div className="text-5xl mb-4">🔍</div>
+                    <h3 className="font-bold text-gray-700 text-base mb-1">No products found</h3>
+                    <p className="text-gray-400 text-sm">Try a different category or search term</p>
                 </div>
             )}
         </div>

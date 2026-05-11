@@ -1,15 +1,30 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
 @theme {
-    --font-sans: "Poppins", sans-serif;
-    --color-primary: #a3c4f3;
-    --color-primary-dark: #8bb2e8;
-    --color-accent: #f1c0e8;
-    --color-pink-orchid: #cdb4db;
-    --color-pastel-petal: #ffc8dd;
-    --color-blush-pop: #ffafcc;
-    --color-icy-blue: #bde0fe;
-    --color-sky-blue: #a2d2ff;
+    --font-sans: "Inter", sans-serif;
+
+    /* ── NEW PREMIUM BRAND PALETTE ── */
+    --color-brand-pink:       #f72585;
+    --color-brand-raspberry:  #b5179e;
+    --color-brand-indigo:     #7209b7;
+    --color-brand-ultrasonic: #560bad;
+    --color-brand-azure:      #480ca8;
+    --color-brand-royal:      #3a0ca3;
+    --color-brand-persian:    #3f37c9;
+    --color-brand-electric:   #4361ee;
+    --color-brand-cloudy:     #4895ef;
+    --color-brand-sky:        #4cc9f0;
+
+    /* ── LEGACY WEBSITE VARS – DO NOT REMOVE ── */
+    --color-primary:          #a3c4f3;
+    --color-primary-dark:     #8bb2e8;
+    --color-accent:           #f1c0e8;
+    --color-pink-orchid:      #cdb4db;
+    --color-pastel-petal:     #ffc8dd;
+    --color-blush-pop:        #ffafcc;
+    --color-icy-blue:         #bde0fe;
+    --color-sky-blue:         #a2d2ff;
 }
 
 @layer utilities {
@@ -19,37 +34,45 @@
         -webkit-backdrop-filter: blur(12px);
         border: 1px solid rgba(255, 255, 255, 0.2);
     }
-    .shadow-inner-sm {
-        box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.03);
+    .glass-dark {
+        background: rgba(10, 2, 30, 0.75);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .shadow-inner-sm { box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.03); }
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); }
+    .native-app-bg { background: #f0f1f7; }
+    .brand-gradient { background: linear-gradient(135deg, #f72585 0%, #7209b7 50%, #4361ee 100%); }
+    .brand-gradient-text {
+        background: linear-gradient(135deg, #f72585, #4361ee);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    .native-card {
+        background: #ffffff;
+        border-radius: 18px;
+        box-shadow: 0 2px 14px rgba(67,97,238,0.09);
+        border: 1px solid rgba(67,97,238,0.07);
     }
 }
 
-/* ── Shimmer skeleton animation ── */
+/* ── Shimmer skeleton ── */
 @keyframes shimmer {
     0%   { transform: translateX(-100%); }
     100% { transform: translateX(200%); }
 }
 
 /* ── Global mobile smoothness ── */
-* {
-    -webkit-tap-highlight-color: transparent;
-    user-select: none; /* Disable text selection for app-like feel */
-}
-
-input, textarea, p, h1, h2, h3, h4, h5, h6, span, div {
-    /* Allow selection only on inputs, or if explicitly needed but we disable global selection */
-}
-
-input, textarea {
-    user-select: auto;
-}
-
-html {
-    overscroll-behavior-y: none; /* Prevent pull-to-refresh on mobile */
-}
-
+* { -webkit-tap-highlight-color: transparent; user-select: none; }
+input, textarea { user-select: auto; }
+html { overscroll-behavior-y: none; }
 body {
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-y: none;
     touch-action: pan-y;
+    font-family: 'Inter', sans-serif;
 }

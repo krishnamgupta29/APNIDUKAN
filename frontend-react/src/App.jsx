@@ -125,7 +125,7 @@ export default function App() {
             </AnimatePresence>
 
             {!showIntro && (
-                Capacitor.isNativePlatform() ? (
+                (Capacitor.isNativePlatform() || new URLSearchParams(window.location.search).get('native') === '1') ? (
                     <NativeApp 
                         cart={cart} 
                         addToCart={addToCart} 
