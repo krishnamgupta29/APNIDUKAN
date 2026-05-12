@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
     HeadphonesIcon, HelpCircle, BookOpen, Shield, FileText,
     ChevronRight, Settings as SettingsIcon,
-    Star, Phone, Info, User, LogOut, Heart, Bell, CreditCard, Share2
+    Star, Phone, Info, User, LogOut
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, ArrowRight, ChevronLeft, History, User, Phone, Navigation, ShieldCheck, CreditCard } from 'lucide-react';
+import { MapPin, ArrowRight, ChevronLeft, History, User, Phone, Navigation, ShieldCheck, Package } from 'lucide-react';
 import { Geolocation } from '@capacitor/geolocation';
 import { Capacitor } from '@capacitor/core';
 
@@ -175,7 +175,7 @@ export default function Checkout({ cart, subtotal, deliveryTotal, totalCalc, set
                     <div className="flex-1 h-[2px] bg-white/10 mx-3 mb-6" />
                     <div className="flex flex-col items-center gap-2 opacity-30">
                         <div className="w-9 h-9 rounded-2xl bg-white/10 flex items-center justify-center">
-                            <CreditCard size={16} className="text-white" />
+                            <Package size={16} className="text-white" />
                         </div>
                         <span className="text-[10px] font-black text-white uppercase tracking-widest">Review</span>
                     </div>
