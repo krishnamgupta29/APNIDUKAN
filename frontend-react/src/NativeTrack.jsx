@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Package, Search, Clock, CheckCircle2, Truck, XCircle, MapPin, AlertCircle, Star, ChevronRight } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import API_URL from './api';
 import { getImageUrl } from './utils';
 

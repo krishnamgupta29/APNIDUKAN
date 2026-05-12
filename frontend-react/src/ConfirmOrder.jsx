@@ -145,27 +145,16 @@ export default function ConfirmOrder({ orderPayload, setCart, setOrderPayload })
                     </div>
                 </div>
 
-                {/* Delivery Timeline Tip */}
-                <div className="p-4 bg-gradient-to-br from-blue-500 to-blue-600 rounded-[24px] text-white flex items-center gap-4 shadow-xl shadow-blue-500/20">
-                    <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                        <Zap size={20} className="text-yellow-300" />
-                    </div>
-                    <div className="flex-1">
-                        <p className="text-xs font-black uppercase tracking-widest opacity-80">Fast Delivery</p>
-                        <p className="text-[11px] font-bold">Most orders delivered within 2-4 hours in Shahjahanpur!</p>
-                    </div>
-                </div>
-
                 {/* Action Button */}
                 <button 
                     onClick={confirmOrderPlace} 
                     disabled={isPlacingOrder}
-                    className="w-full py-5 bg-gray-900 text-white rounded-[24px] font-black text-base flex justify-center items-center gap-2 shadow-2xl shadow-gray-900/30 active:scale-95 transition-transform disabled:opacity-50"
+                    className="w-full py-5 bg-gray-900 text-white rounded-[28px] font-black text-base flex justify-center items-center gap-2 shadow-2xl shadow-gray-900/30 active:scale-95 transition-transform disabled:opacity-50"
                 >
                     {isPlacingOrder ? (
-                        <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     ) : (
-                        <><CheckCircle2 size={20}/> Place Order Now</>
+                        <><CheckCircle2 size={20}/> Confirm & Place Order</>
                     )}
                 </button>
             </div>
