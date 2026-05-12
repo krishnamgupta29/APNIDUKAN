@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Package, Search, Clock, CheckCircle2, Truck, XCircle, MapPin, AlertCircle } from 'lucide-react';
+import { Package, Search, Clock, CheckCircle2, Truck, XCircle, MapPin, AlertCircle, Star } from 'lucide-react';
 import { motion } from 'framer-motion';
 import API_URL from './api';
 import { getImageUrl } from './utils';
@@ -139,29 +139,93 @@ export default function NativeTrack() {
     const [loading, setLoading]     = useState(false);
     const [error, setError]         = useState('');
     const [hasSearched, setHasSearched] = useState(false);
+    const [reviewOrder, setReviewOrder] = useState(null);
+    const [rating, setRating] = useState(0);
+    const [comment, setComment] = useState('');
+    const [isHovered, setIsHovered] = useState(0);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [toast, setToast] = useState(null);
+
+    // Load local history on mount
+    useState(() => {
+        try {
+            const h = JSON.parse(localStorage.getItem('apni_order_history') || '[]');
+            setLocalHistory(h);
+        } catch(e) {}
+    });
 
     const handleTrack = async (e) => {
-        e.preventDefault();
+        if (e) e.preventDefault();
         const clean = phone.replace(/\D/g, '');
         if (clean.length !== 10) { setError('Please enter a valid 10-digit mobile number'); return; }
+        
         setLoading(true);
         setError('');
-        setOrders([]);
+        
+        // Start with local matches
+        const localMatches = localHistory.filter(o => o.phone === clean);
+        setOrders(localMatches);
+        setHasSearched(true);
+
         try {
             const res = await axios.get(`${API_URL}/api/orders/track/${clean}`);
-            setOrders(Array.isArray(res.data) ? res.data : []);
-            setHasSearched(true);
+            const apiOrders = Array.isArray(res.data) ? res.data : [];
+            
+            // Merge & Deduplicate (API orders take precedence for status updates)
+            setOrders(prev => {
+                const map = new Map();
+                // Add local ones first
+                prev.forEach(o => map.set(o._id, o));
+                // API ones overwrite if exists
+                apiOrders.forEach(o => map.set(o._id, o));
+                return Array.from(map.values()).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            });
         } catch (err) {
-            const msg = err.response?.data?.message || err.response?.data?.error || 'Could not fetch orders. Please try again.';
-            setError(msg);
-            setHasSearched(true);
+            // If local matches exist, don't show error as "Could not fetch"
+            if (localMatches.length === 0) {
+                const msg = err.response?.data?.message || err.response?.data?.error || 'Could not fetch orders. Please try again.';
+                setError(msg);
+            }
         } finally {
             setLoading(false);
         }
     };
 
+    const submitFeedback = async () => {
+        if(rating === 0) { alert("Please select stars ⭐"); return; }
+        const order = orders.find(o => o._id === reviewOrder);
+        const orderStatus = order?.status?.toUpperCase();
+        if(orderStatus === 'RETURNED' && !comment.trim()) { alert("Please provide a reason for return!"); return; }
+
+        setIsSubmitting(true);
+        try {
+            await axios.post(`${API_URL}/api/orders/${reviewOrder}/feedback`, { rating, comment });
+            setToast(orderStatus === 'RETURNED' ? "Reason submitted!" : "Thanks for your feedback!");
+            setReviewOrder(null);
+            setTimeout(()=>setToast(null), 3000);
+            handleTrack(); // refresh
+        } catch(e) { 
+            alert("Failed to submit. Try again."); 
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     return (
-        <div className="flex flex-col min-h-screen pb-28" style={{ background: '#f0f1f7' }}>
+        <div className="flex flex-col min-h-screen pb-40" style={{ background: '#f0f1f7' }}>
+            
+            {/* Toast Notifications */}
+            <AnimatePresence>
+                {toast && (
+                    <motion.div 
+                        initial={{opacity:0, y:20}} animate={{opacity:1, y:0}} exit={{opacity:0}} 
+                        className="fixed bottom-24 left-4 right-4 z-[100] bg-gray-900 text-white px-6 py-4 rounded-2xl font-bold shadow-2xl flex items-center justify-between"
+                    >
+                        <span>{toast}</span>
+                        <CheckCircle2 size={18} className="text-emerald-400" />
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Header */}
             <div
@@ -213,26 +277,136 @@ export default function NativeTrack() {
             </div>
 
             {/* Results */}
-            <div className="px-3 py-4 space-y-3">
+            <div className="px-3 py-4 space-y-4">
                 {hasSearched && !loading && orders.length === 0 && !error && (
                     <div className="flex flex-col items-center py-14 text-center">
                         <div className="text-5xl mb-4">📦</div>
                         <h3 className="font-extrabold text-gray-700 text-base mb-1">No Orders Found</h3>
-                        <p className="text-gray-400 text-sm max-w-xs">No active orders linked to this number. Double-check and try again.</p>
+                        <p className="text-gray-400 text-sm max-w-xs">No active orders linked to this number.</p>
                     </div>
                 )}
 
                 {!hasSearched && !loading && (
                     <div className="flex flex-col items-center py-14 text-center">
                         <div className="text-5xl mb-4">🔍</div>
-                        <h3 className="font-bold text-gray-600 text-sm">Enter your phone number above to track your orders</h3>
+                        <h3 className="font-bold text-gray-600 text-sm">Track your orders with your phone number</h3>
                     </div>
                 )}
 
                 {orders.map((order, idx) => (
-                    <OrderCard key={order._id} order={order} idx={idx} />
+                    <div key={order._id}>
+                        <OrderCard order={order} idx={idx} />
+                        {(order.status?.toUpperCase() === 'DELIVERED' || order.status?.toUpperCase() === 'RETURNED') && !order.feedbackGiven && (
+                            <button 
+                                onClick={() => { setReviewOrder(order._id); setRating(0); setComment(''); setIsHovered(0); }}
+                                className="w-full mt-3 py-3.5 rounded-[18px] font-black text-xs uppercase tracking-widest transition-all active:scale-95 shadow-sm"
+                                style={order.status?.toUpperCase() === 'RETURNED' 
+                                    ? { background: 'rgba(245,158,11,0.1)', color: '#d97706', border: '1.5px dashed rgba(245,158,11,0.3)' } 
+                                    : { background: 'rgba(67,97,238,0.1)', color: '#4361ee', border: '1.5px dashed rgba(67,97,238,0.3)' }
+                                }
+                            >
+                                {order.status?.toUpperCase() === 'RETURNED' ? 'Submit Return Feedback 📝' : 'Rate Your Delivery ⭐'}
+                            </button>
+                        )}
+                        {order.feedbackGiven && (
+                            <div className="w-full mt-3 py-3 rounded-[18px] bg-white border border-gray-100 text-center flex items-center justify-center gap-2">
+                                <CheckCircle2 size={14} className="text-emerald-500" />
+                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Feedback Submitted</span>
+                            </div>
+                        )}
+                    </div>
                 ))}
             </div>
+
+            {/* Feedback Modal */}
+            <AnimatePresence>
+                {reviewOrder && (
+                    <motion.div 
+                        initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}
+                        className="fixed inset-0 z-[110] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+                    >
+                        <motion.div 
+                            initial={{y:100, opacity:0}} animate={{y:0, opacity:1}} exit={{y:100, opacity:0}}
+                            className="bg-white w-full max-w-md rounded-t-[32px] sm:rounded-[32px] overflow-hidden shadow-2xl relative"
+                        >
+                            <div className="p-6 pt-8 text-center">
+                                <button 
+                                    onClick={() => setReviewOrder(null)}
+                                    className="absolute top-4 right-4 p-2 rounded-full bg-gray-50 text-gray-400 active:bg-gray-100"
+                                >
+                                    <XCircle size={20} />
+                                </button>
+
+                                <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                    <Clock size={32} className="text-blue-500" />
+                                </div>
+
+                                <h3 className="text-xl font-black text-gray-900 mb-1">
+                                    {orders.find(o => o._id === reviewOrder)?.status?.toUpperCase() === 'RETURNED' ? 'Return Reason' : 'Rate Experience'}
+                                </h3>
+                                <p className="text-gray-400 text-xs font-medium mb-6 px-8">
+                                    How was your experience with this order? Your feedback helps us improve.
+                                </p>
+
+                                {/* Stars */}
+                                <div className="flex justify-center gap-2 mb-6">
+                                    {[1, 2, 3, 4, 5].map((star) => (
+                                        <button
+                                            key={star}
+                                            onClick={() => setRating(star)}
+                                            onMouseEnter={() => setIsHovered(star)}
+                                            onMouseLeave={() => setIsHovered(0)}
+                                            className={`w-12 h-12 flex items-center justify-center transition-all duration-200 active:scale-90
+                                                ${(rating > 0 ? star <= rating : star <= isHovered) ? 'text-[#f59e0b] scale-110' : 'text-gray-200'}
+                                            `}
+                                        >
+                                            <div className="relative">
+                                                <StarIcon size={36} fill={(rating > 0 ? star <= rating : star <= isHovered) ? 'currentColor' : 'none'} strokeWidth={2.5} />
+                                                {(rating > 0 ? star <= rating : star <= isHovered) && (
+                                                    <motion.div 
+                                                        layoutId="star-glow"
+                                                        className="absolute inset-0 bg-yellow-400/20 blur-xl rounded-full"
+                                                    />
+                                                )}
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <textarea 
+                                    value={comment} onChange={e => setComment(e.target.value)}
+                                    placeholder={orders.find(o => o._id === reviewOrder)?.status?.toUpperCase() === 'RETURNED' ? "Why did you return this? (Required)" : "Anything else you'd like to share? (Optional)"}
+                                    className="w-full bg-gray-50 border-2 border-gray-50 rounded-2xl p-4 text-sm font-bold outline-none focus:bg-white focus:border-gray-200 transition-all resize-none mb-6"
+                                    rows="3"
+                                />
+
+                                <button 
+                                    onClick={submitFeedback}
+                                    disabled={isSubmitting}
+                                    className="w-full py-4 rounded-[18px] font-black text-white shadow-xl active:scale-95 disabled:opacity-50 transition-all"
+                                    style={{ background: 'linear-gradient(135deg,#f72585,#4361ee)', boxShadow: '0 8px 24px rgba(247,37,133,0.3)' }}
+                                >
+                                    {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
         </div>
+    );
+}
+
+// Internal icons helper
+function StarIcon({ size, fill, strokeWidth, ...props }) {
+    return (
+        <svg 
+            width={size} height={size} viewBox="0 0 24 24" fill={fill} 
+            stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" 
+            {...props}
+        >
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+        </svg>
     );
 }

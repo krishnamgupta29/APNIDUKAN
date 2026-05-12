@@ -30,7 +30,7 @@ export default function NativeCart({ cart, remFromCart, decreaseQty, addToCart, 
     }
 
     return (
-        <div className="flex flex-col min-h-screen pb-36" style={{ background: '#f0f1f7' }}>
+        <div className="flex flex-col min-h-screen pb-[200px]" style={{ background: '#f0f1f7' }}>
 
             {/* Header */}
             <div
@@ -116,12 +116,16 @@ export default function NativeCart({ cart, remFromCart, decreaseQty, addToCart, 
                 </div>
             </div>
 
-            {/* Checkout CTA – fixed above nav */}
-            <div className="fixed bottom-[88px] left-0 w-full px-4 z-30 pointer-events-none">
+            {/* Checkout CTA – adaptive positioning above nav */}
+            <div className="fixed bottom-0 left-0 w-full px-4 z-40 pointer-events-none pb-[calc(88px+env(safe-area-inset-bottom,16px))]">
+                <div className="absolute inset-0 bg-gradient-to-t from-[#f0f1f7] via-[#f0f1f7]/80 to-transparent -z-10 h-32 mt-auto" />
                 <button
                     onClick={() => navigate('/checkout')}
-                    className="w-full py-4 rounded-[18px] text-white font-extrabold text-base flex items-center justify-center gap-2 pointer-events-auto active:scale-[0.98] transition-transform"
-                    style={{ background: 'linear-gradient(135deg,#f72585,#4361ee)', boxShadow: '0 8px 24px rgba(247,37,133,0.4)' }}
+                    className="w-full py-4 rounded-[20px] text-white font-extrabold text-base flex items-center justify-center gap-2 pointer-events-auto active:scale-[0.98] transition-transform shadow-2xl"
+                    style={{ 
+                        background: 'linear-gradient(135deg,#f72585,#4361ee)', 
+                        boxShadow: '0 8px 32px rgba(247,37,133,0.45)' 
+                    }}
                 >
                     Proceed to Checkout <ArrowRight size={18} />
                 </button>

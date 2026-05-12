@@ -158,29 +158,35 @@ export function NativeProductCard({ p, onClick, onAdd }) {
                 </div>
 
                 {/* Price + Add button */}
-                <div className="flex items-end justify-between mt-auto gap-1">
-                    <div>
-                        <div className="text-sm font-extrabold text-gray-900 leading-none">₹{p.price}</div>
-                        {origPrice && <div className="text-[10px] font-medium text-red-400 line-through mt-0.5 leading-none">₹{origPrice}</div>}
+                <div className="flex items-end justify-between mt-auto pt-2 gap-1 border-t border-gray-50">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                        {origPrice && (
+                            <span className="relative text-[13px] font-bold text-red-500 px-0.5">
+                                ₹{origPrice}
+                                <span className="absolute inset-0 flex items-center justify-center">
+                                    <span className="w-full h-[1.5px] bg-red-500 -rotate-[20deg]" />
+                                </span>
+                            </span>
+                        )}
+                        <div className={`text-base font-black leading-none ${origPrice ? 'text-emerald-600' : 'text-gray-900'}`}>₹{p.price}</div>
                     </div>
                     <button
                         onClick={e => { e.stopPropagation(); onAdd(p); }}
                         disabled={p.outOfStock}
-                        className={`w-8 h-8 rounded-[10px] flex items-center justify-center transition-all active:scale-90 flex-shrink-0 ${p.outOfStock ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'text-white shadow-md'}`}
-                        style={!p.outOfStock ? { background: 'linear-gradient(135deg,#f72585,#4361ee)', boxShadow: '0 3px 10px rgba(247,37,133,0.35)' } : {}}
+                        className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all active:scale-90 flex-shrink-0 ${p.outOfStock ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'text-white shadow-lg'}`}
+                        style={!p.outOfStock ? { background: 'linear-gradient(135deg,#f72585,#4361ee)', boxShadow: '0 4px 12px rgba(247,37,133,0.3)' } : {}}
                     >
-                        <Plus size={14} strokeWidth={3} />
+                        <Plus size={16} strokeWidth={3} />
                     </button>
                 </div>
 
                 {/* Delivery */}
                 {!p.outOfStock && (
-                    <div className="mt-1.5 flex items-center gap-0.5">
-                        <Truck size={8} className="text-gray-400 flex-shrink-0" />
-                        {p.isFreeDelivery
-                            ? <span className="text-[9px] font-bold text-emerald-500">Free delivery</span>
-                            : <span className="text-[9px] text-gray-400 font-medium">₹{p.deliveryCharge} delivery</span>
-                        }
+                    <div className="mt-2 flex items-center gap-1">
+                        <Truck size={10} className={p.isFreeDelivery ? 'text-emerald-500' : 'text-blue-400'} />
+                        <span className={`text-[9px] font-semibold uppercase tracking-tight ${p.isFreeDelivery ? 'text-emerald-500' : 'text-blue-500'}`}>
+                            {p.isFreeDelivery ? 'Free Delivery' : `₹${p.deliveryCharge} Delivery`}
+                        </span>
                     </div>
                 )}
             </div>

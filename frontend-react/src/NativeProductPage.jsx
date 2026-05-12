@@ -229,29 +229,33 @@ export default function NativeProductPage({ addToCart }) {
                     <StarRating rating={product.averageRating} count={product.totalReviews || 0} />
                 </div>
 
-                {/* Pricing */}
-                <div className="flex items-end gap-3 mb-4">
-                    <span className="text-3xl font-black leading-none" style={{ color: '#10b981' }}>₹{product.price}</span>
-                    {hasDiscount && (
-                        <>
-                            <span className="text-lg font-semibold text-red-400 line-through leading-none mb-0.5">₹{product.originalPrice}</span>
-                            <span className="text-xs font-extrabold text-white px-2 py-1 rounded-md mb-0.5" style={{ background: '#f72585' }}>
-                                {discountPct}% OFF
+                {/* Pricing Section */}
+                <div className="mb-5">
+                    <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-1.5">Pricing</p>
+                    <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-3">
+                            {hasDiscount && (
+                                <span className="relative text-2xl font-bold text-red-500 px-1">
+                                    ₹{product.originalPrice}
+                                    <span className="absolute inset-0 flex items-center justify-center">
+                                        <span className="w-full h-[2px] bg-red-500 -rotate-[20deg]" />
+                                    </span>
+                                </span>
+                            )}
+                            <span className={`text-4xl font-black ${hasDiscount ? 'text-emerald-600' : 'text-gray-900'}`}>₹{product.price}</span>
+                            {hasDiscount && (
+                                <span className="text-[11px] font-black text-white px-2 py-1 rounded-lg" style={{ background: 'linear-gradient(135deg,#f72585,#7209b7)' }}>
+                                    {discountPct}% OFF
+                                </span>
+                            )}
+                        </div>
+                        <div className="flex items-center gap-2 mt-1">
+                            <Truck size={14} className={product.isFreeDelivery ? 'text-emerald-500' : 'text-blue-500'} />
+                            <span className={`text-[13px] font-semibold ${product.isFreeDelivery ? 'text-emerald-600' : 'text-blue-600'}`}>
+                                {product.isFreeDelivery ? 'Free Delivery' : `Delivery: ₹${product.deliveryCharge}`}
                             </span>
-                        </>
-                    )}
-                </div>
-
-                {/* Delivery info */}
-                <div
-                    className="flex items-center gap-3 p-3 rounded-[12px] mb-4"
-                    style={{ background: product.isFreeDelivery ? 'rgba(16,185,129,0.08)' : 'rgba(67,97,238,0.06)' }}
-                >
-                    <Truck size={16} style={{ color: product.isFreeDelivery ? '#10b981' : '#4361ee' }} className="flex-shrink-0" />
-                    {product.isFreeDelivery
-                        ? <span className="text-sm font-extrabold text-emerald-600">Free Local Delivery ✓</span>
-                        : <span className="text-sm font-bold text-gray-700">Delivery Charge: <span style={{ color: '#4361ee' }}>₹{product.deliveryCharge}</span></span>
-                    }
+                        </div>
+                    </div>
                 </div>
 
                 {/* Description */}

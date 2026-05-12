@@ -93,6 +93,26 @@ export default function App() {
         window.scrollTo(0, 0);
     }, [pathname]);
 
+    useEffect(() => {
+        let backListener;
+        const setupListener = async () => {
+            if (Capacitor.isNativePlatform()) {
+                const { App } = await import('@capacitor/app');
+                backListener = await App.addListener('backButton', ({ canGoBack }) => {
+                    if (pathname === '/' || pathname === '/home') {
+                        App.exitApp();
+                    } else {
+                        navigate(-1);
+                    }
+                });
+            }
+        };
+        setupListener();
+        return () => {
+            if (backListener) backListener.remove();
+        };
+    }, [pathname, navigate]);
+
     const addToCart = (product, qty = 1) => {
         setCart(prev => {
             const ext = prev.find(p => p.productId === product._id);
