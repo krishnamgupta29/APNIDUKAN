@@ -192,7 +192,7 @@ export default function Checkout({ cart, subtotal, deliveryTotal, totalCalc, set
             <form onSubmit={handleMapClickSubmit} className="px-5 mt-8 space-y-8">
                 
                 {/* Contact Section */}
-                <motion.div initial={{y:20, opacity:0}} animate={{y:0, opacity:1}} className="space-y-4">
+                <div className="space-y-4">
                     <div className="flex items-center justify-between mb-2 ml-1">
                         <h3 className="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em]">Contact Information</h3>
                     </div>
@@ -223,10 +223,10 @@ export default function Checkout({ cart, subtotal, deliveryTotal, totalCalc, set
                             />
                         </div>
                     </div>
-                </motion.div>
+                </div>
 
                 {/* Delivery Section */}
-                <motion.div initial={{y:20, opacity:0}} animate={{y:0, opacity:1}} transition={{delay:0.1}} className="space-y-4">
+                <div className="space-y-4">
                     <div className="flex items-center justify-between mb-2 ml-1">
                         <h3 className="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em]">Delivery Address</h3>
                         {savedDetails && (
@@ -271,10 +271,10 @@ export default function Checkout({ cart, subtotal, deliveryTotal, totalCalc, set
                             )}
                         </div>
                     </div>
-                </motion.div>
+                </div>
 
                 {/* Payment Section */}
-                <motion.div initial={{y:20, opacity:0}} animate={{y:0, opacity:1}} transition={{delay:0.2}}>
+                <div>
                     <div className="flex items-center justify-between mb-4 ml-1">
                         <h3 className="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em]">Payment Mode</h3>
                     </div>
@@ -292,7 +292,7 @@ export default function Checkout({ cart, subtotal, deliveryTotal, totalCalc, set
                             <div className="w-2 h-2 bg-white rounded-full" />
                         </div>
                     </div>
-                </motion.div>
+                </div>
 
                 {/* Action Button */}
                 <button 
