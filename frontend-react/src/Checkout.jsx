@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, ArrowRight, ChevronLeft, History, User, Phone, Navigation, ShieldCheck } from 'lucide-react';
+import { MapPin, ArrowRight, ChevronLeft, History, User, Phone, Navigation, ShieldCheck, CreditCard } from 'lucide-react';
 import { Geolocation } from '@capacitor/geolocation';
 import { Capacitor } from '@capacitor/core';
 
@@ -189,7 +189,18 @@ export default function Checkout({ cart, subtotal, deliveryTotal, totalCalc, set
                 </div>
             </div>
 
-            <form onSubmit={handleMapClickSubmit} className="px-5 mt-8 space-y-8">
+            <div className="px-5 mt-6">
+                {savedDetails && (
+                    <button 
+                        type="button" onClick={handleAutoFill}
+                        className="w-full py-4 bg-blue-50 text-[#4361ee] rounded-2xl text-xs font-black uppercase tracking-widest active:scale-95 transition-all flex items-center justify-center gap-2 border border-blue-100/50 shadow-sm"
+                    >
+                        <History size={16} /> Use My Saved Details
+                    </button>
+                )}
+            </div>
+
+            <form onSubmit={handleMapClickSubmit} className="px-5 mt-6 space-y-8">
                 
                 {/* Contact Section */}
                 <div className="space-y-4">
@@ -229,14 +240,6 @@ export default function Checkout({ cart, subtotal, deliveryTotal, totalCalc, set
                 <div className="space-y-4">
                     <div className="flex items-center justify-between mb-2 ml-1">
                         <h3 className="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em]">Delivery Address</h3>
-                        {savedDetails && (
-                            <button 
-                                type="button" onClick={handleAutoFill}
-                                className="px-3 py-1.5 bg-blue-50 text-[#4361ee] rounded-full text-[9px] font-black uppercase tracking-widest active:scale-95 transition-all"
-                            >
-                                <History size={12} className="inline mr-1" /> Use Saved
-                            </button>
-                        )}
                     </div>
 
                     <div className="bg-white rounded-[40px] p-3 shadow-xl shadow-blue-900/5 border border-gray-50 relative">

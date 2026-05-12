@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Package, Search, Clock, CheckCircle2, Truck, XCircle, MapPin, AlertCircle, Star } from 'lucide-react';
+import { Package, Search, Clock, CheckCircle2, Truck, XCircle, MapPin, AlertCircle, Star, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import API_URL from './api';
 import { getImageUrl } from './utils';

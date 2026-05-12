@@ -9,14 +9,6 @@ import { motion } from 'framer-motion';
 
 const SECTIONS = [
     {
-        label: 'Account & Orders',
-        items: [
-            { icon: User, color: '#4361ee', bg: 'rgba(67,97,238,0.1)', title: 'My Profile', sub: 'Manage your personal info', path: '/profile' },
-            { icon: Heart, color: '#f72585', bg: 'rgba(247,37,133,0.1)', title: 'My Wishlist', sub: 'Saved products you love', path: '/wishlist' },
-            { icon: Bell, color: '#10b981', bg: 'rgba(16,185,129,0.1)', title: 'Notifications', sub: 'Sale alerts & order updates', path: '/notifications' },
-        ]
-    },
-    {
         label: 'Help & Support',
         items: [
             { icon: HeadphonesIcon, color: '#4361ee', bg: 'rgba(67,97,238,0.1)', title: 'Customer Support', sub: 'Talk to our team 24/7', path: '/support' },
@@ -29,7 +21,6 @@ const SECTIONS = [
         items: [
             { icon: Shield, color: '#7209b7', bg: 'rgba(114,9,183,0.1)', title: 'Privacy Policy', sub: 'Data handling terms', path: '/legal' },
             { icon: FileText, color: '#f59e0b', bg: 'rgba(245,158,11,0.1)', title: 'Terms of Service', sub: 'Standard app agreements', path: '/legal' },
-            { icon: Share2, color: '#4cc9f0', bg: 'rgba(76,201,240,0.1)', title: 'Share App', sub: 'Invite friends to ApniDukan', path: '#' },
         ]
     }
 ];
@@ -56,9 +47,6 @@ export default function NativeSettings() {
                             </div>
                             <h1 className="text-2xl font-black text-white tracking-tight">Settings</h1>
                         </div>
-                        <button className="p-2.5 rounded-2xl bg-white/10 text-white active:scale-90 transition-all">
-                            <Bell size={20} />
-                        </button>
                     </div>
 
                     {/* Profile Banner */}
@@ -72,7 +60,7 @@ export default function NativeSettings() {
                         <div className="flex-1">
                             <h2 className="text-white font-black text-lg leading-tight">ApniDukan</h2>
                             <p className="text-white/60 text-xs font-semibold flex items-center gap-1 mt-0.5">
-                                <Info size={10} /> Premium Edition v1.0
+                                <Info size={10} /> Premium Edition v2.0
                             </p>
                             <div className="flex gap-2 mt-3">
                                 <div className="px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/30">
@@ -83,7 +71,6 @@ export default function NativeSettings() {
                                 </div>
                             </div>
                         </div>
-                        <ChevronRight className="text-white/30" />
                     </motion.div>
                 </div>
             </div>
@@ -127,11 +114,6 @@ export default function NativeSettings() {
                         </div>
                     </div>
                 ))}
-
-                {/* Logout Button */}
-                <button className="w-full py-5 rounded-[28px] bg-red-50 text-red-500 font-black text-sm flex items-center justify-center gap-2 active:scale-95 transition-all border border-red-100">
-                    <LogOut size={18} /> Log Out
-                </button>
             </div>
 
             {/* Footer */}
