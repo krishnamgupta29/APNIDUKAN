@@ -145,14 +145,17 @@ export default function NativeTrack() {
     const [isHovered, setIsHovered] = useState(0);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [toast, setToast] = useState(null);
+    const [localHistory, setLocalHistory] = useState([]);
 
     // Load local history on mount
-    useState(() => {
+    React.useEffect(() => {
         try {
             const h = JSON.parse(localStorage.getItem('apni_order_history') || '[]');
-            setLocalHistory(h);
-        } catch(e) {}
-    });
+            setLocalHistory(Array.isArray(h) ? h : []);
+        } catch(e) {
+            console.error("Failed to load history", e);
+        }
+    }, []);
 
     const handleTrack = async (e) => {
         if (e) e.preventDefault();
@@ -278,6 +281,39 @@ export default function NativeTrack() {
 
             {/* Results */}
             <div className="px-3 py-4 space-y-4">
+                {/* Recent Orders (Quick Track) */}
+                {!hasSearched && localHistory.length > 0 && (
+                    <div className="mb-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                        <div className="flex items-center justify-between mb-4 px-2">
+                            <h3 className="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em]">Recent Orders</h3>
+                            <button onClick={() => setLocalHistory([])} className="text-[10px] font-black text-red-400 uppercase tracking-widest opacity-50">Clear</button>
+                        </div>
+                        <div className="space-y-3">
+                            {localHistory.slice(0, 3).map((o, idx) => (
+                                <button 
+                                    key={o._id}
+                                    onClick={() => { setPhone(o.phone); handleTrack(); }}
+                                    className="w-full bg-white p-4 rounded-[24px] border border-gray-50 shadow-xl shadow-blue-900/5 flex items-center justify-between active:scale-[0.98] transition-all"
+                                >
+                                    <div className="flex items-center gap-4 text-left">
+                                        <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-500">
+                                            <Package size={18} />
+                                        </div>
+                                        <div>
+                                            <p className="text-xs font-black text-gray-900">Order #{o._id?.slice(-6).toUpperCase()}</p>
+                                            <p className="text-[10px] font-bold text-gray-400">{new Date(o.createdAt).toLocaleDateString()}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-[10px] font-black text-blue-500 bg-blue-50 px-2.5 py-1 rounded-full uppercase">Track</span>
+                                        <ChevronRight size={14} className="text-gray-300" />
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
                 {hasSearched && !loading && orders.length === 0 && !error && (
                     <div className="flex flex-col items-center py-14 text-center">
                         <div className="text-5xl mb-4">📦</div>
@@ -286,10 +322,13 @@ export default function NativeTrack() {
                     </div>
                 )}
 
-                {!hasSearched && !loading && (
-                    <div className="flex flex-col items-center py-14 text-center">
-                        <div className="text-5xl mb-4">🔍</div>
-                        <h3 className="font-bold text-gray-600 text-sm">Track your orders with your phone number</h3>
+                {!hasSearched && !loading && localHistory.length === 0 && (
+                    <div className="flex flex-col items-center py-20 text-center opacity-50">
+                        <div className="w-20 h-20 rounded-[32px] bg-gray-100 flex items-center justify-center mb-6">
+                            <Search size={32} className="text-gray-300" />
+                        </div>
+                        <h3 className="font-black text-gray-400 text-xs uppercase tracking-widest">Enter Phone to Track</h3>
+                        <p className="text-gray-300 text-[11px] font-bold mt-2">Check live updates of your local orders</p>
                     </div>
                 )}
 

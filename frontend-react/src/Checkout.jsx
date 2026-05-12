@@ -105,24 +105,6 @@ export default function Checkout({ cart, subtotal, deliveryTotal, totalCalc, set
         }
     };
 
-    const handleMapClickSubmit = async (e) => {
-        e.preventDefault();
-        const customerName = nameText;
-        const phone = phoneText;
-        setLocationError('');
-
-        localStorage.setItem('apnidukan_user_details', JSON.stringify({
-            name: customerName,
-            phone: phone,
-            address: addrText
-        }));
-
-        setOrderPayload({
-            customerName, phone, address: addrText, items: cart, 
-            subtotal, deliveryTotal, total: totalCalc
-        });
-        navigate('/confirm-order');
-    };
 
     if (cart.length === 0) {
         return (
@@ -142,148 +124,192 @@ export default function Checkout({ cart, subtotal, deliveryTotal, totalCalc, set
         );
     }
 
+    const handleMapClickSubmit = (e) => {
+        if (e) e.preventDefault();
+        const payload = {
+            customerName: nameText,
+            phone: phoneText,
+            address: addrText,
+            items: cart,
+            subtotal,
+            deliveryTotal,
+            total: totalCalc
+        };
+        
+        // Save details for next time
+        localStorage.setItem('apnidukan_user_details', JSON.stringify({
+            name: nameText,
+            phone: phoneText,
+            address: addrText
+        }));
+
+        setOrderPayload(payload);
+        navigate('/confirm-order');
+    };
+
     return (
         <div className="flex flex-col min-h-screen pb-20" style={{ background: '#f8f9fd' }}>
             {/* Header */}
             <div 
-                className="sticky top-0 z-40 px-4 pt-12 pb-6"
-                style={{ background: 'linear-gradient(160deg,#0d0221 0%,#240046 100%)', boxShadow: '0 4px 24px rgba(0,0,0,0.3)' }}
+                className="sticky top-0 z-40 px-4 pt-12 pb-8 rounded-b-[40px]"
+                style={{ background: 'linear-gradient(160deg,#0d0221 0%,#240046 100%)', boxShadow: '0 10px 30px rgba(0,0,0,0.2)' }}
             >
-                <div className="flex items-center gap-4 mb-6">
+                <div className="flex items-center gap-4 mb-8">
                     <button 
                         onClick={() => navigate(-1)}
-                        className="w-10 h-10 rounded-full flex items-center justify-center bg-white/10 active:scale-90 transition-transform"
+                        className="w-11 h-11 rounded-2xl flex items-center justify-center bg-white/10 backdrop-blur-md active:scale-90 transition-transform"
                     >
                         <ChevronLeft size={24} className="text-white" />
                     </button>
-                    <h1 className="text-2xl font-black text-white">Checkout</h1>
+                    <h1 className="text-2xl font-black text-white tracking-tight">Checkout</h1>
                 </div>
 
                 {/* Progress Steps */}
-                <div className="flex items-center justify-between px-2">
+                <div className="flex items-center justify-between px-6">
                     <div className="flex flex-col items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-lg shadow-white/20">
-                            <span className="text-xs font-black text-[#240046]">1</span>
+                        <div className="w-9 h-9 rounded-2xl bg-white flex items-center justify-center shadow-[0_0_20px_rgba(255,255,255,0.3)]">
+                            <User size={16} className="text-[#240046]" />
                         </div>
                         <span className="text-[10px] font-black text-white uppercase tracking-widest">Details</span>
                     </div>
-                    <div className="flex-1 h-0.5 bg-white/20 mx-2 mb-6" />
-                    <div className="flex flex-col items-center gap-2 opacity-50">
-                        <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-                            <span className="text-xs font-black text-white">2</span>
+                    <div className="flex-1 h-[2px] bg-white/10 mx-3 mb-6" />
+                    <div className="flex flex-col items-center gap-2 opacity-30">
+                        <div className="w-9 h-9 rounded-2xl bg-white/10 flex items-center justify-center">
+                            <CreditCard size={16} className="text-white" />
                         </div>
                         <span className="text-[10px] font-black text-white uppercase tracking-widest">Review</span>
                     </div>
-                    <div className="flex-1 h-0.5 bg-white/20 mx-2 mb-6" />
-                    <div className="flex flex-col items-center gap-2 opacity-50">
-                        <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-                            <span className="text-xs font-black text-white">3</span>
+                    <div className="flex-1 h-[2px] bg-white/10 mx-3 mb-6" />
+                    <div className="flex flex-col items-center gap-2 opacity-30">
+                        <div className="w-9 h-9 rounded-2xl bg-white/10 flex items-center justify-center">
+                            <ShieldCheck size={16} className="text-white" />
                         </div>
                         <span className="text-[10px] font-black text-white uppercase tracking-widest">Done</span>
                     </div>
                 </div>
             </div>
 
-            <form onSubmit={handleMapClickSubmit} className="px-4 mt-8 space-y-6">
+            <form onSubmit={handleMapClickSubmit} className="px-5 mt-8 space-y-8">
+                
                 {/* Contact Section */}
-                <div className="bg-white rounded-[32px] p-6 shadow-sm border border-gray-50">
-                    <div className="flex items-center gap-2 mb-6">
-                        <User size={18} className="text-[#4361ee]" />
-                        <h2 className="text-base font-black text-gray-900">Contact Information</h2>
+                <motion.div initial={{y:20, opacity:0}} animate={{y:0, opacity:1}} className="space-y-4">
+                    <div className="flex items-center justify-between mb-2 ml-1">
+                        <h3 className="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em]">Contact Information</h3>
                     </div>
                     
-                    <div className="space-y-4">
-                        <div className="relative">
-                            <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <div className="bg-white rounded-[32px] p-2 shadow-xl shadow-blue-900/5 border border-gray-50">
+                        <div className="relative group">
+                            <div className="absolute left-6 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-[#4361ee] group-focus-within:bg-[#4361ee] group-focus-within:text-white transition-all">
+                                <User size={18} />
+                            </div>
                             <input 
                                 name="name" required 
                                 value={nameText} onChange={e => setNameText(e.target.value)} 
                                 placeholder="Full Name" 
-                                className="w-full h-14 pl-12 pr-4 bg-gray-50 border border-gray-100 rounded-2xl focus:bg-white focus:border-[#4361ee] font-bold text-sm outline-none transition-all" 
+                                className="w-full h-16 pl-20 pr-6 bg-transparent rounded-3xl font-black text-gray-800 text-sm outline-none transition-all placeholder:text-gray-300" 
                             />
                         </div>
-                        <div className="relative">
-                            <Phone size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <div className="h-px bg-gray-50 mx-6" />
+                        <div className="relative group">
+                            <div className="absolute left-6 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl bg-pink-50 flex items-center justify-center text-[#f72585] group-focus-within:bg-[#f72585] group-focus-within:text-white transition-all">
+                                <Phone size={18} />
+                            </div>
                             <input 
                                 name="phone" required 
                                 value={phoneText} onChange={e => setPhoneText(e.target.value)} 
                                 type="tel" pattern="^[0-9]{10}$" 
-                                placeholder="Phone Number" 
-                                className="w-full h-14 pl-12 pr-4 bg-gray-50 border border-gray-100 rounded-2xl focus:bg-white focus:border-[#4361ee] font-bold text-sm outline-none transition-all" 
+                                placeholder="10-Digit Mobile Number" 
+                                className="w-full h-16 pl-20 pr-6 bg-transparent rounded-3xl font-black text-gray-800 text-sm outline-none transition-all placeholder:text-gray-300" 
                             />
                         </div>
                     </div>
-                </div>
+                </motion.div>
 
                 {/* Delivery Section */}
-                <div className="bg-white rounded-[32px] p-6 shadow-sm border border-gray-50">
-                    <div className="flex items-center justify-between mb-6">
-                        <div className="flex items-center gap-2">
-                            <MapPin size={18} className="text-[#f72585]" />
-                            <h2 className="text-base font-black text-gray-900">Delivery Address</h2>
-                        </div>
+                <motion.div initial={{y:20, opacity:0}} animate={{y:0, opacity:1}} transition={{delay:0.1}} className="space-y-4">
+                    <div className="flex items-center justify-between mb-2 ml-1">
+                        <h3 className="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em]">Delivery Address</h3>
                         {savedDetails && (
                             <button 
                                 type="button" onClick={handleAutoFill}
-                                className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 text-purple-600 rounded-lg text-[10px] font-black uppercase tracking-widest active:scale-95 transition-transform"
+                                className="px-3 py-1.5 bg-blue-50 text-[#4361ee] rounded-full text-[9px] font-black uppercase tracking-widest active:scale-95 transition-all"
                             >
-                                <History size={12} /> Recent
+                                <History size={12} className="inline mr-1" /> Use Saved
                             </button>
                         )}
                     </div>
 
-                    <div className="space-y-4">
+                    <div className="bg-white rounded-[40px] p-3 shadow-xl shadow-blue-900/5 border border-gray-50 relative">
                         <div className="relative">
-                            <MapPin size={16} className="absolute left-4 top-5 text-gray-400" />
+                            <div className="absolute left-4 top-4 w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600">
+                                <MapPin size={18} />
+                            </div>
                             <textarea
                                 name="address" required rows="4"
                                 value={addrText}
                                 onChange={e => { setAddrText(e.target.value); setLocationError(''); }}
-                                placeholder="Full address with landmarks..."
-                                className={`w-full p-4 pl-12 bg-gray-50 border rounded-2xl focus:bg-white font-bold text-sm outline-none resize-none transition-all ${
-                                    locationError ? 'border-red-300 focus:border-red-500 bg-red-50/20' : 'border-gray-100 focus:border-[#f72585]'
+                                placeholder="Street name, House/Flat no., Landmark (Shahjahanpur)"
+                                className={`w-full p-6 pl-16 bg-gray-50/50 rounded-[32px] font-bold text-sm outline-none resize-none transition-all border-2 border-transparent focus:bg-white focus:border-purple-200 ${
+                                    locationError ? 'border-red-300' : ''
                                 }`}
                             />
                         </div>
 
-                        <button 
-                            type="button" onClick={handleUseGPS} disabled={fetchingGPS}
-                            className="w-full h-14 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 bg-blue-50 text-[#4361ee] active:scale-95 transition-transform disabled:opacity-50"
-                        >
-                            {fetchingGPS ? (
-                                <div className="w-5 h-5 border-2 border-[#4361ee] border-t-transparent rounded-full animate-spin" />
-                            ) : (
-                                <><Navigation size={18} /> Use Current Location</>
+                        <div className="mt-3 p-1">
+                            <button 
+                                type="button" onClick={handleUseGPS} disabled={fetchingGPS}
+                                className="w-full h-14 rounded-[24px] font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3 bg-gradient-to-r from-blue-600 to-[#4361ee] text-white shadow-lg shadow-blue-500/20 active:scale-95 transition-all disabled:opacity-50"
+                            >
+                                {fetchingGPS ? (
+                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                ) : (
+                                    <><Navigation size={18} className="rotate-45" /> Auto-Detect My Location</>
+                                )}
+                            </button>
+                            {locationError && (
+                                <p className="text-[10px] text-red-500 font-black mt-3 text-center px-4 leading-tight uppercase tracking-widest">{locationError}</p>
                             )}
-                        </button>
+                        </div>
                     </div>
-                </div>
+                </motion.div>
 
-                {/* Payment Section (Locked to COD) */}
-                <div className="bg-white rounded-[32px] p-6 shadow-sm border border-gray-50">
-                    <div className="flex items-center gap-2 mb-4">
-                        <ShieldCheck size={18} className="text-emerald-500" />
-                        <h2 className="text-base font-black text-gray-900">Payment Method</h2>
+                {/* Payment Section */}
+                <motion.div initial={{y:20, opacity:0}} animate={{y:0, opacity:1}} transition={{delay:0.2}}>
+                    <div className="flex items-center justify-between mb-4 ml-1">
+                        <h3 className="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em]">Payment Mode</h3>
                     </div>
-                    <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100 flex items-center gap-3">
-                        <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center">
+                    <div className="p-5 bg-white rounded-[32px] border-2 border-emerald-500/10 shadow-xl shadow-emerald-900/5 flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-500">
+                                <ShieldCheck size={24} />
+                            </div>
+                            <div>
+                                <p className="font-black text-sm text-gray-900">Cash on Delivery</p>
+                                <p className="text-[11px] text-emerald-600 font-bold">100% Safe Payment</p>
+                            </div>
+                        </div>
+                        <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/30">
                             <div className="w-2 h-2 bg-white rounded-full" />
                         </div>
-                        <span className="font-bold text-emerald-700 text-sm">Cash on Delivery (COD)</span>
                     </div>
-                </div>
+                </motion.div>
 
                 {/* Action Button */}
                 <button 
                     type="submit" 
-                    className="w-full py-5 bg-gray-900 text-white rounded-[24px] font-black text-base flex justify-center items-center gap-2 shadow-2xl shadow-gray-900/30 active:scale-95 transition-transform"
+                    className="w-full py-6 bg-gray-900 text-white rounded-[32px] font-black text-base flex justify-center items-center gap-3 shadow-2xl shadow-gray-900/40 active:scale-[0.98] transition-all mt-4"
                 >
-                    Review Order <ArrowRight size={20}/>
+                    Review & Confirm <ArrowRight size={22}/>
                 </button>
             </form>
 
-            <div className="py-10 text-center opacity-30">
-                <p className="text-[10px] font-black uppercase tracking-widest">Secure Checkout v1.2</p>
+            <div className="py-12 text-center">
+                <div className="flex justify-center gap-6 opacity-20">
+                    <div className="h-6 w-12 bg-gray-400 rounded-md" />
+                    <div className="h-6 w-12 bg-gray-400 rounded-md" />
+                    <div className="h-6 w-12 bg-gray-400 rounded-md" />
+                </div>
+                <p className="text-[10px] font-black text-gray-300 mt-6 uppercase tracking-[0.3em]">Encrypted Checkout v2.0</p>
             </div>
         </div>
     );
