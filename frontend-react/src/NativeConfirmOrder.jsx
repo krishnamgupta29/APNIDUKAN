@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { CheckCircle2, MapPin, ChevronLeft, CreditCard, ShoppingBag, Truck, Zap } from 'lucide-react';
 import axios from 'axios';
 import { getImageUrl, LocalOrderStore } from './utils';
+import API_URL from './api';
 
 export default function ConfirmOrder({ orderPayload, setCart, setOrderPayload }) {
     const navigate = useNavigate();

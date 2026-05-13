@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { CheckCircle2, MapPin, ArrowLeft, Phone } from 'lucide-react';
 import axios from 'axios';
 import API_URL from './api';
+import { LocalOrderStore } from './utils';
 
 export default function ConfirmOrder({ orderPayload, setCart, setOrderPayload }) {
     const navigate = useNavigate();
@@ -36,10 +37,7 @@ export default function ConfirmOrder({ orderPayload, setCart, setOrderPayload })
                 createdAt: new Date().toISOString(),
                 paymentMethod: 'COD'
             };
-            try {
-                const history = JSON.parse(localStorage.getItem('apni_order_history') || '[]');
-                localStorage.setItem('apni_order_history', JSON.stringify([localOrder, ...history]));
-            } catch (e) { console.error('History save failed', e); }
+            LocalOrderStore.saveOrder(localOrder);
 
             setCart([]);
             setOrderPayload(prev => ({ ...prev, placedId: orderId }));
