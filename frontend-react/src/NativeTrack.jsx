@@ -130,7 +130,7 @@ export default function NativeTrack() {
                                     </div>
                                     <h3 className="text-sm font-black text-gray-900 truncate">{mainItem?.name || 'Order Items'}</h3>
                                     <p className="text-[11px] font-bold mt-1">
-                                        <span className="text-emerald-600 font-black">₹{remote?.totalAmount || order.totalAmount}</span>
+                                        <span className="text-emerald-500 font-black">₹{remote?.totalAmount || order.totalAmount}</span>
                                         <span className="text-gray-300 mx-2">•</span>
                                         <span className="text-gray-400 font-bold">{new Date(order.date || Date.now()).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</span>
                                     </p>
@@ -157,29 +157,38 @@ export default function NativeTrack() {
                             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
                             className="fixed bottom-0 left-0 w-full bg-white rounded-t-[3.5rem] z-[70] max-h-[92vh] overflow-hidden flex flex-col shadow-2xl"
                         >
-                            <div className="bg-white px-8 pt-6 pb-4 z-10 border-b border-gray-50 flex-shrink-0">
+                             <div className="bg-white px-8 pt-6 pb-4 z-10 border-b border-gray-50 flex-shrink-0">
                                 <div className="w-12 h-1.5 bg-gray-100 rounded-full mx-auto mb-6" />
-                                <div className="flex justify-between items-center">
-                                    <div>
-                                        <h2 className="text-2xl font-black text-gray-900 tracking-tight">Order Details</h2>
-                                        <div className="flex items-center gap-2 mt-1">
-                                            <span className={`w-2 h-2 rounded-full ${statusInfo.color} animate-pulse`} />
-                                            <p className={`text-[10px] font-black uppercase tracking-widest ${statusInfo.color.replace('bg-', 'text-')}`}>{statusInfo.label}</p>
-                                            <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100/50 uppercase tracking-widest">
-                                                ID: #{remote?.orderId || activeOrder.orderId || selectedOrder.slice(-6).toUpperCase()}
-                                            </span>
+                                {(() => {
+                                    const activeOrder = localOrders.find(o => o._id === selectedOrder);
+                                    if (!activeOrder) return null;
+                                    const remoteOrder = ordersData[selectedOrder];
+                                    const statusInfo = getStatusInfo(selectedOrder, activeOrder.status);
+                                    return (
+                                        <div className="flex justify-between items-center">
+                                            <div>
+                                                <h2 className="text-2xl font-black text-gray-900 tracking-tight">Order Details</h2>
+                                                <div className="flex items-center gap-2 mt-1">
+                                                    <span className={`w-2 h-2 rounded-full ${statusInfo.color} animate-pulse`} />
+                                                    <p className={`text-[10px] font-black uppercase tracking-widest ${statusInfo.color.replace('bg-', 'text-')}`}>{statusInfo.label}</p>
+                                                    <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100/50 uppercase tracking-widest">
+                                                        ID: #{remoteOrder?.orderId || activeOrder.orderId || selectedOrder.slice(-6).toUpperCase()}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <button onClick={() => setSelectedOrder(null)} className="p-3 bg-gray-50 rounded-2xl text-gray-400 active:scale-90 transition-all"><X size={20}/></button>
                                         </div>
-                                    </div>
-                                    <button onClick={() => setSelectedOrder(null)} className="p-3 bg-gray-50 rounded-2xl text-gray-400 active:scale-90 transition-all"><X size={20}/></button>
-                                </div>
+                                    );
+                                })()}
                             </div>
 
                             <div className="flex-1 overflow-y-auto px-8 pb-32">
                                 {(() => {
-                                const activeOrder = localOrders.find(o => o._id === selectedOrder);
-                                const remoteOrder = ordersData[selectedOrder];
-                                const statusInfo = getStatusInfo(selectedOrder, activeOrder.status);
-                                const hasFeedback = remoteOrder?.feedbackGiven;
+                                    const activeOrder = localOrders.find(o => o._id === selectedOrder);
+                                    if (!activeOrder) return null;
+                                    const remoteOrder = ordersData[selectedOrder];
+                                    const statusInfo = getStatusInfo(selectedOrder, activeOrder.status);
+                                    const hasFeedback = remoteOrder?.feedbackGiven;
 
                                 return (
                                     <div className="px-8 pb-20 space-y-8">

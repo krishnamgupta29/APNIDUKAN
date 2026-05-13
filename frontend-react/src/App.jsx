@@ -25,6 +25,27 @@ import { Download } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import NativeApp from './NativeApp';
 
+class ErrorBoundary extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { hasError: false };
+    }
+    static getDerivedStateFromError(error) { return { hasError: true }; }
+    componentDidCatch(error, errorInfo) { console.error("App Crash:", error, errorInfo); }
+    render() {
+        if (this.state.hasError) {
+            return (
+                <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center bg-gray-50">
+                    <h2 className="text-2xl font-black text-gray-900 mb-4">Oops! Something went wrong.</h2>
+                    <p className="text-gray-500 mb-8">The app encountered an error. Please try restarting.</p>
+                    <button onClick={() => window.location.reload()} className="px-8 py-4 bg-blue-600 text-white rounded-2xl font-black">Restart App</button>
+                </div>
+            );
+        }
+        return this.props.children;
+    }
+}
+
 function Navigation({ cartCount, onCartClick }) {
     const navigate = useNavigate();
     return (
@@ -58,11 +79,11 @@ function Navigation({ cartCount, onCartClick }) {
 
 export default function App() {
     const [showIntro, setShowIntro] = useState(() => {
-        return !sessionStorage.getItem('apni_intro_seen');
+        return !localStorage.getItem('apni_intro_seen');
     });
 
     const handleIntroComplete = () => {
-        sessionStorage.setItem('apni_intro_seen', 'true');
+        localStorage.setItem('apni_intro_seen', 'true');
         setShowIntro(false);
     };
 
@@ -139,7 +160,7 @@ export default function App() {
     const totalCalc = subtotal + deliveryTotal;
 
     return (
-        <>
+        <ErrorBoundary>
             <AnimatePresence>
                 {showIntro && <Intro key="intro" onComplete={handleIntroComplete} />}
             </AnimatePresence>
@@ -185,12 +206,10 @@ export default function App() {
 
                     <Footer />
 
-                    {/* App Install Guide Popup */}
                     <AnimatePresence>
                         {showInstallGuide && <InstallGuidePopup onClose={() => setShowInstallGuide(false)} />}
                     </AnimatePresence>
 
-                    {/* Cart Drawer */}
                     <AnimatePresence>
                         {isCartOpen && (
                             <motion.div key="cart-container" className="fixed inset-0 z-[60]">
@@ -246,6 +265,6 @@ export default function App() {
                 </div>
                 )
             )}
-        </>
+        </ErrorBoundary>
     );
 }
