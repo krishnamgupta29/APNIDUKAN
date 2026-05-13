@@ -129,13 +129,14 @@ export default function DeliveryPanel() {
                                         </div>
 
                                         {order.items && (
-                                            <div className="space-y-2">
-                                                {order.items.map((item, idx) => (
-                                                    <div key={idx} className="flex justify-between text-xs font-bold text-gray-500 bg-gray-50/50 p-2 rounded-lg">
-                                                        <span className="truncate max-w-[180px]">Item {idx + 1}</span>
-                                                        <span className="text-gray-900 shrink-0">x{item.quantity}</span>
-                                                    </div>
-                                                ))}
+                                            <div className="flex items-center gap-3 p-4 bg-blue-50/50 rounded-2xl border border-blue-100/50">
+                                                <Package size={18} className="text-blue-500" />
+                                                <div className="flex justify-between flex-1 items-center">
+                                                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Quantity</span>
+                                                    <span className="text-sm font-black text-blue-600">
+                                                        {order.items.reduce((total, item) => total + (item.quantity || 0), 0)} Items
+                                                    </span>
+                                                </div>
                                             </div>
                                         )}
                                     </div>
