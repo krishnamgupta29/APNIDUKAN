@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { CheckCircle2, MapPin, ChevronLeft, CreditCard, ShoppingBag, Truck, Zap } from 'lucide-react';
 import axios from 'axios';
-import API_URL from './api';
+import { getImageUrl, LocalOrderStore } from './utils';
 
 export default function ConfirmOrder({ orderPayload, setCart, setOrderPayload }) {
     const navigate = useNavigate();
@@ -21,25 +21,23 @@ export default function ConfirmOrder({ orderPayload, setCart, setOrderPayload })
         setIsPlacingOrder(true);
         try {
             const res = await axios.post(`${API_URL}/api/orders`, orderPayload);
-            const orderId = res.data.orderId;
+            const orderId = res.data._id || res.data.orderId;
             
             // Local History Save
             const localOrder = {
                 _id: orderId,
+                orderId: res.data.orderId,
                 phone: orderPayload.phone,
                 customerName: orderPayload.customerName,
                 address: orderPayload.address,
                 items: orderPayload.items,
                 totalAmount: orderPayload.total,
-                status: 'Pending',
+                status: 'ORDERED',
                 createdAt: new Date().toISOString(),
                 paymentMethod: 'COD'
             };
             
-            try {
-                const history = JSON.parse(localStorage.getItem('apni_order_history') || '[]');
-                localStorage.setItem('apni_order_history', JSON.stringify([localOrder, ...history]));
-            } catch (e) { console.error("History save failed", e); }
+            LocalOrderStore.saveOrder(localOrder);
 
             setCart([]); 
             setOrderPayload(prev => ({...prev, placedId: orderId}));

@@ -194,89 +194,115 @@ export default function Admin() {
                         <table className="w-full text-left min-w-[600px] border-collapse">
                             <thead><tr className="border-b border-gray-100 text-gray-400 text-xs tracking-wider uppercase"><th className="pb-4 pr-4 pl-2">Order Info</th><th className="pb-4 pr-4">Customer & Address</th><th className="pb-4 pr-4">Items</th><th className="pb-4 pr-4">Total</th><th className="pb-4">Action</th></tr></thead>
                             <tbody>
-                                {orders.filter(o => orderTab === 'PENDING' ? (o.status !== 'DELIVERED' && o.status !== 'RETURNED' && o.status !== 'delivered' && o.status !== 'returned') : (o.status === 'DELIVERED' || o.status === 'RETURNED' || o.status === 'delivered' || o.status === 'returned')).map(o => (
-                                    <tr key={o._id} className="border-b last:border-0 border-gray-50 hover:bg-gray-50/50 transition-colors">
-                                        <td className="py-4 pr-4 pl-2 align-top">
-                                            <strong className="text-gray-900 font-mono text-sm">{o.orderId}</strong><br />
-                                            <span className="text-[10px] 2xl:text-xs text-gray-400 whitespace-nowrap">{new Date(o.createdAt).toLocaleString()}</span>
-                                            {o.status === 'NEW' && <span className="ml-2 px-1.5 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-extrabold rounded shadow-sm uppercase tracking-wide">New</span>}
-                                        </td>
-                                        <td className="pr-4 align-top max-w-[240px]">
-                                            <div className="font-bold text-gray-800 text-sm tracking-tight">{o.customerName}</div>
-                                            <div className="text-[11px] text-gray-400 font-mono mt-0.5">{o.phone}</div>
-                                            <div className="text-[11px] text-gray-600 leading-[1.4] mt-1.5 p-2 bg-gray-50/80 border border-gray-100 rounded-xl line-clamp-3 hover:line-clamp-none transition-all cursor-default">
-                                                <div className="flex items-start gap-1.5">
-                                                    <MapPin size={10} className="mt-0.5 text-gray-400 shrink-0" />
-                                                    <span>{o.address || <span className="text-gray-300 italic">Address not provided</span>}</span>
+                                {orders.filter(o => {
+                                    const st = o.status?.toUpperCase() || 'NEW';
+                                    return orderTab === 'PENDING' 
+                                        ? (st !== 'DELIVERED' && st !== 'RETURNED') 
+                                        : (st === 'DELIVERED' || st === 'RETURNED');
+                                }).map(o => {
+                                    const st = o.status?.toUpperCase() || 'NEW';
+                                    return (
+                                        <tr key={o._id} className="border-b last:border-0 border-gray-50 hover:bg-gray-50/50 transition-colors">
+                                            <td className="py-4 pr-4 pl-2 align-top">
+                                                <strong className="text-gray-900 font-mono text-sm">{o.orderId}</strong><br />
+                                                <span className="text-[10px] 2xl:text-xs text-gray-400 whitespace-nowrap">{new Date(o.createdAt).toLocaleString()}</span>
+                                                {st === 'NEW' && <span className="ml-2 px-1.5 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-extrabold rounded shadow-sm uppercase tracking-wide">New</span>}
+                                            </td>
+                                            <td className="pr-4 align-top max-w-[240px]">
+                                                <div className="font-bold text-gray-800 text-sm tracking-tight">{o.customerName}</div>
+                                                <div className="text-[11px] text-gray-400 font-mono mt-0.5">{o.phone}</div>
+                                                <div className="text-[11px] text-gray-600 leading-[1.4] mt-1.5 p-2 bg-gray-50/80 border border-gray-100 rounded-xl line-clamp-3 hover:line-clamp-none transition-all cursor-default">
+                                                    <div className="flex items-start gap-1.5">
+                                                        <MapPin size={10} className="mt-0.5 text-gray-400 shrink-0" />
+                                                        <span>{o.address || <span className="text-gray-300 italic">Address not provided</span>}</span>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </td>
-                                        <td className="text-xs max-w-[200px] pr-4 align-top">
-                                            <div className="flex flex-wrap gap-1">
-                                                {o.items.map(i => <span key={i._id} className="inline-block bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded font-medium border border-gray-200">{i.quantity}x {i.name}</span>)}
-                                            </div>
-                                        </td>
-                                        <td className="font-extrabold text-emerald-600 pr-4 align-top">₹{o.total}</td>
-                                        <td className="align-top">
-                                            {orderTab === 'PENDING' ? (
-                                                <div className="flex flex-col gap-2 items-start">
-                                                    <select 
-                                                        value={o.status} 
-                                                        onChange={e => updateStatus(o._id, e.target.value)} 
-                                                        className={`p-2 pr-8 border rounded-xl text-[10px] font-black uppercase tracking-wider outline-none shadow-sm cursor-pointer transition-all appearance-none relative
-                                                            ${o.status === 'assigned' ? 'bg-purple-50 border-purple-200 text-purple-700 focus:ring-purple-100' : ''}
-                                                            ${o.status === 'pending' || o.status === 'NEW' ? 'bg-gray-50 border-gray-200 text-gray-700 focus:ring-gray-100' : ''}
-                                                            ${o.status === 'DELIVERED' || o.status === 'delivered' ? 'bg-emerald-50 border-emerald-200 text-emerald-700 focus:ring-emerald-100' : ''}
-                                                            ${o.status === 'RETURNED' || o.status === 'returned' ? 'bg-yellow-50 border-yellow-200 text-yellow-700 focus:ring-yellow-100' : ''}`}
-                                                        style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.5rem center', backgroundSize: '0.8rem' }}
-                                                    >
-                                                        <option value="pending">⏳ NEW</option>
-                                                        <option value="assigned">🚚 ASSIGNED</option>
-                                                        <option value="delivered">✅ DELIVERED</option>
-                                                        <option value="returned">🔄 RETURNED</option>
-                                                    </select>
-                                                    
-                                                    {deliveryUsers.length > 0 && (
+                                            </td>
+                                            <td className="text-xs max-w-[200px] pr-4 align-top">
+                                                <div className="flex flex-wrap gap-1">
+                                                    {o.items.map(i => <span key={i._id} className="inline-block bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded font-medium border border-gray-200">{i.quantity}x {i.name}</span>)}
+                                                </div>
+                                            </td>
+                                            <td className="font-extrabold text-emerald-600 pr-4 align-top">₹{o.total}</td>
+                                            <td className="align-top">
+                                                {orderTab === 'PENDING' ? (
+                                                    <div className="flex flex-col gap-2 items-start">
                                                         <select 
-                                                            value={o.assignedTo || ''} 
-                                                            onChange={e => assignOrder(o._id, e.target.value)}
-                                                            className="p-1.5 border border-gray-200 rounded-lg text-xs font-medium text-gray-700 w-full mt-1 outline-none focus:border-blue-400"
+                                                            value={o.status?.toLowerCase()} 
+                                                            onChange={e => updateStatus(o._id, e.target.value.toUpperCase())} 
+                                                            className={`p-2 pr-8 border rounded-xl text-[10px] font-black uppercase tracking-wider outline-none shadow-sm cursor-pointer transition-all appearance-none relative
+                                                                ${o.status?.toLowerCase() === 'assigned' ? 'bg-purple-50 border-purple-200 text-purple-700 focus:ring-purple-100' : ''}
+                                                                ${o.status?.toLowerCase() === 'pending' || o.status === 'NEW' ? 'bg-gray-50 border-gray-200 text-gray-700 focus:ring-gray-100' : ''}
+                                                                ${o.status?.toLowerCase() === 'delivered' ? 'bg-emerald-50 border-emerald-200 text-emerald-700 focus:ring-emerald-100' : ''}
+                                                                ${o.status?.toLowerCase() === 'returned' ? 'bg-yellow-50 border-yellow-200 text-yellow-700 focus:ring-yellow-100' : ''}`}
+                                                            style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.5rem center', backgroundSize: '0.8rem' }}
                                                         >
-                                                            <option value="">Assign Delivery...</option>
-                                                            {deliveryUsers.map(u => <option key={u._id} value={u._id}>{u.name}</option>)}
+                                                            <option value="pending">⏳ ORDERED</option>
+                                                            <option value="assigned">🚚 CONFIRMED</option>
+                                                            <option value="delivered">✅ DELIVERED</option>
+                                                            <option value="returned">🔄 RETURNED</option>
                                                         </select>
-                                                    )}
+                                                        
+                                                        {deliveryUsers.length > 0 && (
+                                                            <select 
+                                                                value={o.assignedTo || ''} 
+                                                                onChange={e => assignOrder(o._id, e.target.value)}
+                                                                className="p-1.5 border border-gray-200 rounded-lg text-xs font-medium text-gray-700 w-full mt-1 outline-none focus:border-blue-400"
+                                                            >
+                                                                <option value="">Assign Delivery...</option>
+                                                                {deliveryUsers.map(u => <option key={u._id} value={u._id}>{u.name}</option>)}
+                                                            </select>
+                                                        )}
 
-                                                    <button onClick={() => deleteOrder(o._id)} title="Delete Order" className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg mt-1 transition-all"><Trash2 size={14}/></button>
-                                                </div>
-                                            ) : (
-                                                <div className="flex flex-col gap-1.5 items-start">
-                                                    {o.status === 'DELIVERED' || o.status === 'delivered' ? (
-                                                        <span className="px-2.5 py-1 bg-emerald-100 border border-emerald-200 text-emerald-800 text-[10px] font-extrabold rounded-lg tracking-widest uppercase flex items-center gap-1.5 shadow-sm"><Check size={12} strokeWidth={3}/> Delivered</span>
-                                                    ) : (
-                                                        <span className="px-2.5 py-1 bg-yellow-100 border border-yellow-200 text-yellow-800 text-[10px] font-extrabold rounded-lg tracking-widest uppercase flex items-center gap-1.5 shadow-sm"><X size={12} strokeWidth={3}/> Returned</span>
-                                                    )}
-                                                    
-                                                    {(o.deliveredBy || o.assignedTo) && (
-                                                        <div className="text-[10px] mt-1 font-bold text-gray-500 bg-gray-50 px-2 py-1 rounded-md border border-gray-100">
-                                                            {o.status === 'RETURNED' || o.status === 'returned' ? 'Returned By: ' : 'Delivered By: '}
-                                                            <span className="text-gray-800">{deliveryUsers.find(u => u._id === (o.deliveredBy || o.assignedTo))?.name || 'Staff'}</span>
-                                                        </div>
-                                                    )}
-                                                    {o.feedbackGiven && (
-                                                        <div className={`mt-0.5 w-full text-[10px] ${o.status === 'RETURNED' ? 'text-red-700 bg-red-50 border-red-200' : 'text-yellow-700 bg-yellow-50 border-yellow-200'} font-bold border px-2.5 py-1.5 rounded-md flex flex-col gap-0.5 shadow-sm`}>
-                                                            {o.status !== 'RETURNED' && <div>⭐ {o.feedback?.rating || o.rating || 5}/5</div>}
-                                                            {o.status === 'RETURNED' && <div>📝 Return Reason:</div>}
-                                                            {o.feedback?.comment && <div className="text-gray-700 font-normal leading-tight mt-0.5">"{o.feedback.comment}"</div>}
-                                                        </div>
-                                                    )}
-                                                    <button onClick={() => deleteOrder(o._id)} title="Delete Order" className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg mt-1 transition-all"><Trash2 size={14}/></button>
-                                                </div>
-                                            )}
-                                        </td>
-                                    </tr>
-                                ))}
-                                {orders.filter(o => orderTab === 'PENDING' ? (o.status !== 'DELIVERED' && o.status !== 'RETURNED') : (o.status === 'DELIVERED' || o.status === 'RETURNED')).length === 0 && (
+                                                        <button onClick={() => deleteOrder(o._id)} title="Delete Order" className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg mt-1 transition-all"><Trash2 size={14}/></button>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex flex-col gap-2 items-start min-w-[150px]">
+                                                        {st === 'DELIVERED' ? (
+                                                            <span className="px-2.5 py-1 bg-emerald-100 border border-emerald-200 text-emerald-800 text-[10px] font-extrabold rounded-lg tracking-widest uppercase flex items-center gap-1.5 shadow-sm"><Check size={12} strokeWidth={3}/> Delivered</span>
+                                                        ) : (
+                                                            <span className="px-2.5 py-1 bg-red-100 border border-red-200 text-red-800 text-[10px] font-extrabold rounded-lg tracking-widest uppercase flex items-center gap-1.5 shadow-sm"><X size={12} strokeWidth={3}/> Returned</span>
+                                                        )}
+                                                        
+                                                        {(o.deliveredBy || o.assignedTo) && (
+                                                            <div className="text-[10px] font-bold text-gray-500 bg-gray-50 px-2 py-1 rounded-md border border-gray-100 w-full">
+                                                                {st === 'RETURNED' ? 'Returned By: ' : 'Delivered By: '}
+                                                                <span className="text-gray-800">{deliveryUsers.find(u => u._id === (o.deliveredBy || o.assignedTo))?.name || 'Staff'}</span>
+                                                            </div>
+                                                        )}
+
+                                                        {o.feedbackGiven && (
+                                                            <div className={`w-full p-3 rounded-xl border ${st === 'RETURNED' ? 'bg-red-50 border-red-100 text-red-900' : 'bg-amber-50 border-amber-100 text-amber-900'} shadow-sm`}>
+                                                                <div className="flex items-center justify-between mb-1.5">
+                                                                    <span className="text-[10px] font-black uppercase tracking-widest opacity-60">
+                                                                        {st === 'RETURNED' ? 'Return Reason' : 'Customer Rating'}
+                                                                    </span>
+                                                                    {st === 'DELIVERED' && (
+                                                                        <div className="flex gap-0.5">
+                                                                            {[...Array(5)].map((_, i) => (
+                                                                                <Star key={i} size={8} fill={i < (o.feedback?.rating || 5) ? 'currentColor' : 'none'} className={i < (o.feedback?.rating || 5) ? 'text-amber-500' : 'text-amber-200'} />
+                                                                            ))}
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                                <p className="text-[11px] font-bold leading-tight italic">
+                                                                    "{o.feedback?.comment || 'No comment provided'}"
+                                                                </p>
+                                                            </div>
+                                                        )}
+                                                        <button onClick={() => deleteOrder(o._id)} title="Delete Order" className="p-1.5 text-red-300 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all self-end"><Trash2 size={14}/></button>
+                                                    </div>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                                {orders.filter(o => {
+                                    const st = o.status?.toUpperCase() || 'NEW';
+                                    return orderTab === 'PENDING' 
+                                        ? (st !== 'DELIVERED' && st !== 'RETURNED') 
+                                        : (st === 'DELIVERED' || st === 'RETURNED');
+                                }).length === 0 && (
                                     <tr><td colSpan="5" className="py-12 text-center text-sm font-bold text-gray-400 bg-gray-50/50 rounded-xl">No {orderTab.toLowerCase()} orders actively found.</td></tr>
                                 )}
                             </tbody>
