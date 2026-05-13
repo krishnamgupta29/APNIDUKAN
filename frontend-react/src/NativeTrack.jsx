@@ -4,6 +4,7 @@ import { Package, MapPin, CheckCircle as CheckCircle2, X, ShoppingBag, Star, Clo
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import API_URL from './api';
+import { getImageUrl } from './utils';
 
 export default function NativeTrack() {
     const navigate = useNavigate();
@@ -63,21 +64,19 @@ export default function NativeTrack() {
 
     const getStatusInfo = (orderId, localStatus) => {
         const remote = ordersData[orderId];
-        const status = remote?.status || localStatus || 'ordered';
+        const status = (remote?.status || localStatus || 'ordered').toLowerCase();
         
-        switch(status.toLowerCase()) {
+        switch(status) {
+            case 'pending':
             case 'ordered': return { step: 1, label: 'ORDERED', color: 'bg-blue-500' };
             case 'confirmed': return { step: 2, label: 'CONFIRMED', color: 'bg-emerald-500' };
             case 'delivered': return { step: 3, label: 'DELIVERED', color: 'bg-emerald-500' };
             case 'returned': return { step: 3, label: 'RETURNED', color: 'bg-red-500' };
-            default: return { step: 1, label: 'ORDERED', color: 'bg-blue-500' };
+            default: return { step: 1, label: 'ORDERED', color: 'bg-gray-500' };
         }
     };
 
-    const getImageUrl = (img) => {
-        if (!img) return 'https://via.placeholder.com/150';
-        return img.startsWith('http') ? img : `${API_URL}${img}`;
-    };
+
 
     return (
         <div className="min-h-screen bg-[#f8fafc] pb-32">
@@ -161,9 +160,15 @@ export default function NativeTrack() {
                                 <div className="w-12 h-1.5 bg-gray-100 rounded-full mx-auto mb-6" />
                                 {(() => {
                                     const activeOrder = localOrders.find(o => o._id === selectedOrder);
-                                    if (!activeOrder) return null;
                                     const remoteOrder = ordersData[selectedOrder];
-                                    const statusInfo = getStatusInfo(selectedOrder, activeOrder.status);
+                                    const statusInfo = getStatusInfo(selectedOrder, activeOrder?.status);
+                                    
+                                    if (!activeOrder && !remoteOrder) return (
+                                        <div className="flex items-center justify-center py-10">
+                                            <p className="text-gray-400 font-bold">Loading order details...</p>
+                                        </div>
+                                    );
+
                                     return (
                                         <div className="flex justify-between items-center">
                                             <div>
@@ -172,7 +177,7 @@ export default function NativeTrack() {
                                                     <span className={`w-2 h-2 rounded-full ${statusInfo.color} animate-pulse`} />
                                                     <p className={`text-[10px] font-black uppercase tracking-widest ${statusInfo.color.replace('bg-', 'text-')}`}>{statusInfo.label}</p>
                                                     <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100/50 uppercase tracking-widest">
-                                                        ID: #{remoteOrder?.orderId || activeOrder.orderId || selectedOrder.slice(-6).toUpperCase()}
+                                                        ID: #{remoteOrder?.orderId || activeOrder?.orderId || selectedOrder?.slice(-6).toUpperCase()}
                                                     </span>
                                                 </div>
                                             </div>
@@ -185,10 +190,11 @@ export default function NativeTrack() {
                             <div className="flex-1 overflow-y-auto px-8 pb-32">
                                 {(() => {
                                     const activeOrder = localOrders.find(o => o._id === selectedOrder);
-                                    if (!activeOrder) return null;
                                     const remoteOrder = ordersData[selectedOrder];
-                                    const statusInfo = getStatusInfo(selectedOrder, activeOrder.status);
+                                    const statusInfo = getStatusInfo(selectedOrder, activeOrder?.status);
                                     const hasFeedback = remoteOrder?.feedbackGiven;
+                                    
+                                    if (!activeOrder && !remoteOrder) return null;
 
                                 return (
                                     <div className="px-8 pb-20 space-y-8">
@@ -247,7 +253,7 @@ export default function NativeTrack() {
                                             <div className="bg-gray-50 rounded-[2.5rem] p-6 border border-gray-100">
                                                 <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2"><ShoppingBag size={14} className="text-blue-500"/> Order Items</h3>
                                                 <div className="space-y-4">
-                                                    {(remoteOrder?.items || activeOrder.items).map((item, idx) => (
+                                                    {(remoteOrder?.items || activeOrder?.items || []).map((item, idx) => (
                                                         <div 
                                                             key={idx} 
                                                             onClick={() => { setSelectedOrder(null); navigate(`/product/${item.productId || item._id}`); }}
@@ -256,7 +262,7 @@ export default function NativeTrack() {
                                                             <img src={getImageUrl(item.image)} className="w-14 h-14 rounded-2xl object-cover bg-white border border-gray-100 shadow-sm group-hover:scale-105 transition-transform" />
                                                             <div className="flex-1 min-w-0">
                                                                 <p className="text-sm font-black text-gray-900 truncate group-hover:text-blue-600 transition-colors">{item.name}</p>
-                                                                <p className="text-[11px] font-bold text-gray-400">Qty: {item.quantity} • ₹{item.price}</p>
+                                                                <p className="text-[11px] font-bold text-gray-400">Qty: {item.quantity || 1} • ₹{item.price || 0}</p>
                                                             </div>
                                                         </div>
                                                     ))}
