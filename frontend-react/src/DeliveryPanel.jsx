@@ -132,7 +132,7 @@ export default function DeliveryPanel() {
                                             <div className="space-y-2">
                                                 {order.items.map((item, idx) => (
                                                     <div key={idx} className="flex justify-between text-xs font-bold text-gray-500 bg-gray-50/50 p-2 rounded-lg">
-                                                        <span className="truncate max-w-[180px]">{item.name}</span>
+                                                        <span className="truncate max-w-[180px]">Item {idx + 1}</span>
                                                         <span className="text-gray-900 shrink-0">x{item.quantity}</span>
                                                     </div>
                                                 ))}
