@@ -79,11 +79,11 @@ function Navigation({ cartCount, onCartClick }) {
 
 export default function App() {
     const [showIntro, setShowIntro] = useState(() => {
-        return !localStorage.getItem('apni_intro_seen');
+        return !sessionStorage.getItem('apni_intro_seen_session');
     });
 
     const handleIntroComplete = () => {
-        localStorage.setItem('apni_intro_seen', 'true');
+        sessionStorage.setItem('apni_intro_seen_session', 'true');
         setShowIntro(false);
     };
 

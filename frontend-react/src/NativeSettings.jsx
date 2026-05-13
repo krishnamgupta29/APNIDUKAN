@@ -123,13 +123,14 @@ export default function NativeSettings() {
             </div>
 
             {/* Footer */}
-            <div className="py-12 text-center">
-                <div className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-gray-100 mb-3">
+            <div className="py-12 px-8">
+                <div className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-gray-100 mb-4">
                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                     <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Systems Operational</span>
                 </div>
-                <p className="text-[10px] font-bold text-gray-300 px-12">
-                    Handcrafted for Shahjahanpur with ❤️. © 2026 ApniDukan. All rights reserved.
+                <p className="text-[11px] font-black text-gray-900 mb-1">ApniDukan Shahjahanpur</p>
+                <p className="text-[10px] font-bold text-gray-400 leading-relaxed">
+                    © 2026 ApniDukan. All rights reserved. Handcrafted with ❤️ for your shopping experience.
                 </p>
             </div>
         </div>

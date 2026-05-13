@@ -9,10 +9,10 @@ import NativeProductPage from './NativeProductPage';
 import NativeCheckout from './NativeCheckout';
 import NativeConfirmOrder from './NativeConfirmOrder';
 import NativeOrderSuccess from './NativeOrderSuccess';
-import Legal from './Legal';
-import SupportPage from './SupportPage';
-import HowToUse from './HowToUse';
-import FAQs from './FAQs';
+import Legal from './NativeLegal';
+import SupportPage from './NativeSupportPage';
+import HowToUse from './NativeHowToUse';
+import FAQs from './NativeFAQs';
 
 function BottomNav({ cartCount }) {
     const navigate = useNavigate();
@@ -25,7 +25,7 @@ function BottomNav({ cartCount }) {
         { path: '/settings', icon: Settings,     label: 'Settings' },
     ];
 
-    const hideOn = ['/checkout', '/confirm-order', '/order-success', '/product'];
+    const hideOn = ['/checkout', '/confirm-order', '/order-success', '/product', '/support', '/faqs', '/legal', '/how-to-use'];
     if (hideOn.some(p => location.pathname.startsWith(p))) return null;
 
     return (

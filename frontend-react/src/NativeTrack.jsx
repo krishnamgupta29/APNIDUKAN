@@ -11,10 +11,14 @@ export default function NativeTrack() {
     const [localOrders, setLocalOrders] = useState([]);
     const [ordersData, setOrdersData] = useState({});
     const [selectedOrder, setSelectedOrder] = useState(null);
-    const [rating, setRating] = useState(5);
-    const [comment, setComment] = useState('');
     const [submitting, setSubmitting] = useState(false);
     const [toast, setToast] = useState(null);
+
+    const handleSelectOrder = (orderId) => {
+        setSelectedOrder(orderId);
+        setRating(0); // Start with 0 stars
+        setComment(''); // Clear text
+    };
 
     useEffect(() => {
         try {
@@ -38,7 +42,7 @@ export default function NativeTrack() {
         try {
             const orderIds = orders.map(o => o.orderId || o._id);
             const { data } = await axios.post(`${API_URL}/api/orders/sync`, { orderIds });
-            const dataMap = {};
+            const dataMap = { ...ordersData }; // Keep old data if sync fails for some
             data.forEach(o => { dataMap[o._id] = o; });
             setOrdersData(dataMap);
         } catch (err) {
@@ -73,6 +77,7 @@ export default function NativeTrack() {
         switch(status) {
             case 'pending':
             case 'ordered': return { step: 1, label: 'ORDERED', color: 'bg-blue-500' };
+            case 'assigned':
             case 'confirmed': return { step: 2, label: 'CONFIRMED', color: 'bg-emerald-500' };
             case 'delivered': return { step: 3, label: 'DELIVERED', color: 'bg-emerald-500' };
             case 'returned':
@@ -86,20 +91,16 @@ export default function NativeTrack() {
 
     return (
         <div className="min-h-screen bg-[#f8fafc] pb-32">
-            {/* Native Header */}
-            <div className="bg-white px-6 pt-12 pb-6 sticky top-0 z-50 border-b border-gray-100">
+             <div className="bg-white px-6 pt-12 pb-6 sticky top-0 z-50 border-b border-gray-100">
                 <div className="flex justify-between items-end">
                     <div>
                         <h1 className="text-3xl font-black text-gray-900 tracking-tight">My Orders</h1>
-                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mt-1">Local History</p>
-                    </div>
-                    <div className="w-10 h-10 bg-gray-900 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-gray-900/20">
-                        <ShoppingBag size={20} />
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Local History</p>
                     </div>
                 </div>
             </div>
 
-            <div className="px-6 py-8 space-y-4">
+            <div className="bg-white">
                 {localOrders.length === 0 ? (
                     <div className="py-20 text-center">
                         <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -119,8 +120,8 @@ export default function NativeTrack() {
                             <motion.div 
                                 key={order._id}
                                 whileTap={{ scale: 0.98 }}
-                                onClick={() => setSelectedOrder(order._id)}
-                                className="bg-white p-5 rounded-[2.5rem] border border-gray-100 shadow-sm flex items-center gap-4 relative overflow-hidden group"
+                                onClick={() => handleSelectOrder(order._id)}
+                                className="bg-white p-6 border-b border-gray-100 flex items-center gap-5 relative group"
                             >
                                 <div className="w-16 h-16 bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 shrink-0">
                                     <img src={getImageUrl(mainItem?.image)} className="w-full h-full object-cover" />
@@ -143,7 +144,7 @@ export default function NativeTrack() {
                                         
                                         {(statusInfo.label === 'DELIVERED' || statusInfo.label === 'RETURNED') && !remote?.feedbackGiven && (
                                             <button 
-                                                onClick={(e) => { e.stopPropagation(); setSelectedOrder(order._id); }}
+                                                onClick={(e) => { e.stopPropagation(); handleSelectOrder(order._id); }}
                                                 className="px-4 py-2 bg-gray-900 text-white text-[10px] font-black rounded-xl active:scale-95 transition-all shadow-lg shadow-gray-900/20 flex items-center gap-1.5"
                                             >
                                                 <Star size={10} fill="currentColor" /> Rate Order
@@ -157,10 +158,6 @@ export default function NativeTrack() {
                                         )}
                                     </div>
                                 </div>
-                                
-                                {!(statusInfo.label === 'DELIVERED' || statusInfo.label === 'RETURNED') && (
-                                    <ChevronRight size={18} className="text-gray-300 ml-1" />
-                                )}
                             </motion.div>
                         );
                     })
@@ -179,7 +176,7 @@ export default function NativeTrack() {
                         <motion.div
                             initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
                             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                            className="fixed bottom-0 left-0 w-full bg-white rounded-t-[3.5rem] z-[70] max-h-[92vh] overflow-hidden flex flex-col shadow-2xl"
+                            className="fixed bottom-0 left-0 w-full bg-white rounded-t-[3.5rem] z-[70] h-[92vh] overflow-hidden flex flex-col shadow-2xl"
                         >
                              <div className="bg-white/80 backdrop-blur-xl px-8 pt-6 pb-4 z-10 border-b border-gray-100/50 flex-shrink-0">
                                 <div className="w-12 h-1.5 bg-gray-200/50 rounded-full mx-auto mb-6" />
@@ -273,14 +270,14 @@ export default function NativeTrack() {
                                             </div>
                                         </div>
 
-                                        <div className="space-y-6">
-                                            {/* Items Box */}
-                                            <div className="bg-gray-50/50 rounded-[2.5rem] p-7 border border-gray-100/80">
-                                                <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6 flex items-center gap-2.5">
-                                                    <div className="p-1.5 bg-blue-50 rounded-lg"><ShoppingBag size={14} className="text-blue-500"/></div>
-                                                    Order Items
-                                                </h3>
-                                                <div className="space-y-5">
+                                        <div className="space-y-10">
+                                             {/* Items Section - Cleaner Full Width Style */}
+                                             <div className="pt-4">
+                                                 <h3 className="text-[11px] font-black text-gray-900 uppercase tracking-widest mb-6 flex items-center gap-3">
+                                                     <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+                                                     Ordered Items
+                                                 </h3>
+                                                 <div className="space-y-8">
                                                     {(remoteOrder?.items || activeOrder?.items || []).map((item, idx) => (
                                                         <div 
                                                             key={idx} 
@@ -295,18 +292,26 @@ export default function NativeTrack() {
                                                         </div>
                                                     ))}
                                                 </div>
-                                            </div>
-
-                                            {/* Delivery Info */}
-                                            <div className="bg-white rounded-[2.5rem] p-6 border border-gray-100 shadow-sm">
-                                                <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2"><MapPin size={14} className="text-emerald-500"/> Delivery Address</h3>
-                                                <p className="text-base font-black text-gray-900 mb-1">{remoteOrder?.customerName || activeOrder.customerName}</p>
-                                                <p className="text-sm text-gray-500 font-medium leading-relaxed italic">"{remoteOrder?.address || activeOrder.address}"</p>
-                                                <div className="mt-6 pt-6 border-t border-gray-50 flex justify-between items-center">
-                                                    <span className="text-xs font-bold text-gray-400">Total Paid Amount</span>
-                                                    <span className="text-2xl font-black text-emerald-600">₹{remoteOrder?.totalAmount || activeOrder.totalAmount}</span>
-                                                </div>
-                                            </div>
+                                             </div>
+ 
+                                             {/* Delivery Info - Simplified Full Width */}
+                                             <div className="pt-4 pb-12">
+                                                 <h3 className="text-[11px] font-black text-gray-900 uppercase tracking-widest mb-6 flex items-center gap-3">
+                                                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                                                     Delivery Details
+                                                 </h3>
+                                                 <div className="space-y-4">
+                                                     <p className="text-xl font-black text-gray-900 leading-tight">{remoteOrder?.customerName || activeOrder.customerName}</p>
+                                                     <div className="flex items-start gap-3">
+                                                        <MapPin size={18} className="text-gray-300 shrink-0 mt-1" />
+                                                        <p className="text-sm text-gray-500 font-bold leading-relaxed">{remoteOrder?.address || activeOrder.address}</p>
+                                                     </div>
+                                                 </div>
+                                                 <div className="mt-8 pt-8 border-t border-gray-50 flex justify-between items-center">
+                                                     <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Bill</span>
+                                                     <span className="text-2xl font-black text-gray-900">₹{remoteOrder?.totalAmount || activeOrder.totalAmount}</span>
+                                                 </div>
+                                             </div>
 
                                             {/* Feedback Section */}
                                             {(statusInfo.label === 'DELIVERED' || statusInfo.label === 'RETURNED') && (
@@ -332,7 +337,7 @@ export default function NativeTrack() {
                                                                         <button 
                                                                             key={star} 
                                                                             onClick={() => setRating(star)} 
-                                                                            className={`p-1 transition-all ${rating >= star ? 'text-yellow-400 scale-125' : 'text-gray-200'}`}
+                                                                            className={`p-1 transition-all ${rating >= star ? 'text-yellow-400 scale-125' : 'text-gray-900'}`}
                                                                         >
                                                                             <Star size={34} fill={rating >= star ? "currentColor" : "none"} strokeWidth={2.5} />
                                                                         </button>
