@@ -1,14 +1,14 @@
 import React from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
-import { Home, ShoppingBag, MapPin, Settings } from 'lucide-react';
+import { Home, ShoppingBag, MapPin, Settings, Package } from 'lucide-react';
 import NativeHome from './NativeHome';
 import NativeCart from './NativeCart';
 import NativeTrack from './NativeTrack';
 import NativeSettings from './NativeSettings';
 import NativeProductPage from './NativeProductPage';
-import Checkout from './Checkout';
-import ConfirmOrder from './ConfirmOrder';
-import OrderSuccess from './OrderSuccess';
+import NativeCheckout from './NativeCheckout';
+import NativeConfirmOrder from './NativeConfirmOrder';
+import NativeOrderSuccess from './NativeOrderSuccess';
 import Legal from './Legal';
 import SupportPage from './SupportPage';
 import HowToUse from './HowToUse';
@@ -106,9 +106,9 @@ export default function NativeApp({
                     <Route path="/settings" element={<NativeSettings />} />
 
                     <Route path="/product/:productId" element={<NativeProductPage addToCart={addToCart} />} />
-                    <Route path="/checkout"      element={<Checkout cart={cart} subtotal={subtotal} deliveryTotal={deliveryTotal} totalCalc={totalCalc} setOrderPayload={setOrderPayload} />} />
-                    <Route path="/confirm-order" element={<ConfirmOrder orderPayload={orderPayload} setCart={setCart} setOrderPayload={setOrderPayload} />} />
-                    <Route path="/order-success" element={<OrderSuccess orderPayload={orderPayload} setOrderPayload={setOrderPayload} />} />
+                    <Route path="/checkout"      element={<NativeCheckout cart={cart} subtotal={subtotal} deliveryTotal={deliveryTotal} totalCalc={totalCalc} setOrderPayload={setOrderPayload} />} />
+                    <Route path="/confirm-order" element={<NativeConfirmOrder orderPayload={orderPayload} setCart={setCart} setOrderPayload={setOrderPayload} />} />
+                    <Route path="/order-success" element={<NativeOrderSuccess orderPayload={orderPayload} setOrderPayload={setOrderPayload} />} />
 
                     <Route path="/legal"       element={<Legal />} />
                     <Route path="/support"     element={<SupportPage />} />

@@ -16,9 +16,17 @@ export default function NativeTrack() {
     const [toast, setToast] = useState(null);
 
     useEffect(() => {
-        const stored = JSON.parse(localStorage.getItem('apni_order_history') || localStorage.getItem('my_orders') || '[]');
-        setLocalOrders(stored);
-        if (stored.length > 0) syncOrders(stored);
+        try {
+            const storedRaw = localStorage.getItem('apni_order_history') || localStorage.getItem('my_orders') || '[]';
+            const stored = JSON.parse(storedRaw);
+            if (Array.isArray(stored)) {
+                setLocalOrders(stored);
+                if (stored.length > 0) syncOrders(stored);
+            }
+        } catch (e) {
+            console.error('Initial load failed', e);
+            setLocalOrders([]);
+        }
     }, []);
 
     const syncOrders = async (orders) => {
@@ -96,7 +104,7 @@ export default function NativeTrack() {
                         <p className="text-gray-400 font-medium text-sm mt-2 px-10">Your locally placed orders will appear here for tracking.</p>
                     </div>
                 ) : (
-                    localOrders.slice().reverse().map(order => {
+                    localOrders.slice().sort((a,b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)).map(order => {
                         const statusInfo = getStatusInfo(order._id, order.status);
                         const remote = ordersData[order._id];
                         const items = remote?.items || order.items || [];
@@ -115,20 +123,19 @@ export default function NativeTrack() {
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 mb-1">
                                         <span className={`w-2 h-2 rounded-full ${statusInfo.color} animate-pulse`} />
-                                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{statusInfo.label}</p>
+                                        <p className={`text-[9px] font-black uppercase tracking-widest ${statusInfo.color.replace('bg-', 'text-')}`}>{statusInfo.label}</p>
+                                        <span className="text-[9px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100/50 uppercase tracking-widest">
+                                            #{remote?.orderId || order.orderId || order._id.slice(-4).toUpperCase()}
+                                        </span>
                                     </div>
                                     <h3 className="text-sm font-black text-gray-900 truncate">{mainItem?.name || 'Order Items'}</h3>
-                                    <p className="text-[11px] font-bold text-gray-400 mt-0.5">₹{remote?.totalAmount || order.totalAmount} • {new Date(order.date || Date.now()).toLocaleDateString()}</p>
+                                    <p className="text-[11px] font-bold mt-1">
+                                        <span className="text-emerald-600 font-black">₹{remote?.totalAmount || order.totalAmount}</span>
+                                        <span className="text-gray-300 mx-2">•</span>
+                                        <span className="text-gray-400 font-bold">{new Date(order.date || Date.now()).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</span>
+                                    </p>
                                 </div>
                                 
-                                {(statusInfo.label === 'DELIVERED' || statusInfo.label === 'RETURNED') && !remote?.feedbackGiven && (
-                                    <button 
-                                        onClick={(e) => { e.stopPropagation(); setSelectedOrder(order._id); }}
-                                        className="px-3 py-2 bg-gray-900 text-white text-[9px] font-black rounded-xl shadow-lg active:scale-90 transition-all flex items-center gap-1"
-                                    >
-                                        <MessageSquare size={10} /> Feedback
-                                    </button>
-                                )}
                                 <ChevronRight size={18} className="text-gray-300 ml-1" />
                             </motion.div>
                         );
@@ -148,20 +155,27 @@ export default function NativeTrack() {
                         <motion.div
                             initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
                             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                            className="fixed bottom-0 left-0 w-full bg-white rounded-t-[3rem] z-[70] max-h-[90vh] overflow-y-auto"
+                            className="fixed bottom-0 left-0 w-full bg-white rounded-t-[3.5rem] z-[70] max-h-[92vh] overflow-hidden flex flex-col shadow-2xl"
                         >
-                            <div className="sticky top-0 bg-white px-8 pt-4 pb-2 z-10">
+                            <div className="bg-white px-8 pt-6 pb-4 z-10 border-b border-gray-50 flex-shrink-0">
                                 <div className="w-12 h-1.5 bg-gray-100 rounded-full mx-auto mb-6" />
-                                <div className="flex justify-between items-center mb-4">
+                                <div className="flex justify-between items-center">
                                     <div>
                                         <h2 className="text-2xl font-black text-gray-900 tracking-tight">Order Details</h2>
-                                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-0.5">#{selectedOrder.slice(-6).toUpperCase()}</p>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <span className={`w-2 h-2 rounded-full ${statusInfo.color} animate-pulse`} />
+                                            <p className={`text-[10px] font-black uppercase tracking-widest ${statusInfo.color.replace('bg-', 'text-')}`}>{statusInfo.label}</p>
+                                            <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100/50 uppercase tracking-widest">
+                                                ID: #{remote?.orderId || activeOrder.orderId || selectedOrder.slice(-6).toUpperCase()}
+                                            </span>
+                                        </div>
                                     </div>
-                                    <button onClick={() => setSelectedOrder(null)} className="p-2 bg-gray-50 rounded-full text-gray-400"><X size={20}/></button>
+                                    <button onClick={() => setSelectedOrder(null)} className="p-3 bg-gray-50 rounded-2xl text-gray-400 active:scale-90 transition-all"><X size={20}/></button>
                                 </div>
                             </div>
 
-                            {(() => {
+                            <div className="flex-1 overflow-y-auto px-8 pb-32">
+                                {(() => {
                                 const activeOrder = localOrders.find(o => o._id === selectedOrder);
                                 const remoteOrder = ordersData[selectedOrder];
                                 const statusInfo = getStatusInfo(selectedOrder, activeOrder.status);
@@ -305,6 +319,7 @@ export default function NativeTrack() {
                                     </div>
                                 );
                             })()}
+                            </div>
                         </motion.div>
                     </>
                 )}
