@@ -85,7 +85,7 @@ export default function NativeSettings() {
             <div className="px-5 -mt-6 relative z-20 space-y-8">
                 {SECTIONS.map((section, sIdx) => (
                     <div key={sIdx}>
-                        <h3 className="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4 ml-2">{section.label}</h3>
+                        <h3 className="text-[11px] font-black text-gray-400 uppercase mb-4 ml-2">{section.label}</h3>
                         <div className="bg-white rounded-[32px] overflow-hidden shadow-xl shadow-blue-900/5 border border-gray-50">
                             {section.items.map((item, iIdx) => {
                                 const Icon = item.icon;

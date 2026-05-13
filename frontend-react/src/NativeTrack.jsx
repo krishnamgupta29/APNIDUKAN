@@ -22,7 +22,11 @@ export default function NativeTrack() {
             const stored = JSON.parse(storedRaw);
             if (Array.isArray(stored)) {
                 setLocalOrders(stored);
-                if (stored.length > 0) syncOrders(stored);
+                if (stored.length > 0) {
+                    syncOrders(stored);
+                    const interval = setInterval(() => syncOrders(stored), 10000); // Sync every 10s
+                    return () => clearInterval(interval);
+                }
             }
         } catch (e) {
             console.error('Initial load failed', e);
@@ -71,7 +75,9 @@ export default function NativeTrack() {
             case 'ordered': return { step: 1, label: 'ORDERED', color: 'bg-blue-500' };
             case 'confirmed': return { step: 2, label: 'CONFIRMED', color: 'bg-emerald-500' };
             case 'delivered': return { step: 3, label: 'DELIVERED', color: 'bg-emerald-500' };
-            case 'returned': return { step: 3, label: 'RETURNED', color: 'bg-red-500' };
+            case 'returned':
+            case 'rejected':
+            case 'return': return { step: 3, label: 'RETURNED', color: 'bg-red-500' };
             default: return { step: 1, label: 'ORDERED', color: 'bg-gray-500' };
         }
     };
@@ -120,22 +126,41 @@ export default function NativeTrack() {
                                     <img src={getImageUrl(mainItem?.image)} className="w-full h-full object-cover" />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <span className={`w-2 h-2 rounded-full ${statusInfo.color} animate-pulse`} />
+                                    <div className="flex items-center gap-2 mb-1.5">
+                                        <div className={`w-2 h-2 rounded-full ${statusInfo.color} ${statusInfo.label !== 'DELIVERED' && statusInfo.label !== 'RETURNED' ? 'animate-pulse' : ''}`} />
                                         <p className={`text-[9px] font-black uppercase tracking-widest ${statusInfo.color.replace('bg-', 'text-')}`}>{statusInfo.label}</p>
                                         <span className="text-[9px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100/50 uppercase tracking-widest">
                                             #{remote?.orderId || order.orderId || order._id.slice(-4).toUpperCase()}
                                         </span>
                                     </div>
-                                    <h3 className="text-sm font-black text-gray-900 truncate">{mainItem?.name || 'Order Items'}</h3>
-                                    <p className="text-[11px] font-bold mt-1">
-                                        <span className="text-emerald-500 font-black">₹{remote?.totalAmount || order.totalAmount}</span>
-                                        <span className="text-gray-300 mx-2">•</span>
-                                        <span className="text-gray-400 font-bold">{new Date(order.date || Date.now()).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</span>
-                                    </p>
+                                    <h3 className="text-sm font-black text-gray-900 truncate pr-4">{mainItem?.name || 'Order Items'}</h3>
+                                    <div className="flex items-center justify-between mt-2">
+                                        <p className="text-[11px] font-bold">
+                                            <span className="text-emerald-500 font-black text-base">₹{remote?.totalAmount || order.totalAmount}</span>
+                                            <span className="text-gray-300 mx-2">•</span>
+                                            <span className="text-gray-400 font-bold">{new Date(order.createdAt || order.date || Date.now()).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</span>
+                                        </p>
+                                        
+                                        {(statusInfo.label === 'DELIVERED' || statusInfo.label === 'RETURNED') && !remote?.feedbackGiven && (
+                                            <button 
+                                                onClick={(e) => { e.stopPropagation(); setSelectedOrder(order._id); }}
+                                                className="px-4 py-2 bg-gray-900 text-white text-[10px] font-black rounded-xl active:scale-95 transition-all shadow-lg shadow-gray-900/20 flex items-center gap-1.5"
+                                            >
+                                                <Star size={10} fill="currentColor" /> Rate Order
+                                            </button>
+                                        )}
+                                        {remote?.feedbackGiven && (
+                                            <div className="flex items-center gap-1.5 text-emerald-500 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-100">
+                                                <CheckCircle2 size={10} />
+                                                <span className="text-[9px] font-black uppercase tracking-widest">Reviewed</span>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                                 
-                                <ChevronRight size={18} className="text-gray-300 ml-1" />
+                                {!(statusInfo.label === 'DELIVERED' || statusInfo.label === 'RETURNED') && (
+                                    <ChevronRight size={18} className="text-gray-300 ml-1" />
+                                )}
                             </motion.div>
                         );
                     })
@@ -156,8 +181,8 @@ export default function NativeTrack() {
                             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
                             className="fixed bottom-0 left-0 w-full bg-white rounded-t-[3.5rem] z-[70] max-h-[92vh] overflow-hidden flex flex-col shadow-2xl"
                         >
-                             <div className="bg-white px-8 pt-6 pb-4 z-10 border-b border-gray-50 flex-shrink-0">
-                                <div className="w-12 h-1.5 bg-gray-100 rounded-full mx-auto mb-6" />
+                             <div className="bg-white/80 backdrop-blur-xl px-8 pt-6 pb-4 z-10 border-b border-gray-100/50 flex-shrink-0">
+                                <div className="w-12 h-1.5 bg-gray-200/50 rounded-full mx-auto mb-6" />
                                 {(() => {
                                     const activeOrder = localOrders.find(o => o._id === selectedOrder);
                                     const remoteOrder = ordersData[selectedOrder];
@@ -197,7 +222,7 @@ export default function NativeTrack() {
                                     if (!activeOrder && !remoteOrder) return null;
 
                                 return (
-                                    <div className="px-8 pb-20 space-y-8">
+                                    <div className="px-6 pb-20 space-y-10">
                                         {/* Cinematic Mobile Progress Timeline */}
                                         <div className="relative px-6 py-8">
                                             {/* Background Track */}
@@ -250,9 +275,12 @@ export default function NativeTrack() {
 
                                         <div className="space-y-6">
                                             {/* Items Box */}
-                                            <div className="bg-gray-50 rounded-[2.5rem] p-6 border border-gray-100">
-                                                <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2"><ShoppingBag size={14} className="text-blue-500"/> Order Items</h3>
-                                                <div className="space-y-4">
+                                            <div className="bg-gray-50/50 rounded-[2.5rem] p-7 border border-gray-100/80">
+                                                <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6 flex items-center gap-2.5">
+                                                    <div className="p-1.5 bg-blue-50 rounded-lg"><ShoppingBag size={14} className="text-blue-500"/></div>
+                                                    Order Items
+                                                </h3>
+                                                <div className="space-y-5">
                                                     {(remoteOrder?.items || activeOrder?.items || []).map((item, idx) => (
                                                         <div 
                                                             key={idx} 
