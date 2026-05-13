@@ -21,7 +21,7 @@ function BottomNav({ cartCount }) {
     const tabs = [
         { path: '/',         icon: Home,        label: 'Home' },
         { path: '/cart',     icon: ShoppingBag, label: 'Cart', badge: cartCount },
-        { path: '/track',    icon: MapPin,       label: 'Orders' },
+        { path: '/track',    icon: Package,     label: 'My Orders' },
         { path: '/settings', icon: Settings,     label: 'Settings' },
     ];
 

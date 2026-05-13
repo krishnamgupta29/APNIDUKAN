@@ -3,11 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import {
     HeadphonesIcon, HelpCircle, BookOpen, Shield, FileText,
     ChevronRight, Settings as SettingsIcon,
-    Star, Phone, Info, User, LogOut
+    Star, Phone, Info, User, LogOut, Package
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const SECTIONS = [
+    {
+        label: 'Account & Orders',
+        items: [
+            { icon: Package, color: '#4361ee', bg: 'rgba(67,97,238,0.1)', title: 'My Orders', sub: 'Track your active & past orders', path: '/track' },
+        ]
+    },
     {
         label: 'Help & Support',
         items: [
