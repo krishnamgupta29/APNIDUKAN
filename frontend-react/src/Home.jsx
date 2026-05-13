@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Star, ArrowRight, Zap, ShieldCheck, MapPin, ShoppingBag, Plus, Search } from 'lucide-react';
+import { Star, ArrowRight, Zap, ShieldCheck, MapPin, ShoppingBag, Plus, Search, Download } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import API_URL from './api';
@@ -27,7 +27,7 @@ function SkeletonCard() {
     );
 }
 
-export default function Home({ addToCart, onAppDownloadClick }) {
+export default function Home({ addToCart }) {
     const [products, setProducts] = useState(() => {
         // Instant load from cache on first render — avoids blank screen
         try {
@@ -110,24 +110,24 @@ export default function Home({ addToCart, onAppDownloadClick }) {
                     <h1 className="text-4xl sm:text-5xl md:text-7xl font-extrabold text-gray-900 tracking-tight leading-tight mb-6 sm:mb-8">
                         Apni Dukan <br className="hidden sm:block" />
                         <span className="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 bg-clip-text text-transparent">
-                            Shahjahanpur 🚀
+                            Shahjahanpur &#128640;
                         </span>
                     </h1>
                     <p className="text-base sm:text-lg text-gray-600 mb-8 sm:mb-12 max-w-2xl mx-auto font-medium leading-relaxed px-4">
                         Experience lightning-fast Delivery within 24h across Shahjahanpur. Shop your daily needs with our trusted platform.
                     </p>
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto mx-auto">
+                    <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto mx-auto justify-center">
                         <button
                             onClick={() => document.getElementById('shop').scrollIntoView({ behavior: 'smooth' })}
-                            className="px-8 sm:px-10 py-3.5 sm:py-4 bg-gray-900 text-white font-bold rounded-full hover:scale-105 active:scale-95 hover:bg-black shadow-xl shadow-gray-200 transition-all flex items-center justify-center gap-2 w-full sm:w-auto touch-manipulation"
+                            className="px-8 sm:px-10 py-3.5 sm:py-4 bg-gray-900 text-white font-bold rounded-full hover:scale-105 active:scale-95 hover:bg-black shadow-xl shadow-gray-200 transition-all flex items-center justify-center gap-2 touch-manipulation"
                         >
                             Start Shopping <ArrowRight size={20} />
                         </button>
                         <button
-                            onClick={onAppDownloadClick}
-                            className="px-8 sm:px-10 py-3.5 sm:py-4 bg-emerald-100 text-emerald-800 font-bold rounded-full hover:scale-105 active:scale-95 hover:bg-emerald-200 transition-all flex items-center justify-center gap-2 w-full sm:w-auto touch-manipulation border border-emerald-200"
+                            onClick={() => navigate('/download')}
+                            className="px-8 sm:px-10 py-3.5 sm:py-4 bg-emerald-500 text-white font-black rounded-full hover:scale-105 active:scale-95 hover:bg-emerald-600 shadow-xl shadow-emerald-200 transition-all flex items-center justify-center gap-2 touch-manipulation"
                         >
-                            <Zap size={20} className="text-emerald-600" /> Install App
+                            Download App <Download size={20} />
                         </button>
                     </div>
                 </motion.div>
@@ -334,17 +334,17 @@ export function ProductCard({ p, onClick, onAdd }) {
                 <div className="flex flex-col gap-0.5 mt-3 pt-3 border-t border-gray-100/60">
                     <div className="flex items-baseline gap-2">
                         <span className={`text-lg md:text-xl font-extrabold tracking-tight ${p.outOfStock ? 'text-gray-400' : 'text-emerald-800'}`}>
-                            ₹{p.price}
+                            &#8377;{p.price}
                         </span>
                         {originalPrice && (
                             <span className="text-xs font-semibold text-red-400/60 line-through">
-                                ₹{originalPrice}
+                                &#8377;{originalPrice}
                             </span>
                         )}
                     </div>
                     {!p.isFreeDelivery && (p.deliveryCharge || 0) > 0 && !p.outOfStock && (
                         <span className="text-[10px] font-bold text-gray-500 uppercase tracking-tighter">
-                            + ₹{p.deliveryCharge} Delivery
+                            + &#8377;{p.deliveryCharge} Delivery
                         </span>
                     )}
                 </div>

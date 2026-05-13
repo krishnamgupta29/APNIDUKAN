@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { 
-    Package, MapPin, CheckCircle, XCircle, LogOut, 
-    Phone, CheckCircle2, LayoutDashboard
-} from 'lucide-react';
+import { Package, MapPin, CheckCircle as CheckCircle2, XCircle, LogOut, Truck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import API_URL from './api';
 
@@ -38,15 +35,11 @@ export default function DeliveryPanel() {
     };
 
     const updateStatus = async (orderId, newStatus) => {
-        const confirmed = window.confirm(`Mark this order as ${newStatus.toUpperCase()}?`);
-        if (!confirmed) return;
-
         try {
-            await axios.put(`${API_URL}/api/orders/${orderId}/status`, { status: newStatus.toUpperCase() }, {
+            await axios.put(`${API_URL}/api/orders/${orderId}/status`, { status: newStatus }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            // Refresh local state
-            setOrders(orders.map(o => o._id === orderId ? { ...o, status: newStatus.toUpperCase() } : o));
+            setOrders(orders.map(o => o._id === orderId ? { ...o, status: newStatus } : o));
         } catch (err) {
             alert('Failed to update status');
         }
@@ -54,163 +47,139 @@ export default function DeliveryPanel() {
 
     const logout = () => {
         sessionStorage.clear();
-        localStorage.removeItem('apnidukan_user_details');
+        localStorage.clear();
         navigate('/login');
     };
 
-    if (loading) return (
-        <div className="min-h-screen flex items-center justify-center bg-[#f8f9fd]">
-            <div className="w-12 h-12 border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin" />
-        </div>
-    );
+    if (loading) return <div className="p-8 text-center text-gray-500 font-bold">Loading...</div>;
 
-    const activeOrders = orders.filter(o => o.status?.toUpperCase() === 'ASSIGNED');
-    const completedOrders = orders.filter(o => {
-        const st = o.status?.toUpperCase();
-        return st === 'DELIVERED' || st === 'RETURNED';
-    });
+    const activeOrders = orders.filter(o => o.status === 'assigned');
+    const completedOrders = orders.filter(o => o.status === 'delivered' || o.status === 'returned');
 
     return (
-        <div className="min-h-screen bg-[#f8f9fd] pb-24">
-            {/* Premium Header */}
-            <div 
-                className="pt-12 pb-24 px-6 text-white sticky top-0 z-20 shadow-xl"
-                style={{ background: 'linear-gradient(160deg,#0d0221 0%,#240046 100%)' }}
-            >
-                <div className="max-w-lg mx-auto flex justify-between items-center">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-white/10 backdrop-blur-xl rounded-2xl flex items-center justify-center border border-white/10 shadow-lg">
-                            <LayoutDashboard size={24} className="text-[#f72585]" />
-                        </div>
-                        <div>
-                            <h1 className="text-xl font-black tracking-tight leading-none mb-1">Delivery Hub</h1>
-                            <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">{userName}</p>
-                        </div>
+        <div className="min-h-screen bg-[#f8fafc] pb-20">
+            {/* Staff Header */}
+            <div className="bg-white border-b border-gray-100 px-6 py-8 shadow-sm">
+                <div className="max-w-4xl mx-auto flex justify-between items-end">
+                    <div>
+                        <h1 className="text-3xl font-black text-gray-900 tracking-tight flex items-center gap-2">
+                            <Truck className="text-blue-600" /> Delivery Panel
+                        </h1>
+                        <p className="text-sm font-bold text-gray-400 uppercase tracking-[0.2em] mt-1">Welcome, {userName}</p>
                     </div>
-                    <button 
-                        onClick={logout}
-                        className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center border border-white/5 active:scale-90 transition-all"
-                    >
-                        <LogOut size={20} className="text-white/60" />
-                    </button>
+                    <div className="flex gap-2">
+                        <div className="bg-blue-50 px-4 py-2 rounded-2xl border border-blue-100 text-center">
+                            <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Active</p>
+                            <p className="text-xl font-black text-blue-600">{activeOrders.length}</p>
+                        </div>
+                        <button onClick={logout} className="p-4 bg-gray-900 text-white rounded-2xl hover:bg-black transition shadow-lg shadow-gray-900/10">
+                            <LogOut size={18} />
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <div className="max-w-lg mx-auto px-6 -mt-12 relative z-30">
-                {/* Stats Summary */}
-                <div className="grid grid-cols-2 gap-4 mb-8">
-                    <div className="bg-white p-6 rounded-[32px] shadow-lg shadow-gray-200/50 border border-white">
-                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Active Tasks</p>
-                        <p className="text-3xl font-black text-gray-900">{activeOrders.length}</p>
+            <div className="max-w-4xl mx-auto p-6">
+                {activeOrders.length === 0 ? (
+                    <div className="bg-white rounded-[2.5rem] p-12 text-center border border-gray-100 shadow-xl shadow-gray-200/50 mt-10">
+                        <div className="w-20 h-20 bg-gray-50 text-gray-300 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <Package size={40} />
+                        </div>
+                        <h2 className="text-2xl font-black text-gray-900 mb-2">No Active Orders</h2>
+                        <p className="text-gray-400 font-medium">Sit back and relax! New orders will appear here.</p>
                     </div>
-                    <div className="bg-white p-6 rounded-[32px] shadow-lg shadow-gray-200/50 border border-white">
-                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Total Done</p>
-                        <p className="text-3xl font-black text-gray-900">{completedOrders.length}</p>
-                    </div>
-                </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <AnimatePresence>
+                            {activeOrders.map(order => (
+                                <motion.div 
+                                    key={order._id}
+                                    layout
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.95 }}
+                                    className="bg-white rounded-[2.5rem] overflow-hidden border border-gray-100 shadow-xl shadow-gray-200/50 flex flex-col hover:shadow-2xl transition-all duration-300"
+                                >
+                                    <div className="p-6 flex-1">
+                                        <div className="flex justify-between items-start mb-6">
+                                            <div>
+                                                <span className="text-[10px] font-black text-blue-500 bg-blue-50 px-3 py-1 rounded-full border border-blue-100 uppercase tracking-widest">
+                                                    Order #{order.orderId || order._id.slice(-6).toUpperCase()}
+                                                </span>
+                                                <h3 className="text-xl font-black text-gray-900 mt-3 tracking-tight">{order.customerName}</h3>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Total</p>
+                                                <p className="text-xl font-black text-gray-900">₹{order.totalAmount || order.total}</p>
+                                            </div>
+                                        </div>
 
-                {/* Active Section */}
-                <h2 className="text-[11px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4 px-2">Assigned Deliveries</h2>
-                
-                <div className="space-y-6">
-                    {activeOrders.length === 0 ? (
-                        <motion.div 
-                            initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                            className="bg-white p-12 rounded-[40px] text-center border border-gray-100 shadow-sm"
-                        >
-                            <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                                <Package size={40} className="text-gray-200" />
-                            </div>
-                            <h3 className="text-lg font-black text-gray-900">All caught up!</h3>
-                            <p className="text-sm font-bold text-gray-400">Wait for the admin to assign new orders.</p>
-                        </motion.div>
-                    ) : (
-                        activeOrders.map((order, idx) => (
-                            <motion.div 
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: idx * 0.1 }}
-                                key={order._id}
-                                className="bg-white rounded-[40px] border border-gray-50 shadow-xl shadow-gray-200/40 overflow-hidden"
-                            >
-                                <div className="p-8">
-                                    <div className="flex justify-between items-start mb-6">
-                                        <div>
-                                            <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-blue-100">#{order.orderId?.toUpperCase()}</span>
-                                            <h3 className="text-xl font-black text-gray-900 mt-3">{order.customerName}</h3>
+                                        <div className="space-y-4 mb-6">
+                                            <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-2xl border border-gray-100/50">
+                                                <MapPin size={18} className="text-red-400 shrink-0 mt-0.5" />
+                                                <div>
+                                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Delivery Address</p>
+                                                    <p className="text-sm font-bold text-gray-700 leading-relaxed italic">"{order.address}"</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-3 px-4">
+                                                <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                                                <p className="text-xs font-black text-gray-500 uppercase tracking-widest">Phone: {order.phone}</p>
+                                            </div>
                                         </div>
-                                        <div className="text-right">
-                                            <p className="text-2xl font-black text-emerald-500 leading-none">₹{order.total}</p>
-                                            <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest mt-1">Cash on delivery</p>
-                                        </div>
+
+                                        {order.items && (
+                                            <div className="space-y-2">
+                                                {order.items.map((item, idx) => (
+                                                    <div key={idx} className="flex justify-between text-xs font-bold text-gray-500 bg-gray-50/50 p-2 rounded-lg">
+                                                        <span className="truncate max-w-[180px]">{item.name}</span>
+                                                        <span className="text-gray-900 shrink-0">x{item.quantity}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
 
-                                    <div className="space-y-3 mb-8">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center text-gray-400 shrink-0">
-                                                <Phone size={18} />
-                                            </div>
-                                            <a href={`tel:${order.phone}`} className="text-sm font-black text-gray-700 decoration-none">{order.phone}</a>
-                                        </div>
-                                        <div className="flex items-start gap-4">
-                                            <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center text-gray-400 shrink-0">
-                                                <MapPin size={18} />
-                                            </div>
-                                            <p className="text-sm font-bold text-gray-500 leading-relaxed">{order.address}</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex gap-3 pt-6 border-t border-gray-50">
+                                    <div className="p-4 bg-gray-50 border-t border-gray-100 flex gap-3">
                                         <button 
-                                            onClick={() => updateStatus(order._id, 'DELIVERED')}
-                                            className="flex-1 h-16 bg-emerald-500 text-white rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 active:scale-95 transition-all"
+                                            onClick={() => updateStatus(order._id, 'delivered')}
+                                            className="flex-1 bg-gray-900 text-white py-4 rounded-2xl font-black text-sm hover:bg-black transition-all shadow-lg shadow-gray-900/10 flex items-center justify-center gap-2"
                                         >
                                             <CheckCircle2 size={18} /> Delivered
                                         </button>
                                         <button 
-                                            onClick={() => updateStatus(order._id, 'RETURNED')}
-                                            className="flex-1 h-16 bg-red-50 text-red-600 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 border border-red-100 active:scale-95 transition-all"
+                                            onClick={() => updateStatus(order._id, 'returned')}
+                                            className="px-6 bg-white text-red-500 border border-red-100 py-4 rounded-2xl font-black text-sm hover:bg-red-50 transition-all flex items-center justify-center gap-2"
                                         >
-                                            <XCircle size={18} /> Returned
+                                            <XCircle size={18} />
                                         </button>
                                     </div>
-                                </div>
-                            </motion.div>
-                        ))
-                    )}
-                </div>
+                                </motion.div>
+                            ))}
+                        </AnimatePresence>
+                    </div>
+                )}
 
-                {/* History Section */}
                 {completedOrders.length > 0 && (
-                    <div className="mt-12">
-                        <h2 className="text-[11px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4 px-2">Recent Success</h2>
-                        <div className="space-y-3">
-                            {completedOrders.map((order, idx) => {
-                                const isDelivered = order.status?.toUpperCase() === 'DELIVERED';
-                                return (
-                                    <motion.div 
-                                        initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                                        key={order._id}
-                                        className="bg-white p-6 rounded-[32px] border border-gray-50 shadow-sm flex items-center justify-between group"
-                                    >
-                                        <div className="flex items-center gap-4">
-                                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${isDelivered ? 'bg-emerald-50 text-emerald-500' : 'bg-red-50 text-red-500'}`}>
-                                                {isDelivered ? <CheckCircle size={24} /> : <XCircle size={24} />}
-                                            </div>
-                                            <div>
-                                                <p className="text-sm font-black text-gray-900">#{order.orderId?.toUpperCase()}</p>
-                                                <p className="text-xs font-bold text-gray-400">{order.customerName}</p>
-                                            </div>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="text-sm font-black text-gray-900">₹{order.total}</p>
-                                            <p className={`text-[9px] font-black uppercase tracking-widest ${isDelivered ? 'text-emerald-500' : 'text-red-500'}`}>
-                                                {isDelivered ? 'Delivered' : 'Returned'}
-                                            </p>
-                                        </div>
-                                    </motion.div>
-                                );
-                            })}
+                    <div className="mt-16">
+                        <div className="flex items-center gap-4 mb-6">
+                            <h3 className="font-black text-2xl text-gray-900 tracking-tight">Recent History</h3>
+                            <div className="h-[2px] flex-1 bg-gray-100" />
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {completedOrders.map(order => (
+                                <div key={order._id} className="bg-white/60 backdrop-blur-sm p-5 rounded-3xl border border-gray-100 flex justify-between items-center group hover:bg-white transition-all shadow-sm">
+                                    <div className="min-w-0">
+                                        <p className="font-black text-gray-900 text-sm truncate">{order.customerName}</p>
+                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">#{order.orderId || order._id.slice(-6).toUpperCase()}</p>
+                                    </div>
+                                    {order.status === 'delivered' ? (
+                                        <span className="shrink-0 text-[10px] font-black bg-emerald-50 text-emerald-600 px-3 py-1.5 rounded-full border border-emerald-100 uppercase tracking-widest">Delivered</span>
+                                    ) : (
+                                        <span className="shrink-0 text-[10px] font-black bg-red-50 text-red-600 px-3 py-1.5 rounded-full border border-red-100 uppercase tracking-widest">Returned</span>
+                                    )}
+                                </div>
+                            ))}
                         </div>
                     </div>
                 )}

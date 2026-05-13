@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Search, ShoppingBag, MapPin, CheckCircle2, ChevronLeft, Rocket, Zap, ShieldCheck } from 'lucide-react';
+import { Search, ShoppingBag, CreditCard, CheckCircle2, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function HowToUse() {
@@ -12,133 +12,78 @@ export default function HowToUse() {
 
     const steps = [
         {
-            icon: Search,
-            title: "Find Your Needs",
-            desc: "Browse our curated local catalog. Use search or categories to find exactly what you're looking for in Shahjahanpur.",
-            color: "#4361ee",
-            bg: "rgba(67,97,238,0.1)"
+            icon: <Search className="text-blue-500" size={32} />,
+            title: "1. Select Products",
+            desc: "Browse our curated local catalog and click on any product to see its details. Add the items you need to your bag.",
+            bg: "bg-blue-50"
         },
         {
-            icon: ShoppingBag,
-            title: "Fill Your Bag",
-            desc: "Add items to your cart with a single tap. Review your items and totals easily before proceeding.",
-            color: "#f72585",
-            bg: "rgba(247,37,133,0.1)"
+            icon: <ShoppingBag className="text-purple-500" size={32} />,
+            title: "2. Secure Checkout",
+            desc: "Open your cart from the top right and click 'Secure Checkout'. Verify the total amount for your selected items.",
+            bg: "bg-purple-50"
         },
         {
-            icon: MapPin,
-            title: "Add Address",
-            desc: "Provide your delivery details. We use local landmarks to ensure your order reaches you without any hassle.",
-            color: "#7209b7",
-            bg: "rgba(114,9,183,0.1)"
+            icon: <CreditCard className="text-orange-500" size={32} />,
+            title: "3. Address & Delivery",
+            desc: "Click 'Use Current Location' to auto-detect your Shahjahanpur address, or type it manually. Fill in your Name and Phone Number.",
+            bg: "bg-orange-50"
         },
         {
-            icon: CheckCircle2,
-            title: "Order & Relax",
-            desc: "Confirm your order. We'll handle the rest and deliver it to your doorstep within hours!",
-            color: "#10b981",
-            bg: "rgba(16,185,129,0.1)"
+            icon: <CheckCircle2 className="text-emerald-500" size={32} />,
+            title: "4. Place Order & Track",
+            desc: "Click 'Review Order' and confirm! Your order will be placed via COD (Cash on Delivery). Use your Order ID to track it.",
+            bg: "bg-emerald-50"
         }
     ];
 
     return (
-        <div className="flex flex-col min-h-screen pb-20" style={{ background: '#f8f9fd' }}>
-            {/* Header */}
-            <div 
-                className="sticky top-0 z-40 px-4 pt-12 pb-6"
-                style={{ background: 'linear-gradient(160deg,#0d0221 0%,#240046 100%)', boxShadow: '0 4px 24px rgba(0,0,0,0.3)' }}
-            >
-                <div className="flex items-center gap-4">
-                    <button 
-                        onClick={() => navigate(-1)}
-                        className="w-10 h-10 rounded-full flex items-center justify-center bg-white/10 active:scale-90 transition-transform"
-                    >
-                        <ChevronLeft size={24} className="text-white" />
-                    </button>
-                    <h1 className="text-2xl font-black text-white">How to Use</h1>
-                </div>
-            </div>
-
-            {/* Intro Card */}
-            <div className="px-4 mt-6 mb-8">
-                <div className="bg-white rounded-[28px] p-6 shadow-xl shadow-blue-900/5 border border-blue-50/50">
-                    <div className="flex items-center gap-4 mb-4">
-                        <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600">
-                            <Rocket size={24} />
-                        </div>
-                        <div>
-                            <h2 className="text-lg font-extrabold text-gray-900">Quick Guide</h2>
-                            <p className="text-xs font-medium text-gray-400 uppercase tracking-widest">4 Simple Steps</p>
-                        </div>
-                    </div>
-                    <p className="text-sm text-gray-500 font-medium leading-relaxed">
-                        ApniDukan is designed to be fast and intuitive. Follow this guide to start shopping like a pro.
-                    </p>
-                </div>
-            </div>
-
-            {/* Steps Timeline */}
-            <div className="px-4 space-y-4 relative">
-                {/* Vertical Line */}
-                <div className="absolute left-10 top-8 bottom-8 w-0.5 bg-gray-100" />
-
-                {steps.map((step, idx) => {
-                    const Icon = step.icon;
-                    return (
-                        <motion.div 
-                            initial={{ opacity: 0, x: -20 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: idx * 0.1 }}
-                            key={idx}
-                            className="flex gap-4 items-start relative z-10"
-                        >
-                            <div 
-                                className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg"
-                                style={{ background: step.bg }}
-                            >
-                                <Icon size={22} style={{ color: step.color }} strokeWidth={2.5} />
-                            </div>
-                            
-                            <div className="flex-1 bg-white rounded-[24px] p-5 shadow-sm border border-gray-50">
-                                <h3 className="text-base font-black text-gray-900 mb-1">{step.title}</h3>
-                                <p className="text-xs text-gray-500 font-medium leading-relaxed">{step.desc}</p>
-                            </div>
-                        </motion.div>
-                    );
-                })}
-            </div>
-
-            {/* Footer Tip */}
-            <div className="px-4 mt-8">
-                <div 
-                    className="rounded-[28px] p-6 text-white overflow-hidden relative"
-                    style={{ background: 'linear-gradient(135deg,#4361ee 0%,#7209b7 100%)', boxShadow: '0 12px 32px rgba(67,97,238,0.3)' }}
+        <main className="w-full min-h-[80vh] bg-[#fdfbf7] py-10 px-4 sm:px-6">
+            <div className="w-full max-w-4xl mx-auto">
+                <button 
+                    onClick={() => navigate(-1)} 
+                    className="flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-gray-900 mb-8 transition"
                 >
-                    <div className="absolute -right-8 -bottom-8 w-32 h-32 rounded-full bg-white/10" />
-                    <div className="absolute -left-4 -top-4 w-16 h-16 rounded-full bg-white/10" />
-                    
-                    <div className="flex items-center gap-3 mb-3">
-                        <Zap size={20} className="text-yellow-400" />
-                        <h3 className="text-lg font-extrabold">Pro Tip</h3>
+                    <ArrowLeft size={16} /> Back
+                </button>
+
+                <div className="bg-white rounded-3xl p-6 md:p-10 shadow-sm border border-gray-100">
+                    <div className="flex flex-col items-center text-center mb-10">
+                        <h1 className="text-3xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-4">
+                            How to Use <span className="text-blue-500">ApniDukaan</span>
+                        </h1>
+                        <p className="text-gray-500 font-medium max-w-xl mx-auto">
+                            Follow these simple steps to easily browse, order, and track your daily needs right to your doorstep.
+                        </p>
                     </div>
-                    <p className="text-sm text-white/80 font-medium leading-relaxed mb-6">
-                        You can track all your orders locally in the "Track Order" section without logging in!
-                    </p>
-                    <button 
-                        onClick={() => navigate('/')}
-                        className="w-full py-4 bg-white text-[#4361ee] rounded-2xl font-black text-sm active:scale-95 transition-transform"
-                    >
-                        Start Shopping Now
-                    </button>
+                    
+                    <div className="grid md:grid-cols-2 gap-6 mb-10">
+                        {steps.map((step, idx) => (
+                            <motion.div 
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: idx * 0.1 }}
+                                key={idx} 
+                                className={`${step.bg} p-6 md:p-8 rounded-3xl border border-white shadow-sm flex flex-col items-start hover:shadow-md transition-shadow`}
+                            >
+                                <div className="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center mb-5">
+                                    {step.icon}
+                                </div>
+                                <h3 className="text-xl font-bold text-gray-900 mb-2">{step.title}</h3>
+                                <p className="text-gray-600 font-medium text-sm leading-relaxed">{step.desc}</p>
+                            </motion.div>
+                        ))}
+                    </div>
+                    
+                    <div className="bg-gray-900 text-white rounded-3xl p-8 text-center shadow-xl shadow-gray-900/10">
+                        <h3 className="text-2xl font-bold mb-3">Ready to order?</h3>
+                        <p className="text-gray-400 font-medium text-sm mb-6 max-w-md mx-auto">Get your daily needs and curated products delivered to your doorstep at lightning speed.</p>
+                        <button onClick={() => navigate('/')} className="px-8 py-3.5 bg-white text-gray-900 font-extrabold rounded-xl hover:scale-105 active:scale-95 transition-transform">
+                            Start Shopping Now
+                        </button>
+                    </div>
                 </div>
             </div>
-
-            {/* Trust badge */}
-            <div className="flex flex-col items-center justify-center py-10 opacity-30">
-                <ShieldCheck size={40} className="text-gray-400 mb-2" />
-                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">100% Trusted Store</p>
-            </div>
-        </div>
+        </main>
     );
 }

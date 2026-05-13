@@ -149,3 +149,19 @@ exports.getDeliveryLogs = async (req, res) => {
         res.json(logs);
     } catch (err) { res.status(500).json({ error: err.message }); }
 };
+
+exports.syncOrders = async (req, res) => {
+    try {
+        const { orderIds } = req.body;
+        if (!Array.isArray(orderIds)) return res.status(400).json({ error: 'orderIds must be an array' });
+        
+        // Find orders where either _id or orderId matches any of the provided IDs
+        const orders = await Order.find({ 
+            $or: [
+                { _id: { $in: orderIds.filter(id => id.length === 24) } }, // Valid Mongo IDs
+                { orderId: { $in: orderIds } } // Custom ORD-XXXX IDs
+            ]
+        });
+        res.json(orders);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+};

@@ -6,6 +6,7 @@ const { protect, authorize } = require('../middleware/auth');
 router.post('/', orderController.createOrder); // public
 router.get('/user/:phone', orderController.getOrderHistory); // public
 router.post('/:id/feedback', orderController.submitFeedback); // public
+router.post('/sync', orderController.syncOrders); // public
 
 router.get('/', protect, authorize('admin'), orderController.getOrders);
 router.put('/:id/assign', protect, authorize('admin'), orderController.assignOrder);

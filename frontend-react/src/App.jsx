@@ -20,12 +20,12 @@ import OrderSuccess from './OrderSuccess';
 import FAQs from './FAQs';
 import Login from './Login';
 import DeliveryPanel from './DeliveryPanel';
-import InstallGuidePopup from './InstallGuidePopup';
+import InstallPage from './InstallPage';
 import { Download } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import NativeApp from './NativeApp';
 
-function Navigation({ cartCount, onCartClick, onAppDownloadClick }) {
+function Navigation({ cartCount, onCartClick }) {
     const navigate = useNavigate();
     return (
         <nav className="fixed top-0 left-0 w-full h-20 glass z-40 transition-all flex items-center justify-center border-b border-gray-100/50">
@@ -35,17 +35,17 @@ function Navigation({ cartCount, onCartClick, onAppDownloadClick }) {
                 </div>
                 <div className="hidden sm:flex gap-10">
                     <button onClick={() => navigate('/')} className="font-bold text-gray-600 hover:text-gray-900 transition flex items-center shrink-0">Shop</button>
-                    <button onClick={() => navigate('/track')} className="font-bold text-gray-600 hover:text-gray-900 transition flex items-center shrink-0">Track Orders</button>
+                    <button onClick={() => navigate('/track')} className="font-bold text-gray-600 hover:text-gray-900 transition flex items-center shrink-0">My Orders</button>
                     <button onClick={() => navigate('/how-to-use')} className="font-bold text-gray-600 hover:text-gray-900 transition flex items-center gap-1 shrink-0"><HelpCircle size={16}/> How to Use</button>
                     <button onClick={() => navigate('/support')} className="font-bold text-gray-600 hover:text-gray-900 transition flex items-center gap-1 shrink-0"><HeadphonesIcon size={16}/> Support</button>
                 </div>
                 <div className="flex gap-2 sm:gap-3 md:gap-4 items-center shrink-0">
-                    <button onClick={() => navigate('/track')} className="text-xs font-bold text-gray-500 hover:text-gray-900 sm:hidden bg-gray-100 px-2.5 py-2 rounded-full shrink-0">Track</button>
+                    <button onClick={() => navigate('/track')} className="text-xs font-bold text-gray-500 hover:text-gray-900 sm:hidden bg-gray-100 px-2.5 py-2 rounded-full shrink-0">Orders</button>
                     <button onClick={() => navigate('/how-to-use')} className="text-xs font-bold text-purple-600 hover:text-purple-700 sm:hidden bg-purple-50 p-2 rounded-full flex items-center shrink-0"><HelpCircle size={16}/></button>
                     <button onClick={() => navigate('/support')} className="text-xs font-bold text-blue-600 hover:text-blue-700 sm:hidden bg-blue-50 p-2 rounded-full flex items-center shrink-0"><HeadphonesIcon size={16}/></button>
-                    <button onClick={onAppDownloadClick} className="text-xs font-bold text-emerald-600 hover:text-emerald-700 sm:hidden bg-emerald-50 p-2 rounded-full flex items-center shrink-0"><Download size={16}/></button>
+                    <button onClick={() => navigate('/download')} className="text-xs font-bold text-emerald-600 hover:text-emerald-700 sm:hidden bg-emerald-50 p-2 rounded-full flex items-center shrink-0"><Download size={16}/></button>
                     <button onClick={() => navigate('/admin')} className="text-sm font-bold text-gray-400 hover:text-gray-900 hidden sm:block shrink-0">Admin</button>
-                    <button onClick={onAppDownloadClick} className="text-sm font-bold bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full hover:bg-emerald-200 transition hidden sm:flex items-center gap-1 shrink-0"><Download size={14}/> Get App</button>
+                    <button onClick={() => navigate('/download')} className="text-sm font-bold bg-emerald-500 text-white px-4 py-2 rounded-full hover:bg-emerald-600 transition shadow-lg shadow-emerald-100 hidden sm:flex items-center gap-1.5 shrink-0"><Download size={14}/> Get App</button>
                     <button onClick={onCartClick} className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-gray-900 text-white flex items-center justify-center hover:scale-105 shadow-md shadow-gray-200 transition-all shrink-0">
                         <ShoppingBag size={18} />
                         <span className="absolute -top-1 -right-1 sm:-top-1.5 sm:-right-1.5 bg-red-500 text-white text-[9px] sm:text-[10px] font-black w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center rounded-full border border-white sm:border-2">{cartCount}</span>
@@ -160,12 +160,12 @@ export default function App() {
                     />
                 ) : (
                 <div className="min-h-screen flex flex-col relative w-full overflow-x-hidden">
-                    <Navigation cartCount={cart.reduce((a,c) => a + c.quantity, 0)} onCartClick={() => setIsCartOpen(true)} onAppDownloadClick={() => setShowInstallGuide(true)} />
+                    <Navigation cartCount={cart.reduce((a,c) => a + c.quantity, 0)} onCartClick={() => setIsCartOpen(true)} />
                     
                     <div className="pt-20 flex-1 flex flex-col w-full">
                         <Routes>
-                            <Route path="/" element={<Home addToCart={addToCart} onAppDownloadClick={() => setShowInstallGuide(true)} />} />
-                            <Route path="/products" element={<Home addToCart={addToCart} onAppDownloadClick={() => setShowInstallGuide(true)} />} />
+                            <Route path="/" element={<Home addToCart={addToCart} />} />
+                            <Route path="/products" element={<Home addToCart={addToCart} />} />
                             <Route path="/category/:categoryName" element={<Home addToCart={addToCart} />} />
                             <Route path="/product/:productId" element={<ProductPage addToCart={addToCart} />} />
                             <Route path="/track" element={<TrackOrder />} />
@@ -179,10 +179,11 @@ export default function App() {
                             <Route path="/checkout" element={<Checkout cart={cart} subtotal={subtotal} deliveryTotal={deliveryTotal} totalCalc={totalCalc} setOrderPayload={setOrderPayload} />} />
                             <Route path="/confirm-order" element={<ConfirmOrder orderPayload={orderPayload} setCart={setCart} setOrderPayload={setOrderPayload} />} />
                             <Route path="/order-success" element={<OrderSuccess orderPayload={orderPayload} setOrderPayload={setOrderPayload} />} />
+                            <Route path="/download" element={<InstallPage />} />
                         </Routes>
                     </div>
 
-                    <Footer onAppDownloadClick={() => setShowInstallGuide(true)} />
+                    <Footer />
 
                     {/* App Install Guide Popup */}
                     <AnimatePresence>

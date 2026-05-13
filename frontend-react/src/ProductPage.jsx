@@ -173,8 +173,8 @@ export default function ProductPage({ addToCart }) {
                         </div>
 
                         <div className="flex items-end gap-3 mb-6 lg:mb-8">
-                            <span className="text-4xl lg:text-5xl font-extrabold text-gray-900 tracking-tighter">₹{product.price}</span>
-                            {hasDiscount && <span className="text-xl text-gray-400 line-through mb-1 font-semibold">₹{product.originalPrice}</span>}
+                            <span className="text-4xl lg:text-5xl font-extrabold text-gray-900 tracking-tighter">&#8377;{product.price}</span>
+                            {hasDiscount && <span className="text-xl text-gray-400 line-through mb-1 font-semibold">&#8377;{product.originalPrice}</span>}
                             {hasDiscount && (
                                 <span className="ml-2 mb-1 px-2.5 py-1 bg-green-100 text-green-700 font-bold text-xs rounded-md">
                                     {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
@@ -194,7 +194,7 @@ export default function ProductPage({ addToCart }) {
                                <strong className="text-xs tracking-wider uppercase text-emerald-800 font-bold">Delivery Information</strong>
                                {product.isFreeDelivery ? 
                                     <span className="text-emerald-600 font-extrabold text-sm flex items-center gap-2">✓ Free Local Delivery</span> : 
-                                    <span className="text-gray-700 font-bold text-sm flex items-center gap-2">🚚 Delivery Charge: ₹{product.deliveryCharge}</span>
+                                    <span className="text-gray-700 font-bold text-sm flex items-center gap-2">🚚 Delivery Charge: &#8377;{product.deliveryCharge}</span>
                                }
                             </div>
                         </div>
