@@ -127,10 +127,10 @@ export default function NativeOrderDetail() {
                     </button>
                     <div>
                         <h1 className="text-2xl font-black text-gray-900 tracking-tight">Order Details</h1>
-                        <div className="flex items-center gap-2 mt-1">
-                            <span className={`w-2 h-2 rounded-full ${statusInfo.dot} animate-pulse`} />
-                            <p className={`text-[12px] font-black uppercase tracking-tight ${statusInfo.text}`}>{statusInfo.label}</p>
-                            <span className="text-[14px] font-black text-blue-600 bg-blue-50 px-3 py-1 rounded-xl border border-blue-100 shadow-sm uppercase tracking-wider">
+                        <div className="flex items-center gap-2 mt-2">
+                            <span className={`w-2.5 h-2.5 rounded-full ${statusInfo.dot} animate-pulse`} />
+                            <p className={`text-[13px] font-black uppercase tracking-tight ${statusInfo.text}`}>{statusInfo.label}</p>
+                            <span className="text-[18px] font-black text-blue-700 bg-blue-50 px-4 py-1.5 rounded-2xl border-2 border-blue-100 shadow-md uppercase tracking-wider">
                                 {formatId(remoteOrder?.orderId || order?.orderId || id.slice(-6))}
                             </span>
                         </div>
@@ -199,9 +199,9 @@ export default function NativeOrderDetail() {
                             </div>
                         ))}
                     </div>
-                    <div className="mt-8 pt-6 border-t border-gray-50 flex justify-between items-center">
+                    <div className="mt-8 pt-6 border-t border-gray-100 flex justify-between items-center">
                         <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Total Amount</span>
-                        <span className="text-2xl font-black text-emerald-600">₹{remoteOrder?.totalAmount || order?.totalAmount || remoteOrder?.total || order?.total || 0}</span>
+                        <span className="text-3xl font-black text-emerald-600">₹{remoteOrder?.totalAmount || order?.totalAmount || remoteOrder?.total || order?.total || remoteOrder?.subtotal || order?.subtotal || 0}</span>
                     </div>
                 </div>
 

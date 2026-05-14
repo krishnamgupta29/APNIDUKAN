@@ -185,20 +185,21 @@ export default function NativeTrack() {
                                     <img src={getImageUrl(mainItem?.image)} className="w-full h-full object-cover" />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-1.5 mb-2">
-                                        <div className={`w-2 h-2 rounded-full ${statusInfo.dot} ${statusInfo.label !== 'DELIVERED' && statusInfo.label !== 'RETURNED' ? 'animate-pulse' : ''}`} />
-                                        <p className={`text-[10px] font-black uppercase tracking-tight ${statusInfo.text}`}>{statusInfo.label}</p>
-                                        <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-100/50 uppercase">
-                                            {formatId(remote?.orderId || order.orderId || order._id.slice(-4))}
+                                    <div className="flex items-center gap-2 mb-2.5">
+                                        <div className={`w-2.5 h-2.5 rounded-full ${statusInfo.dot} ${statusInfo.label !== 'DELIVERED' && statusInfo.label !== 'RETURNED' ? 'animate-pulse' : ''}`} />
+                                        <p className={`text-[12px] font-black uppercase tracking-tight ${statusInfo.text}`}>{statusInfo.label}</p>
+                                        <span className="text-[13px] font-black text-blue-700 bg-blue-50 px-2.5 py-1 rounded-xl border border-blue-200 shadow-sm uppercase">
+                                            {formatId(remote?.orderId || order.orderId || order._id.slice(-6))}
                                         </span>
                                     </div>
-                                    <h3 className="text-[14px] font-black text-gray-900 truncate pr-2 leading-none mb-3">{mainItem?.name || 'Order Items'}</h3>
+                                    <h3 className="text-[15px] font-black text-gray-900 truncate pr-2 leading-none mb-3.5">{mainItem?.name || 'Order Items'}</h3>
                                     <div className="flex items-center justify-between mt-2">
-                                        <p className="text-[12px] font-bold">
-                                            <span className="text-emerald-600 font-black text-lg bg-emerald-50 px-3 py-1 rounded-xl border border-emerald-100">₹{remote?.totalAmount || order.totalAmount || remote?.total || order.total || 0}</span>
-                                            <span className="text-gray-300 mx-2">•</span>
-                                            <span className="text-gray-400 font-bold">{new Date(order.createdAt || order.date || Date.now()).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</span>
-                                        </p>
+                                        <div className="flex flex-col gap-1">
+                                            <span className="text-emerald-700 font-black text-xl bg-emerald-50 px-4 py-1.5 rounded-2xl border-2 border-emerald-100 shadow-sm w-fit">
+                                                ₹{remote?.totalAmount || order.totalAmount || remote?.total || order.total || remote?.subtotal || order.subtotal || 0}
+                                            </span>
+                                            <span className="text-[10px] text-gray-400 font-bold ml-1">{new Date(order.createdAt || order.date || Date.now()).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                                        </div>
                                         
                                         {(statusInfo.label === 'DELIVERED' || statusInfo.label === 'RETURNED') && !remote?.feedbackGiven && !order.feedbackGiven && (
                                             <button 
