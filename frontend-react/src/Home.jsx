@@ -150,9 +150,9 @@ export default function Home({ addToCart }) {
                         key={i}
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: i * 0.08 }}
-                        className="bg-white border border-gray-100/60 p-4 sm:p-8 rounded-2xl sm:rounded-3xl shadow-sm hover:shadow-xl active:scale-95 transform-gpu hover:-translate-y-1 sm:hover:-translate-y-2 transition-all flex flex-col items-center text-center group touch-manipulation"
+                        viewport={{ once: true, margin: "-50px" }}
+                        transition={{ delay: i * 0.05, duration: 0.3 }}
+                        className="bg-white border border-gray-100/60 p-4 sm:p-8 rounded-2xl sm:rounded-3xl shadow-sm md:hover:shadow-xl active:scale-95 transform-gpu md:hover:-translate-y-2 transition-all flex flex-col items-center text-center group touch-manipulation gpu"
                     >
                         <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mb-3 sm:mb-4 group-hover:scale-110 transition-transform">
                             {f.icon}
@@ -284,7 +284,7 @@ export function ProductCard({ p, onClick, onAdd }) {
     return (
         <div
             onClick={onClick}
-            className={`flex flex-col h-full bg-white rounded-3xl p-3 md:p-5 shadow-sm border border-gray-100 relative group transition-all duration-200 ease-out active:scale-[0.97] transform-gpu hover:-translate-y-2 hover:shadow-xl cursor-pointer overflow-hidden touch-manipulation select-none`}
+            className={`flex flex-col h-full bg-white rounded-3xl p-3 md:p-5 shadow-sm border border-gray-100 relative group transition-all duration-200 ease-out active:scale-[0.98] md:hover:-translate-y-2 md:hover:shadow-xl cursor-pointer overflow-hidden touch-manipulation select-none gpu`}
         >
             {/* Free Delivery Badge */}
             {p.isFreeDelivery && !p.outOfStock && (

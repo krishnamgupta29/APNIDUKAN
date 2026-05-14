@@ -137,12 +137,12 @@ export default function ProductPage({ addToCart }) {
                         <AnimatePresence mode="wait">
                             <motion.img 
                                 key={curImg}
-                                initial={{ opacity: 0, scale: 0.98 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.98 }}
-                                transition={{ duration: 0.3 }}
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 0.2 }}
                                 src={sources[curImg]} 
-                                className="absolute w-full h-full object-contain p-6 md:p-12 transition-transform duration-500 group-hover:scale-105" 
+                                className="absolute w-full h-full object-contain p-6 md:p-12 transition-transform duration-300 group-hover:scale-105 gpu" 
                             />
                         </AnimatePresence>
                         

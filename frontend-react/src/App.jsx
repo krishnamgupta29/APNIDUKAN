@@ -215,8 +215,8 @@ export default function App() {
                     <AnimatePresence>
                         {isCartOpen && (
                             <motion.div key="cart-container" className="fixed inset-0 z-[60]">
-                                <motion.div key="cart-bg" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} onClick={()=>setIsCartOpen(false)} className="absolute inset-0 bg-black/50"/>
-                                <motion.div key="cart-panel" initial={{x:'100%'}} animate={{x:0}} exit={{x:'100%'}} transition={{type:'tween',duration:0.25,ease:'easeOut'}} className="absolute top-0 right-0 h-full w-full max-w-sm bg-white shadow-2xl z-10 flex flex-col">
+                                <motion.div key="cart-bg" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} onClick={()=>setIsCartOpen(false)} className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"/>
+                                <motion.div key="cart-panel" initial={{x:'100%'}} animate={{x:0}} exit={{x:'100%'}} transition={{type:'spring', damping:25, stiffness:200}} className="absolute top-0 right-0 h-full w-full max-w-sm bg-white shadow-2xl z-10 flex flex-col gpu">
                                     <div className="p-6 border-b border-gray-100 flex justify-between items-center">
                                         <h2 className="text-xl font-bold">Your Bag</h2>
                                         <button type="button" onClick={()=>setIsCartOpen(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors"><X size={20}/></button>
