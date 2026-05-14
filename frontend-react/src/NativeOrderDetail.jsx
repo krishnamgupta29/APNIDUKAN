@@ -215,10 +215,14 @@ export default function NativeOrderDetail() {
                     </h3>
                     <div className="space-y-6">
                         {items.map((item, idx) => (
-                            <div key={idx} className="flex items-center gap-4 group">
-                                <img src={getImageUrl(item.image)} className="w-16 h-16 rounded-2xl object-cover bg-gray-50 border border-gray-100" />
+                            <div 
+                                key={idx} 
+                                onClick={() => navigate(`/product/${item.productId || item._id}`)}
+                                className="flex items-center gap-4 group cursor-pointer hover:bg-gray-50 p-2 rounded-2xl transition-all border border-transparent hover:border-gray-100"
+                            >
+                                <img src={getImageUrl(item.image)} className="w-16 h-16 rounded-2xl object-cover bg-gray-50 border border-gray-100 transition-transform group-hover:scale-105" />
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-black text-gray-900 truncate leading-tight mb-1">{item.name}</p>
+                                    <p className="text-sm font-black text-gray-900 truncate leading-tight mb-1 group-hover:text-blue-600 transition-colors">{item.name}</p>
                                     <p className="text-xs font-bold text-gray-400">Qty: {item.quantity || 1} • ₹{item.price || 0}</p>
                                 </div>
                             </div>
