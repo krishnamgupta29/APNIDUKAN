@@ -146,7 +146,7 @@ export default function NativeOrderDetail() {
         <div className="min-h-screen bg-[#f8fafc] pb-10">
             {/* Premium Header */}
             <div className="bg-white/80 backdrop-blur-xl sticky top-0 z-50 border-b border-gray-100 px-6 pt-12 pb-6">
-                <div className="flex items-center gap-4">
+                <div className="max-w-5xl mx-auto flex items-center gap-4">
                     <button onClick={() => navigate(-1)} className="p-3 bg-gray-50 rounded-2xl text-gray-900 active:scale-90 transition-all">
                         <ChevronLeft size={24} />
                     </button>
@@ -163,7 +163,7 @@ export default function NativeOrderDetail() {
                 </div>
             </div>
 
-            <div className="px-4 pt-6 space-y-6">
+            <div className="max-w-5xl mx-auto px-4 pt-6 space-y-6">
                 {/* Cinematic Progress Timeline */}
                 <div className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full -mr-16 -mt-16 blur-3xl" />

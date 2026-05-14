@@ -126,12 +126,12 @@ export default function TrackOrder() {
                 </div>
             </div>
 
-            <div className="max-w-3xl mx-auto px-4 pt-6">
+            <div className="max-w-6xl mx-auto px-4 pt-6">
                 {localOrders.length === 0 ? (
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="bg-white rounded-[2.5rem] p-16 text-center border border-gray-100 shadow-xl mt-4"
+                        className="bg-white rounded-[2.5rem] p-16 text-center border border-gray-100 shadow-xl mt-4 max-w-2xl mx-auto"
                     >
                         <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
                             <Package size={48} className="text-gray-200" />
@@ -142,7 +142,7 @@ export default function TrackOrder() {
                         </p>
                     </motion.div>
                 ) : (
-                    <div className="space-y-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 lg:gap-6">
                         {localOrders
                             .slice()
                             .sort((a, b) => new Date(b.createdAt || b.date || 0) - new Date(a.createdAt || a.date || 0))
