@@ -17,22 +17,32 @@ export default function NativeTrack() {
     const [comment, setComment] = useState('');
 
     const handleSelectOrder = (orderId) => {
-        setSelectedOrder(orderId);
-        setRating(0); // Start with 0 stars
-        setComment(''); // Clear text
+        navigate(`/order/${orderId}`);
     };
 
     useEffect(() => {
         try {
-            const storedRaw = localStorage.getItem('apni_order_history') || localStorage.getItem('my_orders') || '[]';
-            const stored = JSON.parse(storedRaw);
-            if (Array.isArray(stored)) {
-                setLocalOrders(stored);
-                if (stored.length > 0) {
-                    syncOrders(stored);
-                    const interval = setInterval(() => syncOrders(stored), 10000); // Sync every 10s
-                    return () => clearInterval(interval);
-                }
+            // Migration: Move orders from 'my_orders' to 'apni_order_history' for persistence
+            const oldOrders = JSON.parse(localStorage.getItem('my_orders') || '[]');
+            const newOrders = JSON.parse(localStorage.getItem('apni_order_history') || '[]');
+            
+            // Merge unique orders
+            const mergedMap = {};
+            [...newOrders, ...oldOrders].forEach(o => {
+                if (o._id) mergedMap[o._id] = { ...mergedMap[o._id], ...o };
+            });
+            const finalOrders = Object.values(mergedMap);
+            
+            if (oldOrders.length > 0) {
+                localStorage.setItem('apni_order_history', JSON.stringify(finalOrders));
+                localStorage.removeItem('my_orders'); // Clean up old key
+            }
+
+            setLocalOrders(finalOrders);
+            if (finalOrders.length > 0) {
+                syncOrders(finalOrders);
+                const interval = setInterval(() => syncOrders(finalOrders), 10000);
+                return () => clearInterval(interval);
             }
         } catch (e) {
             console.error('Initial load failed', e);
@@ -204,212 +214,6 @@ export default function NativeTrack() {
                     })
                 )}
             </div>
-
-            {/* Bottom Sheet Details */}
-            <AnimatePresence>
-                {selectedOrder && (
-                    <>
-                        <motion.div 
-                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                            onClick={() => setSelectedOrder(null)}
-                            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60]"
-                        />
-                        <motion.div
-                            initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
-                            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                            className="fixed bottom-0 left-0 w-full bg-white rounded-t-[3.5rem] z-[70] h-[92vh] overflow-hidden flex flex-col shadow-2xl"
-                        >
-                             <div className="bg-white/80 backdrop-blur-xl px-8 pt-6 pb-4 z-10 border-b border-gray-100/50 flex-shrink-0">
-                                <div className="w-12 h-1.5 bg-gray-200/50 rounded-full mx-auto mb-6" />
-                                {(() => {
-                                    const activeOrder = localOrders.find(o => o._id === selectedOrder);
-                                    const remoteOrder = ordersData[selectedOrder];
-                                    const statusInfo = getStatusInfo(selectedOrder, activeOrder?.status);
-                                    
-                                    if (!activeOrder && !remoteOrder) return (
-                                        <div className="flex items-center justify-center py-10">
-                                            <p className="text-gray-400 font-bold">Loading order details...</p>
-                                        </div>
-                                    );
-
-                                    return (
-                                        <div className="flex justify-between items-center">
-                                            <div>
-                                                <h2 className="text-2xl font-black text-gray-900 tracking-tight">Order Details</h2>
-                                                <div className="flex items-center gap-2 mt-1">
-                                                    <span className={`w-1.5 h-1.5 rounded-full ${statusInfo.dot} animate-pulse`} />
-                                                    <p className={`text-[9px] font-black uppercase tracking-tight ${statusInfo.text}`}>{statusInfo.label}</p>
-                                                    <span className="text-[9px] font-black text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100/50 uppercase">
-                                                        ID: #ORD{remoteOrder?.orderId || activeOrder?.orderId || selectedOrder?.slice(-6).toUpperCase()}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <button onClick={() => setSelectedOrder(null)} className="p-3 bg-gray-50 rounded-2xl text-gray-400 active:scale-90 transition-all"><X size={20}/></button>
-                                        </div>
-                                    );
-                                })()}
-                            </div>
-
-                            <div className="flex-1 overflow-y-auto px-4 pb-32">
-                                {(() => {
-                                    const activeOrder = localOrders.find(o => o._id === selectedOrder);
-                                    const remoteOrder = ordersData[selectedOrder];
-                                    const statusInfo = getStatusInfo(selectedOrder, activeOrder?.status);
-                                    const hasFeedback = remoteOrder?.feedbackGiven;
-                                    
-                                    if (!activeOrder && !remoteOrder) return null;
-
-                                return (
-                                    <div className="px-2 pb-20 space-y-6">
-                                        {/* Cinematic Mobile Progress Timeline */}
-                                        <div className="relative px-2 py-4">
-                                            {/* Background Track */}
-                                            <div className="absolute top-[36px] left-8 right-8 h-[3px] bg-gray-100 rounded-full overflow-hidden">
-                                                <motion.div 
-                                                    initial={{ width: 0 }}
-                                                    animate={{ width: `${((statusInfo.step - 1) / 2) * 100}%` }}
-                                                    transition={{ duration: 1, delay: 0.3 }}
-                                                    className={`h-full ${statusInfo.label === 'RETURNED' ? 'bg-red-500' : 'bg-gradient-to-r from-blue-500 to-emerald-500'}`}
-                                                />
-                                            </div>
-
-                                            {/* Nodes */}
-                                            <div className="flex justify-between relative z-10">
-                                                {[
-                                                    { label: 'Ordered', step: 1, icon: Package },
-                                                    { label: 'Confirmed', step: 2, icon: CheckCircle2 },
-                                                    { label: statusInfo.label === 'RETURNED' ? 'Returned' : 'Delivered', step: 3, icon: statusInfo.label === 'RETURNED' ? AlertOctagon : CheckCircle2 }
-                                                ].map((s, idx) => {
-                                                    const isDone = statusInfo.step >= s.step;
-                                                    const isCurrent = statusInfo.step === s.step;
-                                                    
-                                                    return (
-                                                        <div key={idx} className="flex flex-col items-center">
-                                                            <div className="relative">
-                                                                {isCurrent && (
-                                                                    <motion.div 
-                                                                        initial={{ scale: 0.8, opacity: 0.6 }}
-                                                                        animate={{ scale: 1.6, opacity: 0 }}
-                                                                        transition={{ repeat: Infinity, duration: 2 }}
-                                                                        className={`absolute inset-0 rounded-full ${statusInfo.label === 'RETURNED' ? 'bg-red-500' : 'bg-emerald-500'}`}
-                                                                    />
-                                                                )}
-                                                                <motion.div 
-                                                                    initial={{ scale: 0 }}
-                                                                    animate={{ scale: 1 }}
-                                                                    className={`w-9 h-9 rounded-full flex items-center justify-center border-[3px] border-white shadow-lg transition-colors duration-500 ${isDone ? (statusInfo.label === 'RETURNED' && s.step === 3 ? 'bg-red-500' : 'bg-emerald-500') : 'bg-gray-200'}`}
-                                                                >
-                                                                    <s.icon size={14} className="text-white" />
-                                                                </motion.div>
-                                                            </div>
-                                                            <span className={`mt-3 text-[9px] font-black uppercase tracking-widest ${isDone ? 'text-gray-900' : 'text-gray-400'}`}>
-                                                                {s.label}
-                                                            </span>
-                                                        </div>
-                                                    );
-                                                })}
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-10">
-                                             {/* Items Section - Cleaner Full Width Style */}
-                                             <div className="pt-4">
-                                                 <h3 className="text-[11px] font-black text-gray-900 uppercase tracking-widest mb-6 flex items-center gap-3">
-                                                     <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
-                                                     Ordered Items
-                                                 </h3>
-                                                 <div className="space-y-8">
-                                                    {(remoteOrder?.items || activeOrder?.items || []).map((item, idx) => (
-                                                        <div 
-                                                            key={idx} 
-                                                            onClick={() => { setSelectedOrder(null); navigate(`/product/${item.productId || item._id}`); }}
-                                                            className="flex items-center gap-4 p-2 hover:bg-white rounded-2xl transition-all cursor-pointer group active:scale-95"
-                                                        >
-                                                            <img src={getImageUrl(item.image)} className="w-14 h-14 rounded-2xl object-cover bg-white border border-gray-100 shadow-sm group-hover:scale-105 transition-transform" />
-                                                            <div className="flex-1 min-w-0">
-                                                                <p className="text-sm font-black text-gray-900 truncate group-hover:text-blue-600 transition-colors">{item.name}</p>
-                                                                <p className="text-[11px] font-bold text-gray-400">Qty: {item.quantity || 1} • ₹{item.price || 0}</p>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                             </div>
- 
-                                             {/* Delivery Info - Simplified Full Width */}
-                                             <div className="pt-4 pb-12">
-                                                 <h3 className="text-[11px] font-black text-gray-900 uppercase tracking-widest mb-6 flex items-center gap-3">
-                                                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-                                                     Delivery Details
-                                                 </h3>
-                                                 <div className="space-y-4">
-                                                     <p className="text-xl font-black text-gray-900 leading-tight">{remoteOrder?.customerName || activeOrder.customerName}</p>
-                                                     <div className="flex items-start gap-3">
-                                                        <MapPin size={18} className="text-gray-300 shrink-0 mt-1" />
-                                                        <p className="text-sm text-gray-500 font-bold leading-relaxed">{remoteOrder?.address || activeOrder.address}</p>
-                                                     </div>
-                                                 </div>
-                                                 <div className="mt-4 pt-4 border-t border-gray-50 flex justify-between items-center">
-                                                     <span className="text-[10px] font-black text-gray-400 uppercase tracking-tight">Total Bill</span>
-                                                     <span className="text-xl font-black text-gray-900">₹{remoteOrder?.totalAmount || activeOrder.totalAmount}</span>
-                                                 </div>
-                                                                                        {/* Feedback Section */}
-                                            {(statusInfo.label === 'DELIVERED' || statusInfo.label === 'RETURNED') && (
-                                                <div className={`p-6 rounded-[2.5rem] border shadow-xl transition-all ${statusInfo.label === 'RETURNED' ? 'bg-red-50 border-red-100 shadow-red-100/20' : 'bg-white border-gray-100 shadow-gray-200/40'}`}>
-                                                    {hasFeedback ? (
-                                                        <div className="text-center py-2">
-                                                            <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                                                                <CheckCircle2 size={24} />
-                                                            </div>
-                                                            <h4 className="text-base font-black text-gray-900 mb-0.5">Feedback Submitted!</h4>
-                                                            <p className="text-[10px] text-emerald-600/70 font-bold">Thank you for your response.</p>
-                                                        </div>
-                                                    ) : (
-                                                        <>
-                                                            <div className="mb-4">
-                                                                <h4 className="text-lg font-black text-gray-900 tracking-tight">{statusInfo.label === 'RETURNED' ? 'Why was it returned?' : 'How was your delivery?'}</h4>
-                                                            </div>
-                                                            
-                                                            {statusInfo.label === 'DELIVERED' && (
-                                                                <div className="flex justify-center gap-2 mb-6">
-                                                                    {[1, 2, 3, 4, 5].map(star => (
-                                                                        <button 
-                                                                            key={star} 
-                                                                            onClick={() => setRating(star)} 
-                                                                            className={`p-1 transition-all ${rating >= star ? 'text-yellow-400 scale-110' : 'text-gray-200'}`}
-                                                                        >
-                                                                            <Star size={28} fill={rating >= star ? "currentColor" : "none"} strokeWidth={2} />
-                                                                        </button>
-                                                                    ))}
-                                                                </div>
-                                                            )}
-                                                            
-                                                            <textarea 
-                                                                value={comment}
-                                                                onChange={(e) => setComment(e.target.value)}
-                                                                placeholder={statusInfo.label === 'RETURNED' ? "Reason for return..." : "Write a short review..."}
-                                                                className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl min-h-[100px] outline-none focus:bg-white focus:border-blue-500 transition-all font-bold text-sm text-gray-800 mb-4"
-                                                            />
-                                                            
-                                                            <button 
-                                                                onClick={() => submitFeedback(selectedOrder)}
-                                                                disabled={submitting || (statusInfo.label === 'RETURNED' && !comment.trim())}
-                                                                className="w-full py-4 bg-gray-900 text-white font-black rounded-xl hover:bg-black active:scale-95 transition-all shadow-lg shadow-gray-900/20 disabled:opacity-50 flex items-center justify-center gap-2"
-                                                            >
-                                                                {submitting ? 'Submitting...' : <><CheckCircle2 size={16} /> Send Feedback</>}
-                                                            </button>
-                                                        </>
-                                                    )}
-                                                </div>
-                                            )}        )}
-                                        </div>
-                                    </div>
-                                );
-                            })()}
-                            </div>
-                        </motion.div>
-                    </>
-                )}
-            </AnimatePresence>
 
             {/* Toast Overlay */}
             <AnimatePresence>

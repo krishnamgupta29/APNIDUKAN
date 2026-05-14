@@ -9,6 +9,7 @@ import NativeProductPage from './NativeProductPage';
 import NativeCheckout from './NativeCheckout';
 import NativeConfirmOrder from './NativeConfirmOrder';
 import NativeOrderSuccess from './NativeOrderSuccess';
+import NativeOrderDetail from './NativeOrderDetail';
 import Legal from './NativeLegal';
 import SupportPage from './NativeSupportPage';
 import HowToUse from './NativeHowToUse';
@@ -25,7 +26,7 @@ function BottomNav({ cartCount }) {
         { path: '/settings', icon: Settings,     label: 'Settings' },
     ];
 
-    const hideOn = ['/checkout', '/confirm-order', '/order-success', '/product', '/support', '/faqs', '/legal', '/how-to-use'];
+    const hideOn = ['/checkout', '/confirm-order', '/order-success', '/product', '/support', '/faqs', '/legal', '/how-to-use', '/order'];
     if (hideOn.some(p => location.pathname.startsWith(p))) return null;
 
     return (
@@ -109,6 +110,7 @@ export default function NativeApp({
                     <Route path="/checkout"      element={<NativeCheckout cart={cart} subtotal={subtotal} deliveryTotal={deliveryTotal} totalCalc={totalCalc} setOrderPayload={setOrderPayload} />} />
                     <Route path="/confirm-order" element={<NativeConfirmOrder orderPayload={orderPayload} setCart={setCart} setOrderPayload={setOrderPayload} />} />
                     <Route path="/order-success" element={<NativeOrderSuccess orderPayload={orderPayload} setOrderPayload={setOrderPayload} />} />
+                    <Route path="/order/:id" element={<NativeOrderDetail />} />
 
                     <Route path="/legal"       element={<Legal />} />
                     <Route path="/support"     element={<SupportPage />} />

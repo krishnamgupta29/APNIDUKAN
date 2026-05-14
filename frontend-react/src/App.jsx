@@ -24,6 +24,7 @@ import InstallPage from './InstallPage';
 import { Download } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import NativeApp from './NativeApp';
+import NativeOrderDetail from './NativeOrderDetail';
 
 class ErrorBoundary extends React.Component {
     constructor(props) {
@@ -200,6 +201,7 @@ export default function App() {
                             <Route path="/checkout" element={<Checkout cart={cart} subtotal={subtotal} deliveryTotal={deliveryTotal} totalCalc={totalCalc} setOrderPayload={setOrderPayload} />} />
                             <Route path="/confirm-order" element={<ConfirmOrder orderPayload={orderPayload} setCart={setCart} setOrderPayload={setOrderPayload} />} />
                             <Route path="/order-success" element={<OrderSuccess orderPayload={orderPayload} setOrderPayload={setOrderPayload} />} />
+                            <Route path="/order/:id" element={<NativeOrderDetail />} />
                             <Route path="/download" element={<InstallPage />} />
                         </Routes>
                     </div>
