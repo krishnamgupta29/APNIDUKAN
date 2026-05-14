@@ -161,12 +161,18 @@ export default function NativeTrack() {
 
     const formatId = (id) => {
         if (!id) return '';
-        let clean = String(id).toUpperCase();
-        // Remove all occurrences of ORD and # to avoid doubling
-        while (clean.includes('ORD') || clean.includes('#')) {
-            clean = clean.replace('#', '').replace('ORD', '');
-        }
+        // Strip ALL # and ORD prefixes using regex
+        const clean = String(id).replace(/[#]/g, '').replace(/ORD/gi, '').trim();
         return `#ORD${clean}`;
+    };
+
+    // Calculate price from items if totalAmount is missing/0
+    const getPrice = (remote, local) => {
+        const amt = remote?.totalAmount || local?.totalAmount || remote?.total || local?.total || 0;
+        if (amt > 0) return amt;
+        // Fallback: calculate from items
+        const items = remote?.items || local?.items || [];
+        return items.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 1)), 0);
     };
 
 
@@ -212,15 +218,15 @@ export default function NativeTrack() {
                                     <div className="flex items-center gap-2 mb-2.5">
                                         <div className={`w-2.5 h-2.5 rounded-full ${statusInfo.dot} ${statusInfo.label !== 'DELIVERED' && statusInfo.label !== 'RETURNED' ? 'animate-pulse' : ''}`} />
                                         <p className={`text-[12px] font-black uppercase tracking-tight ${statusInfo.text}`}>{statusInfo.label}</p>
-                                        <span className="text-[13px] font-black text-blue-700 bg-blue-50 px-2.5 py-1 rounded-xl border border-blue-200 shadow-sm uppercase">
+                                        <span className="text-[11px] font-black text-blue-700 bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-200 uppercase">
                                             {formatId(remote?.orderId || order.orderId || order._id.slice(-6))}
                                         </span>
                                     </div>
-                                    <h3 className="text-[15px] font-black text-gray-900 truncate pr-2 leading-none mb-3.5">{mainItem?.name || 'Order Items'}</h3>
+                                    <h3 className="text-[15px] font-black text-gray-900 truncate pr-2 leading-none mb-3">{mainItem?.name || 'Order Items'}</h3>
                                     <div className="flex items-center justify-between mt-2">
                                         <div className="flex flex-col gap-1">
-                                            <span className="text-emerald-700 font-black text-xl bg-emerald-50 px-4 py-1.5 rounded-2xl border-2 border-emerald-100 shadow-sm w-fit">
-                                                ₹{remote?.totalAmount || order.totalAmount || remote?.total || order.total || remote?.subtotal || order.subtotal || 0}
+                                            <span className="text-emerald-700 font-black text-lg bg-emerald-50 px-3 py-1 rounded-xl border border-emerald-100 shadow-sm w-fit">
+                                                ₹{getPrice(remote, order)}
                                             </span>
                                             <span className="text-[10px] text-gray-400 font-bold ml-1">{new Date(order.createdAt || order.date || Date.now()).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
                                         </div>
@@ -233,7 +239,7 @@ export default function NativeTrack() {
                                                 <Star size={10} fill="currentColor" /> Rate Order
                                             </button>
                                         )}
-                                        {remote?.feedbackGiven && (
+                                        {(remote?.feedbackGiven || order.feedbackGiven) && (
                                             <div className="flex items-center gap-1.5 text-emerald-500 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-100">
                                                 <CheckCircle2 size={10} />
                                                 <span className="text-[9px] font-black uppercase tracking-widest">Reviewed</span>

@@ -34,16 +34,33 @@ export default function NativeOrderDetail() {
                     const remote = data[0];
                     setRemoteOrder(remote);
                     
-                    // Persistence: Update local storage if status or feedback flag changed
-                    if (localOrder && (localOrder.status !== remote.status || !!localOrder.feedbackGiven !== !!remote.feedbackGiven)) {
-                        const updated = stored.map(o => o._id === id ? { 
-                            ...o, 
-                            status: remote.status, 
-                            feedbackGiven: remote.feedbackGiven,
-                            totalAmount: remote.totalAmount,
-                            items: remote.items 
-                        } : o);
-                        localStorage.setItem('apni_order_history', JSON.stringify(updated));
+                    // Persistence: Safely update local storage without overwriting good data
+                    if (localOrder) {
+                        let needsUpdate = false;
+                        const updateObj = { ...localOrder };
+                        
+                        if (remote.status && localOrder.status !== remote.status) {
+                            updateObj.status = remote.status;
+                            needsUpdate = true;
+                        }
+                        if (remote.feedbackGiven && !localOrder.feedbackGiven) {
+                            updateObj.feedbackGiven = true;
+                            needsUpdate = true;
+                        }
+                        // Only fill in totalAmount/items if local is missing them
+                        if (remote.totalAmount && !localOrder.totalAmount) {
+                            updateObj.totalAmount = remote.totalAmount;
+                            needsUpdate = true;
+                        }
+                        if (remote.items && remote.items.length > 0 && (!localOrder.items || localOrder.items.length === 0)) {
+                            updateObj.items = remote.items;
+                            needsUpdate = true;
+                        }
+                        
+                        if (needsUpdate) {
+                            const updated = stored.map(o => o._id === id ? updateObj : o);
+                            localStorage.setItem('apni_order_history', JSON.stringify(updated));
+                        }
                     }
                 }
             } catch (err) {
@@ -58,11 +75,16 @@ export default function NativeOrderDetail() {
 
     const formatId = (id) => {
         if (!id) return '';
-        let clean = String(id).toUpperCase();
-        while (clean.includes('ORD') || clean.includes('#')) {
-            clean = clean.replace('#', '').replace('ORD', '');
-        }
+        const clean = String(id).replace(/[#]/g, '').replace(/ORD/gi, '').trim();
         return `#ORD${clean}`;
+    };
+
+    // Calculate price from items if totalAmount is missing/0
+    const getPrice = () => {
+        const amt = remoteOrder?.totalAmount || order?.totalAmount || remoteOrder?.total || order?.total || 0;
+        if (amt > 0) return amt;
+        const allItems = remoteOrder?.items || order?.items || [];
+        return allItems.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 1)), 0);
     };
 
     const getStatusInfo = () => {
@@ -133,7 +155,7 @@ export default function NativeOrderDetail() {
                         <div className="flex items-center gap-2 mt-2">
                             <span className={`w-2.5 h-2.5 rounded-full ${statusInfo.dot} animate-pulse`} />
                             <p className={`text-[13px] font-black uppercase tracking-tight ${statusInfo.text}`}>{statusInfo.label}</p>
-                            <span className="text-[18px] font-black text-blue-700 bg-blue-50 px-4 py-1.5 rounded-2xl border-2 border-blue-100 shadow-md uppercase tracking-wider">
+                            <span className="text-[14px] font-black text-blue-700 bg-blue-50 px-3 py-1 rounded-xl border border-blue-200 shadow-sm uppercase tracking-wide">
                                 {formatId(remoteOrder?.orderId || order?.orderId || id.slice(-6))}
                             </span>
                         </div>
@@ -204,7 +226,7 @@ export default function NativeOrderDetail() {
                     </div>
                     <div className="mt-8 pt-6 border-t border-gray-100 flex justify-between items-center">
                         <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Total Amount</span>
-                        <span className="text-3xl font-black text-emerald-600">₹{remoteOrder?.totalAmount || order?.totalAmount || remoteOrder?.total || order?.total || remoteOrder?.subtotal || order?.subtotal || 0}</span>
+                        <span className="text-3xl font-black text-emerald-600">₹{getPrice()}</span>
                     </div>
                 </div>
 
