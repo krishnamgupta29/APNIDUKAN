@@ -56,6 +56,12 @@ export default function NativeOrderDetail() {
         fetchOrder();
     }, [id]);
 
+    const formatId = (id) => {
+        if (!id) return '';
+        const clean = String(id).replace('#ORD', '').replace('#', '');
+        return `#ORD${clean}`;
+    };
+
     const getStatusInfo = () => {
         const status = (remoteOrder?.status || order?.status || 'ordered').toLowerCase();
         switch(status) {
@@ -93,7 +99,7 @@ export default function NativeOrderDetail() {
         }
     };
 
-    if (loading) return (
+    if (loading && !order) return (
         <div className="min-h-screen bg-white flex items-center justify-center">
             <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
         </div>
@@ -122,10 +128,10 @@ export default function NativeOrderDetail() {
                     <div>
                         <h1 className="text-2xl font-black text-gray-900 tracking-tight">Order Details</h1>
                         <div className="flex items-center gap-2 mt-1">
-                            <span className={`w-1.5 h-1.5 rounded-full ${statusInfo.dot} animate-pulse`} />
-                            <p className={`text-[10px] font-black uppercase tracking-tight ${statusInfo.text}`}>{statusInfo.label}</p>
-                            <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100/50 uppercase">
-                                #ORD{remoteOrder?.orderId || order?.orderId || id.slice(-6).toUpperCase()}
+                            <span className={`w-2 h-2 rounded-full ${statusInfo.dot} animate-pulse`} />
+                            <p className={`text-[12px] font-black uppercase tracking-tight ${statusInfo.text}`}>{statusInfo.label}</p>
+                            <span className="text-[14px] font-black text-blue-600 bg-blue-50 px-3 py-1 rounded-xl border border-blue-100 shadow-sm uppercase tracking-wider">
+                                {formatId(remoteOrder?.orderId || order?.orderId || id.slice(-6))}
                             </span>
                         </div>
                     </div>
@@ -195,7 +201,7 @@ export default function NativeOrderDetail() {
                     </div>
                     <div className="mt-8 pt-6 border-t border-gray-50 flex justify-between items-center">
                         <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Total Amount</span>
-                        <span className="text-2xl font-black text-emerald-600">₹{remoteOrder?.totalAmount || order?.totalAmount}</span>
+                        <span className="text-2xl font-black text-emerald-600">₹{remoteOrder?.totalAmount || order?.totalAmount || remoteOrder?.total || order?.total || 0}</span>
                     </div>
                 </div>
 
