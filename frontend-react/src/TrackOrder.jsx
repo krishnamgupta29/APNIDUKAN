@@ -94,14 +94,18 @@ export default function TrackOrder() {
 
     const getStatusInfo = (orderId, localStatus) => {
         const remote = ordersData[orderId];
-        const status = remote?.status || localStatus || 'ordered';
+        const status = (remote?.status || localStatus || 'ordered').toLowerCase();
         
-        switch(status.toLowerCase()) {
-            case 'ordered': return { step: 1, label: 'ORDERED', color: 'blue' };
-            case 'confirmed': return { step: 2, label: 'CONFIRMED', color: 'yellow' };
-            case 'delivered': return { step: 3, label: 'DELIVERED', color: 'emerald' };
-            case 'returned': return { step: 3, label: 'RETURNED', color: 'red' };
-            default: return { step: 1, label: 'ORDERED', color: 'blue' };
+        switch(status) {
+            case 'pending':
+            case 'ordered': return { step: 1, label: 'ORDERED', text: 'text-blue-600', bg: 'bg-blue-50', dot: 'bg-blue-500' };
+            case 'assigned':
+            case 'confirmed': return { step: 2, label: 'CONFIRMED', text: 'text-yellow-600', bg: 'bg-yellow-50', dot: 'bg-yellow-500' };
+            case 'delivered': return { step: 3, label: 'DELIVERED', text: 'text-emerald-600', bg: 'bg-emerald-50', dot: 'bg-emerald-500' };
+            case 'returned':
+            case 'rejected':
+            case 'return': return { step: 3, label: 'RETURNED', text: 'text-red-600', bg: 'bg-red-50', dot: 'bg-red-500' };
+            default: return { step: 1, label: 'ORDERED', text: 'text-blue-600', bg: 'bg-blue-50', dot: 'bg-blue-500' };
         }
     };
 
@@ -150,7 +154,7 @@ export default function TrackOrder() {
                     </motion.div>
                 ) : (
                     <div className="space-y-0 md:space-y-6 bg-white md:bg-transparent border-y md:border-0 border-gray-100">
-                        {localOrders.slice().reverse().map((order) => {
+                        {localOrders.slice().sort((a,b) => new Date(b.createdAt || b.date || 0) - new Date(a.createdAt || a.date || 0)).map((order) => {
                             const statusInfo = getStatusInfo(order._id, order.status);
                             const remoteOrder = ordersData[order._id];
                             const items = remoteOrder?.items || order.items || [];
@@ -178,22 +182,32 @@ export default function TrackOrder() {
                                         </div>
 
                                         <div className="flex-1 min-w-0">
-                                            <div className="flex items-center gap-2 mb-0.5">
-                                                <span className={`text-[7px] md:text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-widest border ${statusInfo.label === 'RETURNED' ? 'bg-red-50 text-red-500 border-red-100' : 'bg-emerald-50 text-emerald-500 border-emerald-100'}`}>
-                                                    {statusInfo.label}
-                                                </span>
-                                                <span className="text-[8px] md:text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100/50 uppercase tracking-widest">
-                                                    #{remoteOrder?.orderId || order.orderId || order._id.slice(-4).toUpperCase()}
+                                            <div className="flex items-center gap-1.5 mb-1">
+                                                <div className={`w-1.5 h-1.5 rounded-full ${statusInfo.dot} ${statusInfo.label !== 'DELIVERED' && statusInfo.label !== 'RETURNED' ? 'animate-pulse' : ''}`} />
+                                                <p className={`text-[8px] font-black uppercase tracking-tight ${statusInfo.text}`}>{statusInfo.label}</p>
+                                                <span className="text-[8px] font-black text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100/50 uppercase">
+                                                    #ORD{remoteOrder?.orderId || order.orderId || order._id.slice(-4).toUpperCase()}
                                                 </span>
                                             </div>
-                                            <h3 className="text-sm md:text-xl font-black text-gray-900 truncate tracking-tight">{items[0]?.name || 'Multiple Items'}</h3>
-                                            <p className="text-[8px] md:text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mt-0.5">{new Date(order.date || Date.now()).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</p>
+                                            <h3 className="text-base md:text-xl font-black text-gray-900 truncate leading-none mb-2">{items[0]?.name || 'Order Items'}</h3>
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-3">
+                                                    <span className="text-emerald-600 font-black text-base md:text-xl bg-emerald-50 px-3 py-1 rounded-xl border border-emerald-100/50">₹{remoteOrder?.totalAmount || order.totalAmount}</span>
+                                                    <span className="text-[10px] font-bold text-gray-400">{new Date(order.createdAt || order.date || Date.now()).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</span>
+                                                </div>
+                                                
+                                                {(statusInfo.label === 'DELIVERED' || statusInfo.label === 'RETURNED') && !hasFeedback && (
+                                                    <button 
+                                                        onClick={(e) => { e.stopPropagation(); setExpandedOrder(isExpanded ? null : order._id); }}
+                                                        className="px-4 py-2 bg-gray-900 text-white text-[10px] font-black rounded-xl active:scale-95 transition-all shadow-lg flex items-center gap-1.5"
+                                                    >
+                                                        <Star size={10} fill="currentColor" /> Give Feedback
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
 
                                         <div className="flex flex-col items-end gap-1 shrink-0">
-                                            <div className="text-right">
-                                                <p className="text-lg md:text-3xl font-black text-gray-900 tracking-tighter">₹{remoteOrder?.totalAmount || order.totalAmount}</p>
-                                            </div>
                                             <div className={`p-1.5 rounded-full transition-colors ${isExpanded ? 'bg-gray-100 text-gray-900' : 'bg-gray-50 text-gray-400'}`}>
                                                 {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                                             </div>

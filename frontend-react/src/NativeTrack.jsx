@@ -117,14 +117,14 @@ export default function NativeTrack() {
         
         switch(status) {
             case 'pending':
-            case 'ordered': return { step: 1, label: 'ORDERED', color: 'bg-blue-500' };
+            case 'ordered': return { step: 1, label: 'ORDERED', text: 'text-blue-600', bg: 'bg-blue-50', dot: 'bg-blue-500' };
             case 'assigned':
-            case 'confirmed': return { step: 2, label: 'CONFIRMED', color: 'bg-yellow-500' };
-            case 'delivered': return { step: 3, label: 'DELIVERED', color: 'bg-emerald-500' };
+            case 'confirmed': return { step: 2, label: 'CONFIRMED', text: 'text-yellow-600', bg: 'bg-yellow-50', dot: 'bg-yellow-500' };
+            case 'delivered': return { step: 3, label: 'DELIVERED', text: 'text-emerald-600', bg: 'bg-emerald-50', dot: 'bg-emerald-500' };
             case 'returned':
             case 'rejected':
-            case 'return': return { step: 3, label: 'RETURNED', color: 'bg-red-500' };
-            default: return { step: 1, label: 'ORDERED', color: 'bg-gray-500' };
+            case 'return': return { step: 3, label: 'RETURNED', text: 'text-red-600', bg: 'bg-red-50', dot: 'bg-red-500' };
+            default: return { step: 1, label: 'ORDERED', text: 'text-blue-600', bg: 'bg-blue-50', dot: 'bg-blue-500' };
         }
     };
 
@@ -169,16 +169,16 @@ export default function NativeTrack() {
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-1.5 mb-1">
-                                        <div className={`w-1.5 h-1.5 rounded-full ${statusInfo.color} ${statusInfo.label !== 'DELIVERED' && statusInfo.label !== 'RETURNED' ? 'animate-pulse' : ''}`} />
-                                        <p className={`text-[8px] font-black uppercase tracking-tight ${statusInfo.color.replace('bg-', 'text-')}`}>{statusInfo.label}</p>
+                                        <div className={`w-1.5 h-1.5 rounded-full ${statusInfo.dot} ${statusInfo.label !== 'DELIVERED' && statusInfo.label !== 'RETURNED' ? 'animate-pulse' : ''}`} />
+                                        <p className={`text-[8px] font-black uppercase tracking-tight ${statusInfo.text}`}>{statusInfo.label}</p>
                                         <span className="text-[8px] font-black text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100/50 uppercase">
-                                            #{remote?.orderId || order.orderId || order._id.slice(-4).toUpperCase()}
+                                            #ORD{remote?.orderId || order.orderId || order._id.slice(-4).toUpperCase()}
                                         </span>
                                     </div>
                                     <h3 className="text-[13px] font-black text-gray-900 truncate pr-2 leading-none">{mainItem?.name || 'Order Items'}</h3>
                                     <div className="flex items-center justify-between mt-2">
                                         <p className="text-[11px] font-bold">
-                                            <span className="text-emerald-500 font-black text-base">₹{remote?.totalAmount || order.totalAmount}</span>
+                                            <span className="text-emerald-600 font-black text-base bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-100">₹{remote?.totalAmount || order.totalAmount}</span>
                                             <span className="text-gray-300 mx-2">•</span>
                                             <span className="text-gray-400 font-bold">{new Date(order.createdAt || order.date || Date.now()).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</span>
                                         </p>
@@ -237,10 +237,10 @@ export default function NativeTrack() {
                                             <div>
                                                 <h2 className="text-2xl font-black text-gray-900 tracking-tight">Order Details</h2>
                                                 <div className="flex items-center gap-2 mt-1">
-                                                    <span className={`w-1.5 h-1.5 rounded-full ${statusInfo.color} animate-pulse`} />
-                                                    <p className={`text-[9px] font-black uppercase tracking-tight ${statusInfo.color.replace('bg-', 'text-')}`}>{statusInfo.label}</p>
+                                                    <span className={`w-1.5 h-1.5 rounded-full ${statusInfo.dot} animate-pulse`} />
+                                                    <p className={`text-[9px] font-black uppercase tracking-tight ${statusInfo.text}`}>{statusInfo.label}</p>
                                                     <span className="text-[9px] font-black text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100/50 uppercase">
-                                                        ID: #{remoteOrder?.orderId || activeOrder?.orderId || selectedOrder?.slice(-6).toUpperCase()}
+                                                        ID: #ORD{remoteOrder?.orderId || activeOrder?.orderId || selectedOrder?.slice(-6).toUpperCase()}
                                                     </span>
                                                 </div>
                                             </div>
