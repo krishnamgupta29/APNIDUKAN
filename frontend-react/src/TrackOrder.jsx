@@ -15,12 +15,32 @@ export default function TrackOrder() {
     const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
-        const stored = JSON.parse(localStorage.getItem('apni_order_history') || localStorage.getItem('my_orders') || '[]');
-        setLocalOrders(stored);
-        if (stored.length > 0) {
-            syncOrders(stored);
-            const interval = setInterval(() => syncOrders(stored), 10000);
-            return () => clearInterval(interval);
+        try {
+            // Migration: Move orders from 'my_orders' to 'apni_order_history' for persistence
+            const oldOrders = JSON.parse(localStorage.getItem('my_orders') || '[]');
+            const newOrders = JSON.parse(localStorage.getItem('apni_order_history') || '[]');
+            
+            const mergedMap = {};
+            [...newOrders, ...oldOrders].forEach(o => {
+                const key = o._id || o.orderId;
+                if (key) mergedMap[key] = { ...(mergedMap[key] || {}), ...o };
+            });
+            const finalOrders = Object.values(mergedMap);
+            
+            if (oldOrders.length > 0) {
+                localStorage.setItem('apni_order_history', JSON.stringify(finalOrders));
+                localStorage.removeItem('my_orders');
+            }
+
+            setLocalOrders(finalOrders);
+            if (finalOrders.length > 0) {
+                syncOrders(finalOrders);
+                const interval = setInterval(() => syncOrders(finalOrders), 10000);
+                return () => clearInterval(interval);
+            }
+        } catch (e) {
+            console.error('Initial load failed', e);
+            setLocalOrders([]);
         }
     }, []);
 

@@ -26,10 +26,11 @@ export default function NativeTrack() {
             const oldOrders = JSON.parse(localStorage.getItem('my_orders') || '[]');
             const newOrders = JSON.parse(localStorage.getItem('apni_order_history') || '[]');
             
-            // Merge unique orders
+            // Merge unique orders by _id or orderId
             const mergedMap = {};
             [...newOrders, ...oldOrders].forEach(o => {
-                if (o._id) mergedMap[o._id] = { ...mergedMap[o._id], ...o };
+                const key = o._id || o.orderId;
+                if (key) mergedMap[key] = { ...(mergedMap[key] || {}), ...o };
             });
             const finalOrders = Object.values(mergedMap);
             
