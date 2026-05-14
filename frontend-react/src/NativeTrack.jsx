@@ -13,6 +13,8 @@ export default function NativeTrack() {
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [submitting, setSubmitting] = useState(false);
     const [toast, setToast] = useState(null);
+    const [rating, setRating] = useState(0);
+    const [comment, setComment] = useState('');
 
     const handleSelectOrder = (orderId) => {
         setSelectedOrder(orderId);
@@ -78,7 +80,7 @@ export default function NativeTrack() {
             case 'pending':
             case 'ordered': return { step: 1, label: 'ORDERED', color: 'bg-blue-500' };
             case 'assigned':
-            case 'confirmed': return { step: 2, label: 'CONFIRMED', color: 'bg-emerald-500' };
+            case 'confirmed': return { step: 2, label: 'CONFIRMED', color: 'bg-yellow-500' };
             case 'delivered': return { step: 3, label: 'DELIVERED', color: 'bg-emerald-500' };
             case 'returned':
             case 'rejected':
@@ -121,7 +123,7 @@ export default function NativeTrack() {
                                 key={order._id}
                                 whileTap={{ scale: 0.98 }}
                                 onClick={() => handleSelectOrder(order._id)}
-                                className="bg-white p-6 border-b border-gray-100 flex items-center gap-5 relative group"
+                                className="bg-white p-4 border-b border-gray-100 flex items-center gap-3 relative group"
                             >
                                 <div className="w-16 h-16 bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 shrink-0">
                                     <img src={getImageUrl(mainItem?.image)} className="w-full h-full object-cover" />
@@ -209,7 +211,7 @@ export default function NativeTrack() {
                                 })()}
                             </div>
 
-                            <div className="flex-1 overflow-y-auto px-8 pb-32">
+                            <div className="flex-1 overflow-y-auto px-4 pb-32">
                                 {(() => {
                                     const activeOrder = localOrders.find(o => o._id === selectedOrder);
                                     const remoteOrder = ordersData[selectedOrder];
@@ -219,11 +221,11 @@ export default function NativeTrack() {
                                     if (!activeOrder && !remoteOrder) return null;
 
                                 return (
-                                    <div className="px-6 pb-20 space-y-10">
+                                    <div className="px-2 pb-20 space-y-6">
                                         {/* Cinematic Mobile Progress Timeline */}
-                                        <div className="relative px-6 py-8">
+                                        <div className="relative px-2 py-4">
                                             {/* Background Track */}
-                                            <div className="absolute top-[52px] left-12 right-12 h-[3px] bg-gray-100 rounded-full overflow-hidden">
+                                            <div className="absolute top-[36px] left-8 right-8 h-[3px] bg-gray-100 rounded-full overflow-hidden">
                                                 <motion.div 
                                                     initial={{ width: 0 }}
                                                     animate={{ width: `${((statusInfo.step - 1) / 2) * 100}%` }}

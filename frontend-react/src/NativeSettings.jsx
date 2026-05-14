@@ -102,7 +102,7 @@ export default function NativeSettings() {
                                                 >
                                                     <Icon size={20} style={{ color: item.color }} strokeWidth={2.5} />
                                                 </div>
-                                                <div>
+                                                <div className="text-left">
                                                     <p className="text-[14px] font-black text-gray-900 leading-tight">{item.title}</p>
                                                     <p className="text-[11px] text-gray-400 font-bold mt-1">{item.sub}</p>
                                                 </div>
