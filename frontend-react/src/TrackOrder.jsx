@@ -76,7 +76,7 @@ export default function TrackOrder() {
     };
 
     return (
-        <div className="min-h-screen bg-[#f8fafc] pt-20 pb-4 md:pt-24 md:pb-12 px-0 md:px-6">
+        <div className="min-h-screen bg-[#f8fafc] pt-6 pb-4 md:pt-10 md:pb-12 px-0 md:px-6">
             <div className="max-w-4xl mx-auto">
                 <div className="flex justify-between items-end mb-6 md:mb-10 px-4 md:px-0">
                     <div>
