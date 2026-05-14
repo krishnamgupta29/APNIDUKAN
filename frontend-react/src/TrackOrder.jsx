@@ -11,7 +11,7 @@ export default function TrackOrder() {
     const [ordersData, setOrdersData] = useState({});
     const [expandedOrder, setExpandedOrder] = useState(null);
     const [feedbackText, setFeedbackText] = useState('');
-    const [rating, setRating] = useState(5);
+    const [rating, setRating] = useState(0);
     const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
@@ -28,8 +28,35 @@ export default function TrackOrder() {
         try {
             const orderIds = orders.map(o => o.orderId || o._id);
             const { data } = await axios.post(`${API_URL}/api/orders/sync`, { orderIds });
+            
             const dataMap = {};
-            data.forEach(o => { dataMap[o._id] = o; });
+            const updatedLocalOrders = [...localOrders];
+            let changed = false;
+
+            data.forEach(remoteOrder => {
+                dataMap[remoteOrder._id] = remoteOrder;
+                
+                // Persistence: Update local storage if status or feedback flag changed
+                const idx = updatedLocalOrders.findIndex(lo => lo._id === remoteOrder._id);
+                if (idx !== -1) {
+                    const local = updatedLocalOrders[idx];
+                    if (local.status !== remoteOrder.status || !!local.feedbackGiven !== !!remoteOrder.feedbackGiven) {
+                        updatedLocalOrders[idx] = { 
+                            ...local, 
+                            status: remoteOrder.status,
+                            feedbackGiven: remoteOrder.feedbackGiven,
+                            totalAmount: remoteOrder.totalAmount,
+                            items: remoteOrder.items
+                        };
+                        changed = true;
+                    }
+                }
+            });
+
+            if (changed) {
+                setLocalOrders(updatedLocalOrders);
+                localStorage.setItem('apni_order_history', JSON.stringify(updatedLocalOrders));
+            }
             setOrdersData(dataMap);
         } catch (err) {
             console.error('Sync failed', err);
@@ -44,12 +71,20 @@ export default function TrackOrder() {
                 rating, 
                 comment: feedbackText 
             });
-            // Update local data to reflect feedback submitted
+            
+            // Update state and local storage immediately
+            const updatedLocal = localOrders.map(lo => 
+                lo._id === orderId ? { ...lo, feedbackGiven: true } : lo
+            );
+            setLocalOrders(updatedLocal);
+            localStorage.setItem('apni_order_history', JSON.stringify(updatedLocal));
+
             setOrdersData(prev => ({
                 ...prev,
                 [orderId]: { ...prev[orderId], feedbackGiven: true }
             }));
             setFeedbackText('');
+            setRating(0);
         } catch (err) {
             alert('Failed to submit feedback');
         } finally {
@@ -271,25 +306,24 @@ export default function TrackOrder() {
 
                                                     {/* Feedback Section */}
                                                     {(statusInfo.label === 'DELIVERED' || statusInfo.label === 'RETURNED') && (
-                                                        <div className="mt-12">
+                                                        <div className="mt-8">
                                                             {hasFeedback ? (
-                                                                <div className="bg-emerald-50 border border-emerald-100 p-10 rounded-[3rem] text-center">
-                                                                    <CheckCircle2 size={40} className="text-emerald-500 mx-auto mb-4" />
-                                                                    <h5 className="text-2xl font-black text-gray-900 tracking-tight">Feedback Received!</h5>
-                                                                    <p className="text-emerald-600/70 font-bold text-sm mt-1">Thank you for helping us improve our service.</p>
+                                                                <div className="bg-emerald-50 border border-emerald-100 p-8 rounded-[2rem] text-center">
+                                                                    <CheckCircle2 size={32} className="text-emerald-500 mx-auto mb-3" />
+                                                                    <h5 className="text-xl font-black text-gray-900">Feedback Received!</h5>
+                                                                    <p className="text-emerald-600/70 font-bold text-xs mt-1">Thank you for your response.</p>
                                                                 </div>
                                                             ) : (
-                                                                <div className={`p-6 md:p-10 rounded-[2rem] md:rounded-[3rem] border-2 shadow-2xl transition-all ${statusInfo.label === 'RETURNED' ? 'bg-red-50 border-red-100 shadow-red-100/30' : 'bg-white border-gray-100 shadow-gray-200/50'}`}>
-                                                                    <div className="flex flex-col md:flex-row justify-between gap-4 md:gap-8 mb-6 md:mb-8">
+                                                                <div className={`p-6 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] border-2 shadow-xl transition-all ${statusInfo.label === 'RETURNED' ? 'bg-red-50 border-red-100 shadow-red-100/20' : 'bg-white border-gray-100 shadow-gray-200/40'}`}>
+                                                                    <div className="flex flex-col md:flex-row justify-between gap-4 mb-6">
                                                                         <div>
-                                                                            <h5 className="text-3xl font-black text-gray-900 tracking-tight">{statusInfo.label === 'RETURNED' ? 'Reason for Return?' : 'How was your delivery?'}</h5>
-                                                                            <p className="text-gray-400 font-bold text-xs mt-1 uppercase tracking-widest">Share your thoughts with our team</p>
+                                                                            <h5 className="text-2xl font-black text-gray-900 tracking-tight">{statusInfo.label === 'RETURNED' ? 'Reason for Return?' : 'How was your delivery?'}</h5>
                                                                         </div>
                                                                         {statusInfo.label === 'DELIVERED' && (
-                                                                            <div className="flex gap-2 p-2 bg-gray-50 rounded-2xl border border-gray-100 shrink-0 self-start">
+                                                                            <div className="flex gap-1.5 p-1.5 bg-gray-50 rounded-xl border border-gray-100 self-start">
                                                                                 {[1,2,3,4,5].map(s => (
-                                                                                    <button key={s} onClick={() => setRating(s)} className={`p-1.5 transition-all ${rating >= s ? 'text-yellow-400 scale-125' : 'text-gray-200'}`}>
-                                                                                        <Star size={30} fill={rating >= s ? 'currentColor' : 'none'} strokeWidth={2.5} />
+                                                                                    <button key={s} onClick={() => setRating(s)} className={`p-1 transition-all ${rating >= s ? 'text-yellow-400 scale-110' : 'text-gray-200'}`}>
+                                                                                        <Star size={24} fill={rating >= s ? 'currentColor' : 'none'} strokeWidth={2} />
                                                                                     </button>
                                                                                 ))}
                                                                             </div>
@@ -298,16 +332,16 @@ export default function TrackOrder() {
                                                                     <textarea 
                                                                         value={feedbackText}
                                                                         onChange={(e) => setFeedbackText(e.target.value)}
-                                                                        placeholder={statusInfo.label === 'RETURNED' ? "Please explain why the order was returned (Required)..." : "Write a short review about our service..."}
-                                                                        className="w-full p-6 bg-gray-50 border border-gray-100 rounded-[2rem] min-h-[140px] outline-none focus:ring-8 focus:ring-blue-50/50 focus:bg-white focus:border-blue-400 transition-all font-bold text-gray-700 shadow-inner"
+                                                                        placeholder={statusInfo.label === 'RETURNED' ? "Please explain why..." : "Write a short review..."}
+                                                                        className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl min-h-[100px] outline-none focus:bg-white focus:border-blue-400 transition-all font-bold text-sm text-gray-700 shadow-inner"
                                                                     />
-                                                                    <div className="flex justify-end mt-6">
+                                                                    <div className="flex justify-end mt-4">
                                                                         <button 
                                                                             onClick={() => submitFeedback(order._id)}
                                                                             disabled={submitting || (statusInfo.label === 'RETURNED' && !feedbackText.trim())}
-                                                                            className="px-12 py-5 bg-gray-900 text-white font-black rounded-2xl shadow-2xl shadow-gray-900/20 hover:bg-black hover:-translate-y-1 active:translate-y-0 transition-all flex items-center gap-2 disabled:opacity-50"
+                                                                            className="w-full md:w-auto px-10 py-4 bg-gray-900 text-white font-black rounded-xl shadow-lg hover:bg-black transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                                                                         >
-                                                                            {submitting ? 'Submitting...' : <><MessageSquare size={18} /> Send Feedback</>}
+                                                                            {submitting ? 'Submitting...' : <><MessageSquare size={16} /> Send Feedback</>}
                                                                         </button>
                                                                     </div>
                                                                 </div>

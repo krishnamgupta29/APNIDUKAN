@@ -44,8 +44,36 @@ export default function NativeTrack() {
         try {
             const orderIds = orders.map(o => o.orderId || o._id);
             const { data } = await axios.post(`${API_URL}/api/orders/sync`, { orderIds });
-            const dataMap = { ...ordersData }; // Keep old data if sync fails for some
-            data.forEach(o => { dataMap[o._id] = o; });
+            
+            const dataMap = { ...ordersData };
+            const updatedLocalOrders = [...localOrders];
+            let changed = false;
+
+            data.forEach(remoteOrder => {
+                dataMap[remoteOrder._id] = remoteOrder;
+                
+                // Update local storage if status changed or feedback flag changed
+                const idx = updatedLocalOrders.findIndex(lo => lo._id === remoteOrder._id);
+                if (idx !== -1) {
+                    const local = updatedLocalOrders[idx];
+                    if (local.status !== remoteOrder.status || !!local.feedbackGiven !== !!remoteOrder.feedbackGiven) {
+                        updatedLocalOrders[idx] = { 
+                            ...local, 
+                            status: remoteOrder.status,
+                            feedbackGiven: remoteOrder.feedbackGiven,
+                            // Preserve remote data in local for persistence
+                            totalAmount: remoteOrder.totalAmount,
+                            items: remoteOrder.items
+                        };
+                        changed = true;
+                    }
+                }
+            });
+
+            if (changed) {
+                setLocalOrders(updatedLocalOrders);
+                localStorage.setItem('apni_order_history', JSON.stringify(updatedLocalOrders));
+            }
             setOrdersData(dataMap);
         } catch (err) {
             console.error('Sync failed', err);
@@ -58,12 +86,23 @@ export default function NativeTrack() {
         try {
             await axios.post(`${API_URL}/api/orders/${orderId}/feedback`, { rating, comment });
             setToast('Feedback submitted! Thank you.');
-            // Update local state to show feedback given
+            
+            // Update both state and local storage immediately
+            const updatedLocal = localOrders.map(lo => 
+                lo._id === orderId ? { ...lo, feedbackGiven: true } : lo
+            );
+            setLocalOrders(updatedLocal);
+            localStorage.setItem('apni_order_history', JSON.stringify(updatedLocal));
+            
             setOrdersData(prev => ({
                 ...prev,
                 [orderId]: { ...prev[orderId], feedbackGiven: true }
             }));
-            setTimeout(() => setToast(null), 3000);
+            
+            setTimeout(() => {
+                setToast(null);
+                setSelectedOrder(null); // Close sheet
+            }, 2000);
         } catch (err) {
             setToast('Failed to submit feedback');
             setTimeout(() => setToast(null), 3000);
@@ -129,14 +168,14 @@ export default function NativeTrack() {
                                     <img src={getImageUrl(mainItem?.image)} className="w-full h-full object-cover" />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2 mb-1.5">
-                                        <div className={`w-2 h-2 rounded-full ${statusInfo.color} ${statusInfo.label !== 'DELIVERED' && statusInfo.label !== 'RETURNED' ? 'animate-pulse' : ''}`} />
-                                        <p className={`text-[9px] font-black uppercase tracking-widest ${statusInfo.color.replace('bg-', 'text-')}`}>{statusInfo.label}</p>
-                                        <span className="text-[9px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100/50 uppercase tracking-widest">
+                                    <div className="flex items-center gap-1.5 mb-1">
+                                        <div className={`w-1.5 h-1.5 rounded-full ${statusInfo.color} ${statusInfo.label !== 'DELIVERED' && statusInfo.label !== 'RETURNED' ? 'animate-pulse' : ''}`} />
+                                        <p className={`text-[8px] font-black uppercase tracking-tight ${statusInfo.color.replace('bg-', 'text-')}`}>{statusInfo.label}</p>
+                                        <span className="text-[8px] font-black text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100/50 uppercase">
                                             #{remote?.orderId || order.orderId || order._id.slice(-4).toUpperCase()}
                                         </span>
                                     </div>
-                                    <h3 className="text-sm font-black text-gray-900 truncate pr-4">{mainItem?.name || 'Order Items'}</h3>
+                                    <h3 className="text-[13px] font-black text-gray-900 truncate pr-2 leading-none">{mainItem?.name || 'Order Items'}</h3>
                                     <div className="flex items-center justify-between mt-2">
                                         <p className="text-[11px] font-bold">
                                             <span className="text-emerald-500 font-black text-base">₹{remote?.totalAmount || order.totalAmount}</span>
@@ -198,9 +237,9 @@ export default function NativeTrack() {
                                             <div>
                                                 <h2 className="text-2xl font-black text-gray-900 tracking-tight">Order Details</h2>
                                                 <div className="flex items-center gap-2 mt-1">
-                                                    <span className={`w-2 h-2 rounded-full ${statusInfo.color} animate-pulse`} />
-                                                    <p className={`text-[10px] font-black uppercase tracking-widest ${statusInfo.color.replace('bg-', 'text-')}`}>{statusInfo.label}</p>
-                                                    <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100/50 uppercase tracking-widest">
+                                                    <span className={`w-1.5 h-1.5 rounded-full ${statusInfo.color} animate-pulse`} />
+                                                    <p className={`text-[9px] font-black uppercase tracking-tight ${statusInfo.color.replace('bg-', 'text-')}`}>{statusInfo.label}</p>
+                                                    <span className="text-[9px] font-black text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100/50 uppercase">
                                                         ID: #{remoteOrder?.orderId || activeOrder?.orderId || selectedOrder?.slice(-6).toUpperCase()}
                                                     </span>
                                                 </div>
@@ -309,39 +348,36 @@ export default function NativeTrack() {
                                                         <p className="text-sm text-gray-500 font-bold leading-relaxed">{remoteOrder?.address || activeOrder.address}</p>
                                                      </div>
                                                  </div>
-                                                 <div className="mt-8 pt-8 border-t border-gray-50 flex justify-between items-center">
-                                                     <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Bill</span>
-                                                     <span className="text-2xl font-black text-gray-900">₹{remoteOrder?.totalAmount || activeOrder.totalAmount}</span>
+                                                 <div className="mt-4 pt-4 border-t border-gray-50 flex justify-between items-center">
+                                                     <span className="text-[10px] font-black text-gray-400 uppercase tracking-tight">Total Bill</span>
+                                                     <span className="text-xl font-black text-gray-900">₹{remoteOrder?.totalAmount || activeOrder.totalAmount}</span>
                                                  </div>
-                                             </div>
-
-                                            {/* Feedback Section */}
+                                                                                        {/* Feedback Section */}
                                             {(statusInfo.label === 'DELIVERED' || statusInfo.label === 'RETURNED') && (
-                                                <div className={`p-8 rounded-[3rem] border shadow-2xl transition-all ${statusInfo.label === 'RETURNED' ? 'bg-red-50 border-red-100 shadow-red-100/30' : 'bg-white border-gray-100 shadow-gray-200/50'}`}>
+                                                <div className={`p-6 rounded-[2.5rem] border shadow-xl transition-all ${statusInfo.label === 'RETURNED' ? 'bg-red-50 border-red-100 shadow-red-100/20' : 'bg-white border-gray-100 shadow-gray-200/40'}`}>
                                                     {hasFeedback ? (
-                                                        <div className="text-center py-4">
-                                                            <div className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-200/50">
-                                                                <CheckCircle2 size={28} />
+                                                        <div className="text-center py-2">
+                                                            <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                                                                <CheckCircle2 size={24} />
                                                             </div>
-                                                            <h4 className="text-lg font-black text-gray-900 mb-1">Feedback Submitted!</h4>
-                                                            <p className="text-xs text-emerald-600/70 font-bold">Thank you for your response.</p>
+                                                            <h4 className="text-base font-black text-gray-900 mb-0.5">Feedback Submitted!</h4>
+                                                            <p className="text-[10px] text-emerald-600/70 font-bold">Thank you for your response.</p>
                                                         </div>
                                                     ) : (
                                                         <>
-                                                            <div className="mb-6">
-                                                                <h4 className="text-xl font-black text-gray-900 tracking-tight">{statusInfo.label === 'RETURNED' ? 'Why was it returned?' : 'How was your delivery?'}</h4>
-                                                                <p className="text-gray-500 font-medium text-[11px] mt-1">{statusInfo.label === 'RETURNED' ? 'Please tell us the reason for the return.' : 'Your rating helps us improve.'}</p>
+                                                            <div className="mb-4">
+                                                                <h4 className="text-lg font-black text-gray-900 tracking-tight">{statusInfo.label === 'RETURNED' ? 'Why was it returned?' : 'How was your delivery?'}</h4>
                                                             </div>
                                                             
                                                             {statusInfo.label === 'DELIVERED' && (
-                                                                <div className="flex justify-center gap-4 mb-8">
+                                                                <div className="flex justify-center gap-2 mb-6">
                                                                     {[1, 2, 3, 4, 5].map(star => (
                                                                         <button 
                                                                             key={star} 
                                                                             onClick={() => setRating(star)} 
-                                                                            className={`p-1 transition-all ${rating >= star ? 'text-yellow-400 scale-125' : 'text-gray-900'}`}
+                                                                            className={`p-1 transition-all ${rating >= star ? 'text-yellow-400 scale-110' : 'text-gray-200'}`}
                                                                         >
-                                                                            <Star size={34} fill={rating >= star ? "currentColor" : "none"} strokeWidth={2.5} />
+                                                                            <Star size={28} fill={rating >= star ? "currentColor" : "none"} strokeWidth={2} />
                                                                         </button>
                                                                     ))}
                                                                 </div>
@@ -350,21 +386,21 @@ export default function NativeTrack() {
                                                             <textarea 
                                                                 value={comment}
                                                                 onChange={(e) => setComment(e.target.value)}
-                                                                placeholder={statusInfo.label === 'RETURNED' ? "Reason for return (required)..." : "Write a short review (optional)..."}
-                                                                className="w-full p-5 bg-gray-50/50 border border-gray-100 rounded-[1.5rem] min-h-[120px] outline-none focus:ring-4 focus:ring-blue-50 focus:bg-white focus:border-blue-500 transition-all font-medium text-gray-800 shadow-inner mb-4"
+                                                                placeholder={statusInfo.label === 'RETURNED' ? "Reason for return..." : "Write a short review..."}
+                                                                className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl min-h-[100px] outline-none focus:bg-white focus:border-blue-500 transition-all font-bold text-sm text-gray-800 mb-4"
                                                             />
                                                             
                                                             <button 
                                                                 onClick={() => submitFeedback(selectedOrder)}
                                                                 disabled={submitting || (statusInfo.label === 'RETURNED' && !comment.trim())}
-                                                                className="w-full py-5 bg-gray-900 text-white font-black rounded-2xl hover:bg-black active:scale-95 transition-all shadow-xl shadow-gray-900/20 disabled:opacity-50 flex items-center justify-center gap-2"
+                                                                className="w-full py-4 bg-gray-900 text-white font-black rounded-xl hover:bg-black active:scale-95 transition-all shadow-lg shadow-gray-900/20 disabled:opacity-50 flex items-center justify-center gap-2"
                                                             >
-                                                                {submitting ? 'Submitting...' : <><CheckCircle2 size={18} /> Submit Feedback</>}
+                                                                {submitting ? 'Submitting...' : <><CheckCircle2 size={16} /> Send Feedback</>}
                                                             </button>
                                                         </>
                                                     )}
                                                 </div>
-                                            )}
+                                            )}        )}
                                         </div>
                                     </div>
                                 );
