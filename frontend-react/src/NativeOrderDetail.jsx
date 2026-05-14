@@ -58,7 +58,7 @@ export default function NativeOrderDetail() {
 
     const formatId = (id) => {
         if (!id) return '';
-        const clean = String(id).replace('#ORD', '').replace('#', '');
+        const clean = String(id).replace(/#ORD/gi, '').replace(/#/g, '').trim();
         return `#ORD${clean}`;
     };
 

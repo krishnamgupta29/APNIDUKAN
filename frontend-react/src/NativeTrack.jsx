@@ -21,34 +21,47 @@ export default function NativeTrack() {
     };
 
     useEffect(() => {
-        try {
-            // Migration: Move orders from 'my_orders' to 'apni_order_history' for persistence
-            const oldOrders = JSON.parse(localStorage.getItem('my_orders') || '[]');
-            const newOrders = JSON.parse(localStorage.getItem('apni_order_history') || '[]');
-            
-            // Merge unique orders by _id or orderId
-            const mergedMap = {};
-            [...newOrders, ...oldOrders].forEach(o => {
-                const key = o._id || o.orderId;
-                if (key) mergedMap[key] = { ...(mergedMap[key] || {}), ...o };
-            });
-            const finalOrders = Object.values(mergedMap);
-            
-            if (oldOrders.length > 0) {
-                localStorage.setItem('apni_order_history', JSON.stringify(finalOrders));
-                localStorage.removeItem('my_orders'); // Clean up old key
-            }
+        const loadOrders = () => {
+            try {
+                const oldOrders = JSON.parse(localStorage.getItem('my_orders') || '[]');
+                const newOrders = JSON.parse(localStorage.getItem('apni_order_history') || '[]');
+                
+                const mergedMap = {};
+                [...newOrders, ...oldOrders].forEach(o => {
+                    const key = o._id || o.orderId;
+                    if (key) mergedMap[key] = { ...(mergedMap[key] || {}), ...o };
+                });
+                const finalOrders = Object.values(mergedMap);
+                
+                if (oldOrders.length > 0) {
+                    localStorage.setItem('apni_order_history', JSON.stringify(finalOrders));
+                    localStorage.removeItem('my_orders');
+                }
 
-            setLocalOrders(finalOrders);
-            if (finalOrders.length > 0) {
-                syncOrders(finalOrders);
-                const interval = setInterval(() => syncOrders(finalOrders), 10000);
-                return () => clearInterval(interval);
+                setLocalOrders(finalOrders);
+                if (finalOrders.length > 0) {
+                    syncOrders(finalOrders);
+                }
+            } catch (e) {
+                console.error('Initial load failed', e);
+                setLocalOrders([]);
             }
-        } catch (e) {
-            console.error('Initial load failed', e);
-            setLocalOrders([]);
-        }
+        };
+
+        loadOrders();
+        
+        // Refresh when coming back to this screen
+        window.addEventListener('focus', loadOrders);
+        
+        const interval = setInterval(() => {
+            const currentOrders = JSON.parse(localStorage.getItem('apni_order_history') || '[]');
+            if (currentOrders.length > 0) syncOrders(currentOrders);
+        }, 10000);
+        
+        return () => {
+            window.removeEventListener('focus', loadOrders);
+            clearInterval(interval);
+        };
     }, []);
 
     const syncOrders = async (orders) => {
@@ -71,10 +84,9 @@ export default function NativeTrack() {
                         updatedLocalOrders[idx] = { 
                             ...local, 
                             status: remoteOrder.status,
-                            feedbackGiven: remoteOrder.feedbackGiven,
-                            // Preserve remote data in local for persistence
-                            totalAmount: remoteOrder.totalAmount,
-                            items: remoteOrder.items
+                            feedbackGiven: remoteOrder.feedbackGiven || local.feedbackGiven,
+                            totalAmount: remoteOrder.totalAmount || remoteOrder.total || local.totalAmount || local.total || 0,
+                            items: remoteOrder.items || local.items || []
                         };
                         changed = true;
                     }
@@ -141,7 +153,7 @@ export default function NativeTrack() {
 
     const formatId = (id) => {
         if (!id) return '';
-        const clean = String(id).replace('#ORD', '').replace('#', '');
+        const clean = String(id).replace(/#ORD/gi, '').replace(/#/g, '').trim();
         return `#ORD${clean}`;
     };
 
