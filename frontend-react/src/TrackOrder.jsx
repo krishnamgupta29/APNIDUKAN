@@ -17,7 +17,11 @@ export default function TrackOrder() {
     useEffect(() => {
         const stored = JSON.parse(localStorage.getItem('apni_order_history') || localStorage.getItem('my_orders') || '[]');
         setLocalOrders(stored);
-        if (stored.length > 0) syncOrders(stored);
+        if (stored.length > 0) {
+            syncOrders(stored);
+            const interval = setInterval(() => syncOrders(stored), 10000);
+            return () => clearInterval(interval);
+        }
     }, []);
 
     const syncOrders = async (orders) => {
@@ -59,7 +63,7 @@ export default function TrackOrder() {
         
         switch(status.toLowerCase()) {
             case 'ordered': return { step: 1, label: 'ORDERED', color: 'blue' };
-            case 'confirmed': return { step: 2, label: 'CONFIRMED', color: 'indigo' };
+            case 'confirmed': return { step: 2, label: 'CONFIRMED', color: 'yellow' };
             case 'delivered': return { step: 3, label: 'DELIVERED', color: 'emerald' };
             case 'returned': return { step: 3, label: 'RETURNED', color: 'red' };
             default: return { step: 1, label: 'ORDERED', color: 'blue' };
@@ -72,9 +76,9 @@ export default function TrackOrder() {
     };
 
     return (
-        <div className="min-h-screen bg-[#f8fafc] pt-24 pb-12 px-6">
+        <div className="min-h-screen bg-[#f8fafc] pt-20 pb-4 md:pt-24 md:pb-12 px-0 md:px-6">
             <div className="max-w-4xl mx-auto">
-                <div className="flex justify-between items-end mb-10">
+                <div className="flex justify-between items-end mb-6 md:mb-10 px-4 md:px-0">
                     <div>
                         <motion.h1 
                             initial={{ opacity: 0, x: -20 }}
@@ -100,7 +104,7 @@ export default function TrackOrder() {
                     <motion.div 
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="bg-white rounded-[3rem] p-20 text-center border border-gray-100 shadow-2xl shadow-gray-200/50"
+                        className="bg-white rounded-[2rem] md:rounded-[3rem] p-8 md:p-20 text-center border border-gray-100 shadow-2xl shadow-gray-200/50"
                     >
                         <div className="w-24 h-24 bg-gray-50 text-gray-200 rounded-full flex items-center justify-center mx-auto mb-8">
                             <Package size={48} />
@@ -110,7 +114,7 @@ export default function TrackOrder() {
                         <button className="mt-10 px-8 py-4 bg-gray-900 text-white font-black rounded-2xl hover:bg-black transition-all shadow-xl shadow-gray-200">Start Shopping</button>
                     </motion.div>
                 ) : (
-                    <div className="space-y-6">
+                    <div className="space-y-0 md:space-y-6 bg-white md:bg-transparent border-y md:border-0 border-gray-100">
                         {localOrders.slice().reverse().map((order) => {
                             const statusInfo = getStatusInfo(order._id, order.status);
                             const remoteOrder = ordersData[order._id];
@@ -122,7 +126,7 @@ export default function TrackOrder() {
                                 <motion.div 
                                     key={order._id}
                                     layout
-                                    className={`bg-white rounded-[1.5rem] border transition-all duration-500 overflow-hidden ${isExpanded ? 'shadow-xl border-gray-200 ring-2 ring-gray-50' : 'shadow-lg shadow-gray-100 border-gray-100 hover:border-gray-200'}`}
+                                    className={`bg-white md:rounded-[1.5rem] border-b last:border-b-0 md:border transition-all duration-500 overflow-hidden ${isExpanded ? 'shadow-lg border-gray-200 bg-gray-50/30' : 'md:shadow-lg md:shadow-gray-100 border-gray-100 hover:border-gray-200'}`}
                                 >
                                     {/* Main Card Header */}
                                     <div 
@@ -170,7 +174,7 @@ export default function TrackOrder() {
                                                 exit={{ height: 0, opacity: 0 }}
                                                 className="border-t border-gray-100 bg-[#fcfdfe]"
                                             >
-                                                <div className="p-5 md:p-8">
+                                                <div className="p-4 md:p-8">
                                                     {/* Cinematic Progress Timeline */}
                                                     <div className="max-w-2xl mx-auto mb-12 relative px-4">
                                                         <div className="absolute top-[18px] left-6 right-6 h-[2px] bg-gray-100 rounded-full overflow-hidden">
@@ -192,7 +196,7 @@ export default function TrackOrder() {
                                                                 const isCurrent = statusInfo.step === s.step;
                                                                 const colors = {
                                                                     blue: 'bg-blue-500 shadow-blue-100',
-                                                                    indigo: 'bg-indigo-500 shadow-indigo-100',
+                                                                    yellow: 'bg-yellow-500 shadow-yellow-100',
                                                                     emerald: 'bg-emerald-500 shadow-emerald-100',
                                                                     red: 'bg-red-500 shadow-red-100'
                                                                 };
@@ -220,8 +224,8 @@ export default function TrackOrder() {
                                                         </div>
                                                     </div>
 
-                                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                                        <div className="bg-white p-6 rounded-[1.5rem] border border-gray-100 shadow-lg shadow-gray-100/50">
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0 md:gap-6 divide-y md:divide-y-0 divide-gray-100">
+                                                        <div className="bg-white py-6 md:p-6 md:rounded-[1.5rem] md:border border-gray-100 md:shadow-lg shadow-gray-100/50">
                                                             <h4 className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-1.5"><ShoppingBag size={12}/> Items</h4>
                                                             <div className="space-y-3">
                                                                 {items.map((item, idx) => (
@@ -240,7 +244,7 @@ export default function TrackOrder() {
                                                             </div>
                                                         </div>
 
-                                                        <div className="bg-white p-6 rounded-[1.5rem] border border-gray-100 shadow-lg shadow-gray-100/50">
+                                                        <div className="bg-white py-6 md:p-6 md:rounded-[1.5rem] md:border border-gray-100 md:shadow-lg shadow-gray-100/50">
                                                             <h4 className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-1.5"><MapPin size={12}/> Shipping</h4>
                                                             <p className="text-base font-black text-gray-900 tracking-tight">{remoteOrder?.customerName || order.customerName}</p>
                                                             <p className="text-xs font-bold text-gray-500 italic mt-1.5 leading-relaxed truncate">"{remoteOrder?.address || order.address}"</p>
@@ -249,7 +253,7 @@ export default function TrackOrder() {
                                                             </div>
                                                         </div>
 
-                                                        <div className="bg-gray-900 text-white p-6 rounded-[1.5rem] shadow-xl relative overflow-hidden">
+                                                        <div className="bg-gray-900 text-white p-6 rounded-2xl md:rounded-[1.5rem] shadow-xl relative overflow-hidden my-4 md:my-0">
                                                             <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full -mr-12 -mt-12 blur-2xl" />
                                                             <h4 className="text-[9px] font-black text-white/40 uppercase tracking-[0.2em] mb-6">Final Summary</h4>
                                                             <div className="space-y-3 relative z-10">
@@ -275,8 +279,8 @@ export default function TrackOrder() {
                                                                     <p className="text-emerald-600/70 font-bold text-sm mt-1">Thank you for helping us improve our service.</p>
                                                                 </div>
                                                             ) : (
-                                                                <div className={`p-10 rounded-[3rem] border-2 shadow-2xl transition-all ${statusInfo.label === 'RETURNED' ? 'bg-red-50 border-red-100 shadow-red-100/30' : 'bg-white border-gray-100 shadow-gray-200/50'}`}>
-                                                                    <div className="flex flex-col md:flex-row justify-between gap-8 mb-8">
+                                                                <div className={`p-6 md:p-10 rounded-[2rem] md:rounded-[3rem] border-2 shadow-2xl transition-all ${statusInfo.label === 'RETURNED' ? 'bg-red-50 border-red-100 shadow-red-100/30' : 'bg-white border-gray-100 shadow-gray-200/50'}`}>
+                                                                    <div className="flex flex-col md:flex-row justify-between gap-4 md:gap-8 mb-6 md:mb-8">
                                                                         <div>
                                                                             <h5 className="text-3xl font-black text-gray-900 tracking-tight">{statusInfo.label === 'RETURNED' ? 'Reason for Return?' : 'How was your delivery?'}</h5>
                                                                             <p className="text-gray-400 font-bold text-xs mt-1 uppercase tracking-widest">Share your thoughts with our team</p>
