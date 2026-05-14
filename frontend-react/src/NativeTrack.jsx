@@ -21,47 +21,34 @@ export default function NativeTrack() {
     };
 
     useEffect(() => {
-        const loadOrders = () => {
-            try {
-                const oldOrders = JSON.parse(localStorage.getItem('my_orders') || '[]');
-                const newOrders = JSON.parse(localStorage.getItem('apni_order_history') || '[]');
-                
-                const mergedMap = {};
-                [...newOrders, ...oldOrders].forEach(o => {
-                    const key = o._id || o.orderId;
-                    if (key) mergedMap[key] = { ...(mergedMap[key] || {}), ...o };
-                });
-                const finalOrders = Object.values(mergedMap);
-                
-                if (oldOrders.length > 0) {
-                    localStorage.setItem('apni_order_history', JSON.stringify(finalOrders));
-                    localStorage.removeItem('my_orders');
-                }
-
-                setLocalOrders(finalOrders);
-                if (finalOrders.length > 0) {
-                    syncOrders(finalOrders);
-                }
-            } catch (e) {
-                console.error('Initial load failed', e);
-                setLocalOrders([]);
+        try {
+            // Migration: Move orders from 'my_orders' to 'apni_order_history' for persistence
+            const oldOrders = JSON.parse(localStorage.getItem('my_orders') || '[]');
+            const newOrders = JSON.parse(localStorage.getItem('apni_order_history') || '[]');
+            
+            // Merge unique orders by _id or orderId
+            const mergedMap = {};
+            [...newOrders, ...oldOrders].forEach(o => {
+                const key = o._id || o.orderId;
+                if (key) mergedMap[key] = { ...(mergedMap[key] || {}), ...o };
+            });
+            const finalOrders = Object.values(mergedMap);
+            
+            if (oldOrders.length > 0) {
+                localStorage.setItem('apni_order_history', JSON.stringify(finalOrders));
+                localStorage.removeItem('my_orders'); // Clean up old key
             }
-        };
 
-        loadOrders();
-        
-        // Refresh when coming back to this screen
-        window.addEventListener('focus', loadOrders);
-        
-        const interval = setInterval(() => {
-            const currentOrders = JSON.parse(localStorage.getItem('apni_order_history') || '[]');
-            if (currentOrders.length > 0) syncOrders(currentOrders);
-        }, 10000);
-        
-        return () => {
-            window.removeEventListener('focus', loadOrders);
-            clearInterval(interval);
-        };
+            setLocalOrders(finalOrders);
+            if (finalOrders.length > 0) {
+                syncOrders(finalOrders);
+                const interval = setInterval(() => syncOrders(finalOrders), 10000);
+                return () => clearInterval(interval);
+            }
+        } catch (e) {
+            console.error('Initial load failed', e);
+            setLocalOrders([]);
+        }
     }, []);
 
     const syncOrders = async (orders) => {
@@ -77,17 +64,38 @@ export default function NativeTrack() {
                 dataMap[remoteOrder._id] = remoteOrder;
                 
                 // Update local storage if status changed or feedback flag changed
+                // Persistence: ONLY update local if remote has data and it's different
                 const idx = updatedLocalOrders.findIndex(lo => lo._id === remoteOrder._id);
                 if (idx !== -1) {
                     const local = updatedLocalOrders[idx];
-                    if (local.status !== remoteOrder.status || !!local.feedbackGiven !== !!remoteOrder.feedbackGiven) {
-                        updatedLocalOrders[idx] = { 
-                            ...local, 
-                            status: remoteOrder.status,
-                            feedbackGiven: remoteOrder.feedbackGiven || local.feedbackGiven,
-                            totalAmount: remoteOrder.totalAmount || remoteOrder.total || local.totalAmount || local.total || 0,
-                            items: remoteOrder.items || local.items || []
-                        };
+                    let hasUpdate = false;
+                    const updateObj = { ...local };
+
+                    // Update status ONLY if it's not already delivered/returned (source of truth)
+                    if (remoteOrder.status && local.status !== remoteOrder.status) {
+                        updateObj.status = remoteOrder.status;
+                        hasUpdate = true;
+                    }
+
+                    // Update feedback flag ONLY if it's false locally but true on remote
+                    // OR if it's true locally, keep it true (don't let remote reset it)
+                    if (remoteOrder.feedbackGiven && !local.feedbackGiven) {
+                        updateObj.feedbackGiven = true;
+                        hasUpdate = true;
+                    }
+
+                    // Preserve data fields from remote ONLY if they are not empty
+                    if (remoteOrder.totalAmount && !local.totalAmount) {
+                        updateObj.totalAmount = remoteOrder.totalAmount;
+                        hasUpdate = true;
+                    }
+                    if (remoteOrder.items && remoteOrder.items.length > 0 && (!local.items || local.items.length === 0)) {
+                        updateObj.items = remoteOrder.items;
+                        hasUpdate = true;
+                    }
+
+                    if (hasUpdate) {
+                        updatedLocalOrders[idx] = updateObj;
                         changed = true;
                     }
                 }
@@ -153,7 +161,11 @@ export default function NativeTrack() {
 
     const formatId = (id) => {
         if (!id) return '';
-        const clean = String(id).replace(/#ORD/gi, '').replace(/#/g, '').trim();
+        let clean = String(id).toUpperCase();
+        // Remove all occurrences of ORD and # to avoid doubling
+        while (clean.includes('ORD') || clean.includes('#')) {
+            clean = clean.replace('#', '').replace('ORD', '');
+        }
         return `#ORD${clean}`;
     };
 

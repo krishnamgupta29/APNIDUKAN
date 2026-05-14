@@ -58,7 +58,10 @@ export default function NativeOrderDetail() {
 
     const formatId = (id) => {
         if (!id) return '';
-        const clean = String(id).replace(/#ORD/gi, '').replace(/#/g, '').trim();
+        let clean = String(id).toUpperCase();
+        while (clean.includes('ORD') || clean.includes('#')) {
+            clean = clean.replace('#', '').replace('ORD', '');
+        }
         return `#ORD${clean}`;
     };
 
