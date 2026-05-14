@@ -17,7 +17,8 @@ async function sendWhatsApp(phone, message) {
 exports.createOrder = async (req, res) => {
     try {
         const { customerName, phone, address, items, total } = req.body;
-        const orderId = 'ORD-' + Math.floor(1000 + Math.random() * 9000);
+        // Increased to 6 digits for 900,000 unique combinations
+        const orderId = 'ORD-' + Math.floor(100000 + Math.random() * 900000);
         const savedOrder = await new Order({ orderId, customerName, phone, address, items, total }).save();
 
         // WhatsApp disabled to improve speed / since it's not active
