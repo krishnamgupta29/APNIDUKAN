@@ -39,10 +39,20 @@ export default function NativeTrack() {
                 localStorage.removeItem('my_orders'); // Clean up old key
             }
 
-            setLocalOrders(finalOrders);
-            if (finalOrders.length > 0) {
-                syncOrders(finalOrders);
-                const interval = setInterval(() => syncOrders(finalOrders), 10000);
+            // Repair corrupt orders: fix ₹0 by recalculating from items
+            const repairedOrders = finalOrders.map(o => {
+                const repaired = { ...o };
+                if ((!o.totalAmount || o.totalAmount === 0) && o.items && o.items.length > 0) {
+                    repaired.totalAmount = o.items.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 1)), 0);
+                }
+                return repaired;
+            });
+
+            localStorage.setItem('apni_order_history', JSON.stringify(repairedOrders));
+            setLocalOrders(repairedOrders);
+            if (repairedOrders.length > 0) {
+                syncOrders(repairedOrders);
+                const interval = setInterval(() => syncOrders(repairedOrders), 10000);
                 return () => clearInterval(interval);
             }
         } catch (e) {
@@ -225,7 +235,7 @@ export default function NativeTrack() {
                                     <h3 className="text-[15px] font-black text-gray-900 truncate pr-2 leading-none mb-3">{mainItem?.name || 'Order Items'}</h3>
                                     <div className="flex items-center justify-between mt-2">
                                         <div className="flex flex-col gap-1">
-                                            <span className="text-emerald-700 font-black text-lg bg-emerald-50 px-3 py-1 rounded-xl border border-emerald-100 shadow-sm w-fit">
+                                            <span className="text-emerald-700 font-black text-sm bg-emerald-50 px-2.5 py-1 rounded-xl border border-emerald-100 w-fit">
                                                 ₹{getPrice(remote, order)}
                                             </span>
                                             <span className="text-[10px] text-gray-400 font-bold ml-1">{new Date(order.createdAt || order.date || Date.now()).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>

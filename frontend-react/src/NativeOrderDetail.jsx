@@ -155,7 +155,7 @@ export default function NativeOrderDetail() {
                         <div className="flex items-center gap-2 mt-2">
                             <span className={`w-2.5 h-2.5 rounded-full ${statusInfo.dot} animate-pulse`} />
                             <p className={`text-[13px] font-black uppercase tracking-tight ${statusInfo.text}`}>{statusInfo.label}</p>
-                            <span className="text-[14px] font-black text-blue-700 bg-blue-50 px-3 py-1 rounded-xl border border-blue-200 shadow-sm uppercase tracking-wide">
+                            <span className="text-[11px] font-black text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-lg border border-blue-200 uppercase tracking-wide">
                                 {formatId(remoteOrder?.orderId || order?.orderId || id.slice(-6))}
                             </span>
                         </div>
