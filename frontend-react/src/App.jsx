@@ -159,6 +159,16 @@ export default function App() {
     const subtotal = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
     const deliveryTotal = cart.length > 0 ? Math.max(...cart.map(i => i.deliveryCharge || 0)) : 0;
     const totalCalc = subtotal + deliveryTotal;
+    const SHOW_COMING_SOON = true;
+
+    useEffect(() => {
+        if (SHOW_COMING_SOON && !showIntro) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'auto';
+        }
+        return () => { document.body.style.overflow = 'auto'; };
+    }, [SHOW_COMING_SOON, showIntro]);
 
     return (
         <ErrorBoundary>
@@ -167,26 +177,40 @@ export default function App() {
             </AnimatePresence>
 
             {!showIntro && (
-                (Capacitor.isNativePlatform() || new URLSearchParams(window.location.search).get('native') === '1') ? (
-                    <NativeApp 
-                        cart={cart} 
-                        addToCart={addToCart} 
-                        remFromCart={remFromCart} 
-                        decreaseQty={decreaseQty}
-                        subtotal={subtotal} 
-                        deliveryTotal={deliveryTotal} 
-                        totalCalc={totalCalc}
-                        orderPayload={orderPayload} 
-                        setOrderPayload={setOrderPayload} 
-                        setCart={setCart}
-                    />
-                ) : (
-                <div className="min-h-screen flex flex-col relative w-full overflow-x-hidden">
-                    <Navigation cartCount={cart.reduce((a,c) => a + c.quantity, 0)} onCartClick={() => setIsCartOpen(true)} />
-                    
-                    <div className="pt-20 flex-1 flex flex-col w-full">
-                        <Routes>
-                            <Route path="/" element={<Home addToCart={addToCart} />} />
+                <>
+                    {SHOW_COMING_SOON && (
+                        <div className="coming-soon-overlay">
+                            <motion.div 
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="flex flex-col items-center"
+                            >
+                                <h1 className="coming-soon-text">Coming Soon</h1>
+                                <p className="mt-4 text-gray-500 font-bold tracking-[0.3em] uppercase text-xs sm:text-sm">Something exciting is brewing</p>
+                            </motion.div>
+                        </div>
+                    )}
+
+                    {(Capacitor.isNativePlatform() || new URLSearchParams(window.location.search).get('native') === '1') ? (
+                        <NativeApp 
+                            cart={cart} 
+                            addToCart={addToCart} 
+                            remFromCart={remFromCart} 
+                            decreaseQty={decreaseQty}
+                            subtotal={subtotal} 
+                            deliveryTotal={deliveryTotal} 
+                            totalCalc={totalCalc}
+                            orderPayload={orderPayload} 
+                            setOrderPayload={setOrderPayload} 
+                            setCart={setCart}
+                        />
+                    ) : (
+                        <div className="min-h-screen flex flex-col relative w-full overflow-x-hidden">
+                            <Navigation cartCount={cart.reduce((a,c) => a + c.quantity, 0)} onCartClick={() => setIsCartOpen(true)} />
+                            
+                            <div className="pt-20 flex-1 flex flex-col w-full">
+                                <Routes>
+                                    <Route path="/" element={<Home addToCart={addToCart} />} />
                             <Route path="/products" element={<Home addToCart={addToCart} />} />
                             <Route path="/category/:categoryName" element={<Home addToCart={addToCart} />} />
                             <Route path="/product/:productId" element={<ProductPage addToCart={addToCart} />} />
@@ -264,8 +288,9 @@ export default function App() {
                             </motion.div>
                         )}
                     </AnimatePresence>
-                </div>
-                )
+                        </div>
+                    )}
+                </>
             )}
         </ErrorBoundary>
     );
