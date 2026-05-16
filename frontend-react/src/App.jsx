@@ -179,7 +179,19 @@ export default function App() {
             {!showIntro && (
                 <>
                     {SHOW_COMING_SOON && (
-                        <div className="coming-soon-overlay">
+                        <div style={{
+                            position: 'fixed',
+                            inset: 0,
+                            backgroundColor: 'rgba(255, 255, 255, 0.4)',
+                            backdropFilter: 'blur(20px) saturate(180%)',
+                            WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                            zIndex: 999999,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            pointerEvents: 'all',
+                            cursor: 'not-allowed'
+                        }}>
                             <motion.div 
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 animate={{ opacity: 1, scale: 1 }}
