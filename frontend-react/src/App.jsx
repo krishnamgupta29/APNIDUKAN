@@ -159,7 +159,7 @@ export default function App() {
     const subtotal = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
     const deliveryTotal = cart.length > 0 ? Math.max(...cart.map(i => i.deliveryCharge || 0)) : 0;
     const totalCalc = subtotal + deliveryTotal;
-    const SHOW_COMING_SOON = true;
+    const SHOW_COMING_SOON = false;
 
     useEffect(() => {
         if (SHOW_COMING_SOON && !showIntro) {
