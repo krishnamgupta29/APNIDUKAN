@@ -8,7 +8,19 @@ import { getImageUrl } from './utils';
 
 export default function Admin() {
     const navigate = useNavigate();
-    const ADMIN_TOKEN = sessionStorage.getItem('auth_token') || 'apnidukanspn9140';
+    
+    const getAdminToken = () => {
+        let token = sessionStorage.getItem('auth_token') || localStorage.getItem('auth_token');
+        if (!token) {
+            const match = document.cookie.match(new RegExp('(^| )auth_token=([^;]+)'));
+            if (match) token = match[2];
+        }
+        return token || 'apnidukanspn9140';
+    };
+
+    const ADMIN_TOKEN = getAdminToken();
+    const admin_token = ADMIN_TOKEN;
+
     const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' && window.innerWidth < 1024);
     
     useEffect(() => {
@@ -17,7 +29,14 @@ export default function Admin() {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    const [auth, setAuth] = useState(!!sessionStorage.getItem('auth_token')); // Memory-only session or token presence
+    const hasStoredToken = () => {
+        const token = sessionStorage.getItem('auth_token') || localStorage.getItem('auth_token');
+        if (token) return true;
+        const match = document.cookie.match(new RegExp('(^| )auth_token=([^;]+)'));
+        return !!match;
+    };
+
+    const [auth, setAuth] = useState(hasStoredToken());
     const [pass, setPass] = useState('');
     const [error, setError] = useState('');
     const [shakeKey, setShakeKey] = useState(0);
@@ -28,8 +47,29 @@ export default function Admin() {
     const [products, setProducts] = useState([]);
     const [deliveryUsers, setDeliveryUsers] = useState([]);
 
+    const handleSessionExpired = () => {
+        sessionStorage.removeItem('auth_token');
+        localStorage.removeItem('auth_token');
+        document.cookie = "auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        setAuth(false);
+        navigate('/login');
+    };
+
+    const handleApiError = (err, customMessage) => {
+        console.error(err);
+        const status = err.response?.status;
+        const errMsg = err.response?.data?.error || err.message;
+        
+        if (status === 401 || status === 403) {
+            handleSessionExpired();
+            alert(`Session expired: ${errMsg}. Please log in again.`);
+        } else {
+            alert(`${customMessage}: ${errMsg}`);
+        }
+    };
+
     useEffect(() => { 
-        if (auth || sessionStorage.getItem('auth_token')) { 
+        if (auth || sessionStorage.getItem('auth_token') || localStorage.getItem('auth_token')) { 
             fetchOrders(); 
             fetchProducts(); 
             fetchDeliveryUsers();
@@ -38,9 +78,21 @@ export default function Admin() {
 
     const fetchDeliveryUsers = async () => {
         try {
-            const { data } = await axios.get(`${API_URL}/api/auth/delivery-users`, { headers: { Authorization: `Bearer ${ADMIN_TOKEN}` } });
+            const token = getAdminToken();
+            const { data } = await axios.get(`${API_URL}/api/auth/delivery-users`, { 
+                headers: { 
+                    Authorization: `Bearer ${token}`, 
+                    'x-admin-token': token 
+                } 
+            });
             setDeliveryUsers(data);
-        } catch (e) { console.error('No JWT or not admin'); }
+        } catch (e) { 
+            console.error('Error fetching delivery users:', e); 
+            const status = e.response?.status;
+            if (status === 401 || status === 403) {
+                handleSessionExpired();
+            }
+        }
     };
 
     if (isMobile) {
@@ -60,8 +112,10 @@ export default function Admin() {
     const login = (e) => { 
         e.preventDefault(); 
         if (pass === 'apnidukanspn9140') { 
+            sessionStorage.setItem('auth_token', 'apnidukanspn9140');
+            localStorage.setItem('auth_token', 'apnidukanspn9140');
+            document.cookie = "auth_token=apnidukanspn9140; path=/; max-age=2592000; SameSite=Lax; Secure";
             setAuth(true); 
-            // Do NOT save to localStorage to ensure refresh requires password again
             setError('');
         } else {
             setError('Incorrect password');
@@ -71,23 +125,78 @@ export default function Admin() {
     };
 
 
-    const fetchOrders = async () => axios.get(`${API_URL}/api/orders`, { headers: { Authorization: `Bearer ${ADMIN_TOKEN}`, 'x-admin-token': ADMIN_TOKEN } }).then(res => setOrders(res.data));
-    const fetchProducts = async () => axios.get(`${API_URL}/api/products`).then(res => setProducts(res.data));
+    const fetchOrders = async () => {
+        try {
+            const token = getAdminToken();
+            const res = await axios.get(`${API_URL}/api/orders`, { 
+                headers: { 
+                    Authorization: `Bearer ${token}`, 
+                    'x-admin-token': token 
+                } 
+            });
+            setOrders(res.data);
+        } catch (e) {
+            console.error('Error fetching orders:', e);
+            const status = e.response?.status;
+            if (status === 401 || status === 403) {
+                handleSessionExpired();
+            }
+        }
+    };
+
+    const fetchProducts = async () => {
+        try {
+            const res = await axios.get(`${API_URL}/api/products`);
+            setProducts(res.data);
+        } catch (e) {
+            console.error('Error fetching products:', e);
+        }
+    };
 
     const updateStatus = async (id, status) => {
-        await axios.put(`${API_URL}/api/orders/${id}/status`, { status }, { headers: { Authorization: `Bearer ${ADMIN_TOKEN}`, 'x-admin-token': ADMIN_TOKEN } });
-        fetchOrders();
+        try {
+            const token = getAdminToken();
+            await axios.put(`${API_URL}/api/orders/${id}/status`, { status }, { 
+                headers: { 
+                    Authorization: `Bearer ${token}`, 
+                    'x-admin-token': token 
+                } 
+            });
+            fetchOrders();
+        } catch (e) {
+            handleApiError(e, 'Failed to update order status');
+        }
     };
 
     const assignOrder = async (id, deliveryUserId) => {
-        await axios.put(`${API_URL}/api/orders/${id}/assign`, { deliveryUserId }, { headers: { Authorization: `Bearer ${ADMIN_TOKEN}` } });
-        fetchOrders();
+        try {
+            const token = getAdminToken();
+            await axios.put(`${API_URL}/api/orders/${id}/assign`, { deliveryUserId }, { 
+                headers: { 
+                    Authorization: `Bearer ${token}`, 
+                    'x-admin-token': token 
+                } 
+            });
+            fetchOrders();
+        } catch (e) {
+            handleApiError(e, 'Failed to assign order');
+        }
     };
 
     const deleteOrder = async (id) => {
         if(!confirm("Are you sure you want to completely delete this order?")) return;
-        await axios.delete(`${API_URL}/api/orders/${id}`, { headers: { 'x-admin-token': ADMIN_TOKEN } });
-        fetchOrders();
+        try {
+            const token = getAdminToken();
+            await axios.delete(`${API_URL}/api/orders/${id}`, { 
+                headers: { 
+                    Authorization: `Bearer ${token}`, 
+                    'x-admin-token': token 
+                } 
+            });
+            fetchOrders();
+        } catch (e) {
+            handleApiError(e, 'Failed to delete order');
+        }
     };
 
     const downloadCSV = () => {
@@ -300,7 +409,7 @@ export default function Admin() {
             {view === 'catalog' && (
                 <div className="flex flex-col lg:flex-row gap-6 md:gap-10">
                     <div className="w-full lg:w-[45%] xl:w-2/5">
-                        <AddProductForm refreshCatalog={fetchProducts} />
+                        <AddProductForm refreshCatalog={fetchProducts} adminToken={ADMIN_TOKEN} onAuthFailure={handleSessionExpired} />
                     </div>
                     <div className="lg:col-span-7">
                         <div className="grid sm:grid-cols-2 gap-4">
@@ -320,7 +429,22 @@ export default function Admin() {
                                                 {p.outOfStock && <span className="text-[10px] font-bold bg-red-100 text-red-700 px-2.5 py-1 rounded-full uppercase tracking-wider">Empty</span>}
                                             </div>
                                         </div>
-                                        <button onClick={async () => { await axios.delete(`${API_URL}/api/products/${p._id}`, { headers: { 'x-admin-token': ADMIN_TOKEN } }); fetchProducts(); }} className="absolute top-4 right-4 text-red-300 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-red-50 rounded-full"><Trash2 size={18} /></button>
+                                        <button onClick={async () => { 
+                                            if (window.confirm("Are you sure you want to delete this product?")) {
+                                                try {
+                                                    const token = getAdminToken();
+                                                    await axios.delete(`${API_URL}/api/products/${p._id}`, { 
+                                                        headers: { 
+                                                            Authorization: `Bearer ${token}`, 
+                                                            'x-admin-token': token 
+                                                        } 
+                                                    }); 
+                                                    fetchProducts(); 
+                                                } catch (e) {
+                                                    handleApiError(e, 'Failed to delete product');
+                                                }
+                                            }
+                                        }} className="absolute top-4 right-4 text-red-300 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-red-50 rounded-full"><Trash2 size={18} /></button>
                                     </motion.div>
                                 ))}
                             </AnimatePresence>
@@ -346,8 +470,18 @@ export default function Admin() {
                                         <button 
                                             onClick={async () => {
                                                 if(window.confirm('Delete this delivery user?')) {
-                                                    await axios.delete(`${API_URL}/api/auth/delivery-users/${user._id}`, { headers: { Authorization: `Bearer ${ADMIN_TOKEN}` } });
-                                                    fetchDeliveryUsers();
+                                                    try {
+                                                        const token = getAdminToken();
+                                                        await axios.delete(`${API_URL}/api/auth/delivery-users/${user._id}`, { 
+                                                            headers: { 
+                                                                Authorization: `Bearer ${token}`, 
+                                                                'x-admin-token': token 
+                                                            } 
+                                                        });
+                                                        fetchDeliveryUsers();
+                                                    } catch (e) {
+                                                        handleApiError(e, 'Failed to delete delivery user');
+                                                    }
                                                 }
                                             }}
                                             className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
@@ -367,11 +501,18 @@ export default function Admin() {
                                     e.preventDefault();
                                     const fd = new FormData(e.target);
                                     try {
-                                        await axios.post(`${API_URL}/api/auth/register-delivery`, Object.fromEntries(fd), { headers: { Authorization: `Bearer ${ADMIN_TOKEN}` } });
+                                        const token = getAdminToken();
+                                        await axios.post(`${API_URL}/api/auth/register-delivery`, Object.fromEntries(fd), { 
+                                            headers: { 
+                                                Authorization: `Bearer ${token}`, 
+                                                'x-admin-token': token 
+                                            } 
+                                        });
                                         fetchDeliveryUsers();
                                         e.target.reset();
+                                        alert("Delivery staff created successfully!");
                                     } catch (err) {
-                                        alert("Error creating delivery user.");
+                                        handleApiError(err, "Failed to create delivery user");
                                     }
                                 }} 
                                 className="space-y-4"
@@ -390,7 +531,7 @@ export default function Admin() {
     );
 }
 
-function AddProductForm({ refreshCatalog }) {
+function AddProductForm({ refreshCatalog, adminToken, onAuthFailure }) {
     const fileInputRef = useRef(null);
     const [files, setFiles] = useState([]);
     const [previews, setPreviews] = useState([]);
@@ -406,6 +547,15 @@ function AddProductForm({ refreshCatalog }) {
     
     const [loading, setLoading] = useState(false);
     const [toast, setToast] = useState(null); // { type: 'success' | 'error', msg: string }
+
+    const getAdminToken = () => {
+        let token = adminToken || sessionStorage.getItem('auth_token') || localStorage.getItem('auth_token');
+        if (!token || token === 'apnidukanspn9140') {
+            const match = document.cookie.match(new RegExp('(^| )auth_token=([^;]+)'));
+            if (match) token = match[2];
+        }
+        return token || 'apnidukanspn9140';
+    };
 
     const isMissingField = (field) => {
         if (toast?.type !== 'error') return false;
@@ -454,7 +604,16 @@ function AddProductForm({ refreshCatalog }) {
         files.forEach(f => formData.append('images', f));
 
         try {
-            await axios.post(`${API_URL}/api/products`, formData, { headers: { 'x-admin-token': ADMIN_TOKEN } });
+            const currentToken = getAdminToken();
+            const ADMIN_TOKEN = currentToken;
+            const admin_token = currentToken;
+
+            await axios.post(`${API_URL}/api/products`, formData, { 
+                headers: { 
+                    'Authorization': `Bearer ${currentToken}`,
+                    'x-admin-token': currentToken 
+                } 
+            });
             
             // Success Reset State
             refreshCatalog();
@@ -467,7 +626,17 @@ function AddProductForm({ refreshCatalog }) {
             if(fileInputRef.current) fileInputRef.current.value = null;
 
         } catch(err) {
-            setToast({ type: 'error', msg: `Failed to add product: ${err.response?.data?.error || err.message}` });
+            console.error('Error uploading product:', err);
+            const status = err.response?.status;
+            const errMsg = err.response?.data?.error || err.message;
+            if (status === 401 || status === 403) {
+                setToast({ type: 'error', msg: `Session expired: Please log in again.` });
+                if (onAuthFailure) {
+                    setTimeout(() => onAuthFailure(), 1500);
+                }
+            } else {
+                setToast({ type: 'error', msg: `Failed to add product: ${errMsg}` });
+            }
         }
         setLoading(false);
     };

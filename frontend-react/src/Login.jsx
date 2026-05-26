@@ -20,6 +20,8 @@ export default function Login() {
             const { data } = await axios.post(`${API_URL}/api/auth/login`, { username, password });
             
             sessionStorage.setItem('auth_token', data.token);
+            localStorage.setItem('auth_token', data.token);
+            document.cookie = `auth_token=${data.token}; path=/; max-age=2592000; SameSite=Lax; Secure`;
             sessionStorage.setItem('user_role', data.role);
             sessionStorage.setItem('user_name', data.name);
 
