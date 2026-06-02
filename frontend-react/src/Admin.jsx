@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { Package, Trash2, X, Check, UploadCloud, AlertOctagon, MapPin, Download, Users, Truck, User } from 'lucide-react';
+import { Package, Trash2, X, Check, UploadCloud, AlertOctagon, MapPin, Download, Users, Truck, User, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import API_URL from './api';
@@ -29,11 +29,29 @@ export default function Admin() {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
+    useEffect(() => {
+        // Clean up legacy persistent admin bypass token if found
+        if (localStorage.getItem('auth_token') === 'apnidukanspn9140') {
+            localStorage.removeItem('auth_token');
+        }
+        if (sessionStorage.getItem('auth_token') === 'apnidukanspn9140' && sessionStorage.getItem('admin_authenticated') !== 'true') {
+            sessionStorage.setItem('admin_authenticated', 'true');
+        }
+        if (document.cookie.includes('auth_token=apnidukanspn9140')) {
+            document.cookie = "auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        }
+    }, []);
+
     const hasStoredToken = () => {
-        const token = sessionStorage.getItem('auth_token') || localStorage.getItem('auth_token');
-        if (token) return true;
-        const match = document.cookie.match(new RegExp('(^| )auth_token=([^;]+)'));
-        return !!match;
+        // Only allow admin access if it's explicitly authenticated in this tab session
+        if (sessionStorage.getItem('admin_authenticated') === 'true') {
+            return true;
+        }
+        // Or if they logged in as admin via the login portal in this tab session
+        if (sessionStorage.getItem('user_role') === 'admin' && sessionStorage.getItem('auth_token')) {
+            return true;
+        }
+        return false;
     };
 
     const [auth, setAuth] = useState(hasStoredToken());
@@ -112,9 +130,8 @@ export default function Admin() {
     const login = (e) => { 
         e.preventDefault(); 
         if (pass === 'apnidukanspn9140') { 
+            sessionStorage.setItem('admin_authenticated', 'true');
             sessionStorage.setItem('auth_token', 'apnidukanspn9140');
-            localStorage.setItem('auth_token', 'apnidukanspn9140');
-            document.cookie = "auth_token=apnidukanspn9140; path=/; max-age=2592000; SameSite=Lax; Secure";
             setAuth(true); 
             setError('');
         } else {
@@ -280,10 +297,26 @@ export default function Admin() {
         <div className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-10">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 md:mb-10 pb-6 border-b border-gray-100 gap-4">
                 <h1 className="text-3xl md:text-4xl font-bold text-gray-800 tracking-tight">Workspace<span className="text-emerald-500">.</span></h1>
-                <div className="flex w-full md:w-auto gap-2 p-1.5 bg-gray-100/80 rounded-xl overflow-x-auto">
-                    <button onClick={() => setView('catalog')} className={`flex-1 md:flex-none px-4 md:px-6 py-2.5 font-bold text-sm md:text-base rounded-lg transition-all whitespace-nowrap ${view === 'catalog' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-400 hover:text-gray-700'}`}>Add Product</button>
-                    <button onClick={() => setView('orders')} className={`flex-1 md:flex-none px-4 md:px-6 py-2.5 font-bold text-sm md:text-base rounded-lg transition-all whitespace-nowrap ${view === 'orders' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-400 hover:text-gray-700'}`}>Orders</button>
-                    <button onClick={() => setView('delivery')} className={`flex-1 md:flex-none px-4 md:px-6 py-2.5 font-bold text-sm md:text-base rounded-lg transition-all whitespace-nowrap flex items-center gap-2 ${view === 'delivery' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-400 hover:text-gray-700'}`}><Truck size={16}/> Delivery Staff</button>
+                <div className="flex w-full md:w-auto items-center gap-3">
+                    <div className="flex flex-1 md:flex-none gap-2 p-1.5 bg-gray-100/80 rounded-xl overflow-x-auto">
+                        <button onClick={() => setView('catalog')} className={`flex-1 md:flex-none px-4 md:px-6 py-2.5 font-bold text-sm md:text-base rounded-lg transition-all whitespace-nowrap ${view === 'catalog' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-400 hover:text-gray-700'}`}>Add Product</button>
+                        <button onClick={() => setView('orders')} className={`flex-1 md:flex-none px-4 md:px-6 py-2.5 font-bold text-sm md:text-base rounded-lg transition-all whitespace-nowrap ${view === 'orders' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-400 hover:text-gray-700'}`}>Orders</button>
+                        <button onClick={() => setView('delivery')} className={`flex-1 md:flex-none px-4 md:px-6 py-2.5 font-bold text-sm md:text-base rounded-lg transition-all whitespace-nowrap flex items-center gap-2 ${view === 'delivery' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-400 hover:text-gray-700'}`}><Truck size={16}/> Delivery Staff</button>
+                    </div>
+                    <button 
+                        onClick={() => {
+                            sessionStorage.removeItem('admin_authenticated');
+                            sessionStorage.removeItem('auth_token');
+                            sessionStorage.removeItem('user_role');
+                            localStorage.removeItem('auth_token');
+                            document.cookie = "auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                            setAuth(false);
+                        }} 
+                        title="Logout Admin" 
+                        className="p-3 bg-gray-900 text-white rounded-xl hover:bg-black hover:scale-105 transition-all shadow-md shadow-gray-900/10 flex items-center justify-center shrink-0"
+                    >
+                        <LogOut size={18} />
+                    </button>
                 </div>
             </div>
 
