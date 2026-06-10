@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { Package, Trash2, X, Check, UploadCloud, AlertOctagon, MapPin, Download, Users, Truck, User, LogOut } from 'lucide-react';
+import { Package, Trash2, X, Check, UploadCloud, AlertOctagon, MapPin, Download, Users, Truck, User, LogOut, Pencil } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import API_URL from './api';
@@ -64,6 +64,13 @@ export default function Admin() {
     const [orders, setOrders] = useState([]);
     const [products, setProducts] = useState([]);
     const [deliveryUsers, setDeliveryUsers] = useState([]);
+
+    // Edit Product State
+    const [editProduct, setEditProduct] = useState(null);
+    const [editPrice, setEditPrice] = useState('');
+    const [editOriginalPrice, setEditOriginalPrice] = useState('');
+    const [editOutOfStock, setEditOutOfStock] = useState(false);
+    const [editLoading, setEditLoading] = useState(false);
 
     const handleSessionExpired = () => {
         sessionStorage.removeItem('auth_token');
@@ -214,6 +221,43 @@ export default function Admin() {
         } catch (e) {
             handleApiError(e, 'Failed to delete order');
         }
+    };
+
+    const openEditModal = (product) => {
+        setEditProduct(product);
+        setEditPrice(product.price);
+        setEditOriginalPrice(product.originalPrice || '');
+        setEditOutOfStock(product.outOfStock || false);
+    };
+
+    const closeEditModal = () => {
+        setEditProduct(null);
+        setEditPrice('');
+        setEditOriginalPrice('');
+        setEditOutOfStock(false);
+    };
+
+    const updateProduct = async () => {
+        if (!editProduct) return;
+        setEditLoading(true);
+        try {
+            const token = getAdminToken();
+            await axios.put(`${API_URL}/api/products/${editProduct._id}`, {
+                price: Number(editPrice),
+                originalPrice: editOriginalPrice ? Number(editOriginalPrice) : undefined,
+                outOfStock: editOutOfStock
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'x-admin-token': token
+                }
+            });
+            fetchProducts();
+            closeEditModal();
+        } catch (e) {
+            handleApiError(e, 'Failed to update product');
+        }
+        setEditLoading(false);
     };
 
     const downloadCSV = () => {
@@ -462,22 +506,25 @@ export default function Admin() {
                                                 {p.outOfStock && <span className="text-[10px] font-bold bg-red-100 text-red-700 px-2.5 py-1 rounded-full uppercase tracking-wider">Empty</span>}
                                             </div>
                                         </div>
-                                        <button onClick={async () => { 
-                                            if (window.confirm("Are you sure you want to delete this product?")) {
-                                                try {
-                                                    const token = getAdminToken();
-                                                    await axios.delete(`${API_URL}/api/products/${p._id}`, { 
-                                                        headers: { 
-                                                            Authorization: `Bearer ${token}`, 
-                                                            'x-admin-token': token 
-                                                        } 
-                                                    }); 
-                                                    fetchProducts(); 
-                                                } catch (e) {
-                                                    handleApiError(e, 'Failed to delete product');
+                                        <div className="absolute top-4 right-4 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button onClick={() => openEditModal(p)} className="text-blue-400 hover:text-blue-600 p-2 hover:bg-blue-50 rounded-full transition-all" title="Edit Product"><Pencil size={16} /></button>
+                                            <button onClick={async () => { 
+                                                if (window.confirm("Are you sure you want to delete this product?")) {
+                                                    try {
+                                                        const token = getAdminToken();
+                                                        await axios.delete(`${API_URL}/api/products/${p._id}`, { 
+                                                            headers: { 
+                                                                Authorization: `Bearer ${token}`, 
+                                                                'x-admin-token': token 
+                                                            } 
+                                                        }); 
+                                                        fetchProducts(); 
+                                                    } catch (e) {
+                                                        handleApiError(e, 'Failed to delete product');
+                                                    }
                                                 }
-                                            }
-                                        }} className="absolute top-4 right-4 text-red-300 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-red-50 rounded-full"><Trash2 size={18} /></button>
+                                            }} className="text-red-300 hover:text-red-600 p-2 hover:bg-red-50 rounded-full transition-all" title="Delete Product"><Trash2 size={16} /></button>
+                                        </div>
                                     </motion.div>
                                 ))}
                             </AnimatePresence>
@@ -485,6 +532,75 @@ export default function Admin() {
                     </div>
                 </div>
             )}
+
+            {/* Edit Product Modal */}
+            <AnimatePresence>
+                {editProduct && (
+                    <motion.div
+                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/40 backdrop-blur-sm"
+                        onClick={closeEditModal}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                            onClick={e => e.stopPropagation()}
+                            className="bg-white rounded-[2rem] p-8 shadow-2xl w-full max-w-md relative overflow-hidden border border-gray-100"
+                        >
+                            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-400 via-emerald-400 to-teal-500"></div>
+                            
+                            <button onClick={closeEditModal} className="absolute top-5 right-5 p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-gray-700">
+                                <X size={20} />
+                            </button>
+
+                            <div className="flex items-center gap-4 mb-8">
+                                <img src={getImageUrl(editProduct.images?.[0] || editProduct.image)} className="w-16 h-16 object-cover rounded-2xl bg-gray-50 border border-gray-100 shadow-sm" />
+                                <div className="flex-1 min-w-0">
+                                    <h3 className="font-bold text-lg text-gray-900 truncate">{editProduct.name}</h3>
+                                    <p className="text-sm text-gray-400 truncate">{editProduct.description}</p>
+                                </div>
+                            </div>
+
+                            <div className="space-y-5">
+                                <div className="flex gap-4">
+                                    <div className="flex-1">
+                                        <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Selling Price *</label>
+                                        <div className="relative">
+                                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₹</span>
+                                            <input value={editPrice} onChange={e => setEditPrice(e.target.value)} type="number" className="w-full py-3.5 pl-10 pr-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 transition-all font-bold text-gray-900" />
+                                        </div>
+                                    </div>
+                                    <div className="flex-1">
+                                        <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">MRP <span className="opacity-50">Optional</span></label>
+                                        <div className="relative">
+                                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-400 font-bold">₹</span>
+                                            <input value={editOriginalPrice} onChange={e => setEditOriginalPrice(e.target.value)} type="number" placeholder="-" className="w-full py-3.5 pl-10 pr-4 bg-emerald-50/30 border border-emerald-100 rounded-2xl outline-none focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 transition-all font-bold text-emerald-700" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <label className={`flex items-center gap-4 p-4 border rounded-2xl cursor-pointer transition-all group ${editOutOfStock ? 'bg-red-50 border-red-200 text-red-800 shadow-sm' : 'bg-white border-gray-200 hover:border-red-200'}`}>
+                                    <input type="checkbox" checked={editOutOfStock} onChange={e => setEditOutOfStock(e.target.checked)} className="hidden" />
+                                    <div className={`w-6 h-6 rounded-lg flex items-center justify-center transition-all ${editOutOfStock ? 'bg-red-500 text-white shadow-md shadow-red-200' : 'bg-gray-100 text-transparent group-hover:bg-red-100 group-hover:text-red-300'}`}>
+                                        <Check size={16} strokeWidth={3} />
+                                    </div>
+                                    <div>
+                                        <p className="font-bold text-sm">Out of Stock</p>
+                                        <p className="text-xs opacity-70">Disables purchasing for this item.</p>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <div className="flex gap-3 mt-8">
+                                <button onClick={closeEditModal} className="flex-1 py-3.5 bg-gray-100 text-gray-700 font-bold rounded-2xl hover:bg-gray-200 transition-all">Cancel</button>
+                                <button onClick={updateProduct} disabled={editLoading || !editPrice} className="flex-1 py-3.5 bg-gray-900 text-white font-bold rounded-2xl hover:bg-black hover:-translate-y-0.5 transition-all shadow-xl shadow-gray-900/10 disabled:opacity-50 disabled:hover:translate-y-0 flex items-center justify-center gap-2">
+                                    {editLoading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><Check size={18} /> Save Changes</>}
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
             
             {view === 'delivery' && (
                 <div className="bg-white rounded-3xl p-4 md:p-8 shadow-sm border border-gray-100/50">

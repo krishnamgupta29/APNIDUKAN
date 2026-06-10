@@ -26,6 +26,20 @@ exports.createProduct = async (req, res) => {
     catch (err) { console.error(err); res.status(500).json({ error: err.message }); }
 };
 
+exports.updateProduct = async (req, res) => {
+    try {
+        const { price, originalPrice, outOfStock } = req.body;
+        const updateFields = {};
+        if (price !== undefined) updateFields.price = price;
+        if (originalPrice !== undefined) updateFields.originalPrice = originalPrice;
+        if (outOfStock !== undefined) updateFields.outOfStock = outOfStock === 'true' || outOfStock === true;
+
+        const updated = await Product.findByIdAndUpdate(req.params.id, updateFields, { new: true });
+        if (!updated) return res.status(404).json({ error: 'Product not found' });
+        res.json(updated);
+    } catch(err) { res.status(500).json({ error: err.message }); }
+};
+
 exports.deleteProduct = async (req, res) => {
     try {
         await Product.findByIdAndDelete(req.params.id);
