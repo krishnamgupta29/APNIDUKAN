@@ -210,19 +210,47 @@ export default function NativeHome({ addToCart }) {
         try { const c = localStorage.getItem('apni_products_cache'); return c ? JSON.parse(c) : []; } catch { return []; }
     });
     const [loading, setLoading] = useState(products.length === 0);
+    const [error, setError] = useState(false);
     const [search, setSearch] = useState('');
     const [cat, setCat] = useState('All');
     const navigate = useNavigate();
+    const cancelledRef = useRef(false);
+
+    const fetchProducts = async (retries = 3) => {
+        if (retries === 3) {
+            setError(false);
+            setLoading(products.length === 0);
+        }
+        try {
+            const r = await axios.get(`${API_URL}/api/products`, {
+                timeout: 30000, // 30s timeout to allow cold start to finish
+            });
+            if (!cancelledRef.current) {
+                setProducts(r.data);
+                setLoading(false);
+                setError(false);
+                try { localStorage.setItem('apni_products_cache', JSON.stringify(r.data)); } catch {}
+            }
+        } catch (err) {
+            console.error("Native fetch products failed:", err);
+            if (!cancelledRef.current) {
+                if (retries > 0) {
+                    console.log(`Retrying native fetch... (${retries} left)`);
+                    setTimeout(() => {
+                        if (!cancelledRef.current) fetchProducts(retries - 1);
+                    }, 3000);
+                } else {
+                    setLoading(false);
+                    setError(true);
+                }
+            }
+        }
+    };
 
     useEffect(() => {
-        let dead = false;
-        axios.get(`${API_URL}/api/products`).then(r => {
-            if (dead) return;
-            setProducts(r.data);
-            setLoading(false);
-            try { localStorage.setItem('apni_products_cache', JSON.stringify(r.data)); } catch {}
-        }).catch(() => { if (!dead) setLoading(false); });
-        return () => { dead = true; };
+        cancelledRef.current = false;
+        fetchProducts(3);
+        return () => { cancelledRef.current = true; };
     }, []);
 
     const withCat = products.map(p => ({ ...p, _cat: categorize(p) }));
@@ -327,7 +355,23 @@ export default function NativeHome({ addToCart }) {
                 }
             </div>
 
-            {!loading && filtered.length === 0 && (
+            {/* Error state */}
+            {error && products.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
+                    <div className="text-5xl mb-4">⚠️</div>
+                    <h3 className="font-bold text-gray-800 text-base mb-1">Connection Error</h3>
+                    <p className="text-gray-500 text-xs mt-1 max-w-xs">We couldn't load products. The server might be starting up. Please try again.</p>
+                    <button 
+                        onClick={() => fetchProducts(3)} 
+                        className="mt-6 px-6 py-2.5 text-white font-bold text-xs rounded-full shadow-md"
+                        style={{ background: 'linear-gradient(135deg,#f72585,#7209b7)', boxShadow: '0 4px 12px rgba(247,37,133,0.35)' }}
+                    >
+                        Retry Loading
+                    </button>
+                </div>
+            )}
+
+            {!loading && !error && filtered.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
                     <div className="text-5xl mb-4">🔍</div>
                     <h3 className="font-bold text-gray-700 text-base mb-1">No products found</h3>

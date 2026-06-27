@@ -37,29 +37,48 @@ export default function Home({ addToCart }) {
         return [];
     });
     const [loading, setLoading] = useState(products.length === 0);
+    const [error, setError] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('All');
     const navigate = useNavigate();
+    const cancelledRef = useRef(false);
+
+    const fetchProducts = async (retries = 3) => {
+        if (retries === 3) {
+            setError(false);
+            setLoading(products.length === 0);
+        }
+        try {
+            const res = await axios.get(`${API_URL}/api/products`, {
+                timeout: 30000, // 30s timeout to allow cold start to finish
+            });
+            if (!cancelledRef.current) {
+                setProducts(res.data);
+                setLoading(false);
+                setError(false);
+                // Cache in localStorage for next visit
+                try { localStorage.setItem('apni_products_cache', JSON.stringify(res.data)); } catch {}
+            }
+        } catch (err) {
+            console.error("Fetch products failed:", err);
+            if (!cancelledRef.current) {
+                if (retries > 0) {
+                    console.log(`Retrying fetch... (${retries} left)`);
+                    setTimeout(() => {
+                        if (!cancelledRef.current) fetchProducts(retries - 1);
+                    }, 3000);
+                } else {
+                    setLoading(false);
+                    setError(true);
+                }
+            }
+        }
+    };
 
     useEffect(() => {
-        let cancelled = false;
-        const fetchProducts = async () => {
-            try {
-                const res = await axios.get(`${API_URL}/api/products`, {
-                    timeout: 8000, // 8s timeout
-                });
-                if (!cancelled) {
-                    setProducts(res.data);
-                    setLoading(false);
-                    // Cache in localStorage for next visit
-                    try { localStorage.setItem('apni_products_cache', JSON.stringify(res.data)); } catch {}
-                }
-            } catch {
-                if (!cancelled) setLoading(false); // stop skeleton even on error
-            }
-        };
-        fetchProducts();
-        return () => { cancelled = true; };
+        cancelledRef.current = false;
+        fetchProducts(3);
+        return () => { cancelledRef.current = true; };
     }, []);
 
     const categorizeProduct = (p) => {
@@ -220,8 +239,20 @@ export default function Home({ addToCart }) {
                     }
                 </div>
 
+                {/* Error state */}
+                {error && products.length === 0 && (
+                    <div className="text-center py-20 text-gray-500 font-medium px-4 w-full flex flex-col items-center">
+                        <div className="text-red-500 text-5xl mb-4">⚠️</div>
+                        <p className="text-lg font-bold text-gray-800">Connection Error</p>
+                        <p className="text-sm text-gray-500 mt-1 max-w-md mx-auto">We are having trouble connecting to the server. The server might be starting up. Please try again.</p>
+                        <button onClick={() => fetchProducts(3)} className="mt-6 px-8 py-3.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 active:scale-95 transition-all shadow-lg shadow-blue-100">
+                            Retry Loading
+                        </button>
+                    </div>
+                )}
+
                 {/* No products state */}
-                {!loading && filteredProducts.length === 0 && (
+                {!loading && !error && filteredProducts.length === 0 && (
                     <div className="text-center py-20 text-gray-400 font-medium">
                         <Search size={48} className="mx-auto mb-4 opacity-30" />
                         <p className="text-lg text-gray-500">No items found matching "{searchQuery}"</p>

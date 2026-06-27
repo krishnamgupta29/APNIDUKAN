@@ -37,7 +37,8 @@ export default function ProductPage({ addToCart }) {
     const [qty, setQty] = useState(1);
 
     useEffect(() => {
-        const fetchProducts = async () => {
+        let active = true;
+        const fetchProducts = async (retries = 3) => {
             try {
                 let cached = [];
                 try {
@@ -45,13 +46,16 @@ export default function ProductPage({ addToCart }) {
                     if (c) cached = JSON.parse(c);
                 } catch {}
                 
-                if (cached.length > 0) {
+                if (cached.length > 0 && active) {
                     setAllProducts(cached);
                     const found = cached.find(p => p._id === productId);
                     if (found) setProduct(found);
                 }
 
-                const res = await axios.get(`${API_URL}/api/products`);
+                const res = await axios.get(`${API_URL}/api/products`, {
+                    timeout: 30000, // 30s timeout
+                });
+                if (!active) return;
                 setAllProducts(res.data);
                 const foundApi = res.data.find(p => p._id === productId);
                 if (foundApi) {
@@ -63,10 +67,18 @@ export default function ProductPage({ addToCart }) {
                 try { localStorage.setItem('apni_products_cache', JSON.stringify(res.data)); } catch {}
             } catch (error) {
                 console.error("Failed fetching products", error);
-                setLoading(false);
+                if (retries > 0 && active) {
+                    console.log(`Retrying product fetch... (${retries} left)`);
+                    setTimeout(() => {
+                        if (active) fetchProducts(retries - 1);
+                    }, 3000);
+                } else if (active) {
+                    setLoading(false);
+                }
             }
         };
-        fetchProducts();
+        fetchProducts(3);
+        return () => { active = false; };
     }, [productId]);
 
     const sources = useMemo(() => {

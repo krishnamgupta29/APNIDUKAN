@@ -67,30 +67,42 @@ export default function NativeProductPage({ addToCart }) {
         setCurImg(0);
         setQty(1);
         setAdded(false);
-        const load = async () => {
-            setLoading(true);
+        let active = true;
+        const load = async (retries = 3) => {
+            if (retries === 3) setLoading(true);
             try {
                 // Try cache first
                 let cached = [];
                 try { const c = localStorage.getItem('apni_products_cache'); if (c) cached = JSON.parse(c); } catch {}
-                if (cached.length) {
+                if (cached.length && active) {
                     setAllProducts(cached);
                     const f = cached.find(p => p._id === productId);
                     if (f) setProduct(f);
                 }
                 // Fresh fetch
-                const res = await axios.get(`${API_URL}/api/products`);
+                const res = await axios.get(`${API_URL}/api/products`, {
+                    timeout: 30000, // 30s timeout
+                });
+                if (!active) return;
                 setAllProducts(res.data);
                 const found = res.data.find(p => p._id === productId);
                 if (found) { setProduct(found); setCurImg(0); }
+                setLoading(false);
                 try { localStorage.setItem('apni_products_cache', JSON.stringify(res.data)); } catch {}
             } catch (err) {
-                console.error(err);
-            } finally {
-                setLoading(false);
+                console.error("Native product load failed:", err);
+                if (retries > 0 && active) {
+                    console.log(`Retrying native product fetch... (${retries} left)`);
+                    setTimeout(() => {
+                        if (active) load(retries - 1);
+                    }, 3000);
+                } else if (active) {
+                    setLoading(false);
+                }
             }
         };
-        load();
+        load(3);
+        return () => { active = false; };
     }, [productId]);
 
     const sources = useMemo(() => {

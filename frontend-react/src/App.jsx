@@ -25,6 +25,7 @@ import { Download } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import NativeApp from './NativeApp';
 import NativeOrderDetail from './NativeOrderDetail';
+import UpdateChecker from './UpdateChecker';
 
 class ErrorBoundary extends React.Component {
     constructor(props) {
@@ -204,6 +205,8 @@ export default function App() {
                     )}
 
                     {(Capacitor.isNativePlatform() || new URLSearchParams(window.location.search).get('native') === '1') ? (
+                        <>
+                        <UpdateChecker />
                         <NativeApp 
                             cart={cart} 
                             addToCart={addToCart} 
@@ -216,6 +219,7 @@ export default function App() {
                             setOrderPayload={setOrderPayload} 
                             setCart={setCart}
                         />
+                        </>
                     ) : (
                         <div className="min-h-screen flex flex-col relative w-full overflow-x-hidden">
                             <Navigation cartCount={cart.reduce((a,c) => a + c.quantity, 0)} onCartClick={() => setIsCartOpen(true)} />
